@@ -1,0 +1,4 @@
+#Compilados, respaldados y base de datos
+*.pyc
+*~
+*.sql
