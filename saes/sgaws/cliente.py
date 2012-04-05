@@ -78,8 +78,8 @@ class SGA:
 
     def unidades_estudiante(self, id_oferta, cedula):
         """
-        @params: id de la oferta, cedula del estudiante
-        @return: unidades [id, carrera, numero_modulo, paralelo, seccion, nombre_unidad, creditos_unidad]
+            @params: id de la oferta, cedula del estudiante
+            @return: unidades [id, carrera, numero_modulo, paralelo, seccion, nombre_unidad, creditos_unidad]
         """
         matriculas = self.matriculas_estudiante(id_oferta,cedula)
         unidades = []
@@ -110,14 +110,17 @@ class SGA:
                     carrera=js[0], modulo=js[2], paralelo=js[3],
                     seccion=js[4], unidad=u[0], creditos=u[2]
                 ))
-                
         return unidades
 
     def unidades_docente(self,id_oferta, cedula):
+        """ 
+            @params: id_oferta, cedula del docente
+            @return: unidades [carrera, unidad, modulo, paralelo]
+        """
         r = self.wsacademica.sgaws_carga_horaria_docente(id_oferta=id_oferta, cedula=cedula)
         js = json.loads(r)
         us = js[3]
-        # Se ordenan las unidades de acuerdo a su nombre [0]
+        # Se ordenan las unidades de acuerdo a su nombre [1]
         us.sort(lambda x,y: cmp(x[1].upper(),y[1].upper()))
         unidades = []
         for u in us:
