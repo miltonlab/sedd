@@ -1,0 +1,61 @@
+{% extends "admin/change_form.html" %}
+{% load i18n %}
+
+{% block extrahead %}
+{{ block.super }}
+<script type="text/javascript">
+    (function($) {
+        $(document).ready(function($) {
+	    var logjs = "";
+	    $("#link_load_sga").click(function() {
+		var r=confirm("Se va a cargar la información Académica del SGA");
+		if (r == true){
+		    $.ajax({
+			url: "/sga/cargar_info_sga/{{ object_id }}",
+			method: "GET",
+			//data: "periodo_academico_id={{ object_id }}",
+			/*success: function (data){
+			    alert(data);
+			},*/
+			error: function(xhr,status,error){
+			    alert("error: " + status + "-" + error);
+			}
+		    });
+		}
+	    });
+
+	    $("#link_load_ofertas").click(function() {
+		var r=confirm("Va a recargar ofertas académicas del SGA");
+		if (r == true){
+		    $.ajax({
+			url: "/sga/cargar_ofertas_sga/{{ object_id }}",
+			method: "GET",
+			//data: "periodo_academico_id={{ object_id }}",
+			success: function (data){
+			    // Regresamos a la lista de Periodos Académicos
+			    $(window.location).attr('href',"{% url admin:app_periodoacademico_changelist %}")
+			},
+			error: function(xhr,status,error){
+			    alert("error: " + status + "-" + error);
+			}
+		    });
+		}
+	    });
+         });
+    })(django.jQuery);
+</script>
+{% endblock %}
+
+{% block after_field_sets %}
+
+{% endblock %}
+
+{% block after_related_objects %}
+<br/>
+<br/>
+<ul class="object-tools">
+  <li> <a id="link_load_ofertas" class="historylink"> Recargar Ofertas </a> </li>
+  <li> <a id="link_load_sga" class="historylink"> Cargar SGA </a> </li>
+</ul>
+
+{% endblock %}

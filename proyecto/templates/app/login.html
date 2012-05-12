@@ -1,0 +1,23 @@
+{% extends "admin/login.html" %}
+
+{% block title %} Evaluación Docente  {% endblock %}
+
+
+
+{% csrf_token %}
+{% if next %}
+    <input type="hidden" name="next" value="{{ next }}" />
+{% endif %}
+
+
+{% block branding %}
+   <h1 id="site-name">  Evaluación Desempeño Docente  </h1>
+
+{% endblock %}
+
+{% block content %}
+   {{ form.non_field_errors}}   
+   {{ block.super }}
+{% endblock %}
+
+

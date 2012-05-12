@@ -1,0 +1,11 @@
+{#  extends "base.html" #}
+
+{% block title %}Encuestas que existen {% endblock %}
+
+{% block content %}
+<h1> Encuestas </h1>
+{% for encuesta in lista_encuestas %}
+<p> Encuesta: <a href='/' > {{ encuesta.titulo }} </a> </p>
+<hr/>
+{% endfor %}
+{% endblock %}
