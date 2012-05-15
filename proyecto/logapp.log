@@ -1,7 +1,0 @@
-
-[ERROR 2012-05-15 10:28:08,439 sga]:  Error recargando ofertas SGA: global name 'SGA' is not defined
-[ERROR 2012-05-15 10:33:50,080 sga]:  Error recargando ofertas SGA: global name 'SGA' is not defined
-[ERROR 2012-05-15 10:36:36,754 sga]:  Error recargando ofertas SGA: global name 'settings' is not defined
-[ERROR 2012-05-15 10:37:59,082 sga]:  Error recargando ofertas SGA: global name 'self' is not defined
-[ERROR 2012-05-15 10:39:22,611 sga]:  Error recargando ofertas SGA: 'id_sga' is an invalid keyword argument for this function
-[ERROR 2012-05-15 10:40:20,243 sga]:  Error recargando ofertas SGA: 'id_sga' is an invalid keyword argument for this function
