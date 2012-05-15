@@ -1,0 +1,12 @@
+[
+  {
+    "model": "app.PeriodoAcademico",
+    "pk": 1,
+    "fields": {
+      "nombre" : " Periodo Academico Marzo Julio / 2012",
+      "inicio": "2012-03-01",
+      "fin": "2012-07-31",
+      "periodoLectivo" : "2011 - 2013"
+    }
+  }
+]

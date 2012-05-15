@@ -1,0 +1,10 @@
+[
+  {
+    "model": "app.PeriodoAcademico",
+    "pk": 1,
+    "fields": {
+      "inicio": "01/03/2012",
+      "fin": "31/07/2012"
+    }
+  },
+]
