@@ -1,5 +1,6 @@
 #!/usr/bin/env python
-#-*-coding:utf-8-*-
+#-*- encoding:utf-8 -*-
+
 from SOAPpy import Config, HTTPTransport, SOAPAddress, WSDL
 import json
 
@@ -33,18 +34,17 @@ class myHTTPTransport (HTTPTransport):
         return HTTPTransport.call(self, addr, data, namespace, soapaction,encoding, http_proxy, config)
 
 
-### arreglar problema de webservis modificado
 class SGA:
     def __init__(self, sgaws_user, sgaws_pass):
         u,p = sgaws_user, sgaws_pass
         wsdlFileValidacion = 'http://{0}:{1}@ws.unl.edu.ec/sgaws/wsvalidacion/soap/api.wsdl'.format(u,p)
         wsdlFilePersonal = 'http://{0}:{1}@ws.unl.edu.ec/sgaws/wspersonal/soap/api.wsdl'.format(u,p)
-        #wsdlFileAcademica = 'http://{0}:{1}@ws.unl.edu.ec/sgaws/wsacademica/soap/api.wsdl'.format(u,p)
+        wsdlFileAcademica = 'http://{0}:{1}@ws.unl.edu.ec/sgaws/wsacademica/soap/api.wsdl'.format(u,p)
         wsdlFileInstitucional = 'http://{0}:{1}@ws.unl.edu.ec/sgaws/wsinstitucional/soap/api.wsdl'.format(u,p)
         myHTTPTransport.setAuthentication(u,p)
         self.wsvalidacion = WSDL.Proxy(wsdlFileValidacion, transport=myHTTPTransport)
         self.wspersonal = WSDL.Proxy(wsdlFilePersonal, transport=myHTTPTransport)
-        #self.wsacademica = WSDL.Proxy(wsdlFileAcademica, transport=myHTTPTransport)
+        self.wsacademica = WSDL.Proxy(wsdlFileAcademica, transport=myHTTPTransport)
         self.wsinstitucional = WSDL.Proxy(wsdlFileInstitucional, transport=myHTTPTransport)
 
     """
@@ -138,7 +138,6 @@ class SGA:
         @params: cedula del estudiante
         @return: cedula, nombres, apellidos, fecha_nacimiento, telefono, celular, direccion_actual,
         pais, ciudad, email, genero
-        @TODO: Usar json en vez de parsear strings
         """
         cadena = self.wspersonal.sgaws_datos_estudiante(cedula=username)
         js=json.loads(cadena)
@@ -149,14 +148,6 @@ class SGA:
                               fecha_nacimiento=js[3], telefono=js[4], celular=js[5], direccion_actual=js[6],
                               pais=js[7], ciudad=js[8], email=js[9], genero=js[10],
                             )
-        """
-        if 'error' in cadena.lower(): return None
-        lista = cadena.replace('["','').replace('"]','').split('", "')
-        estudiante = {'cedula':lista[0],'nombres':lista[1].title(),'apellidos':lista[2].title(),\
-                      'fecha_nacimiento':lista[3],'telefono':lista[4], 'celular':lista[5],\
-                      'direccion_actual':lista[6],'pais':lista[7],'ciudad':lista[8],'email':lista[9],\
-                      'genero':lista[10]}
-        """
         return estudiante
 
     def datos_docente(self,username):
@@ -171,7 +162,7 @@ class SGA:
         else:
             docente = dict(nombres=js[0].title(), apellidos=js[1].title(), cedula=js[2], titulo=js[3], tipo=js[4])
         return docente
-        
+
     def matriculas_estudiante(self,id_oferta,cedula):
         """
         @params: cedula del estudiante
@@ -234,7 +225,7 @@ class SGA:
     def unidades_docente(self,id_oferta, cedula):
         """ 
             @params: id_oferta, cedula del docente
-            @return: unidades [carrera, modulo, paralelo, unidad]
+            @return: unidades [carrera, modulo, paralelo, unidad, id]
         """
         r = self.wsacademica.sgaws_carga_horaria_docente(id_oferta=id_oferta, cedula=cedula)
         js = json.loads(r)
@@ -250,7 +241,6 @@ class SGA:
             ))
         return unidades
 
-    ###???
     def unidades_oferta(self,id_oferta):
         """
             Consulta todas las unidades de los planes de estudio de una oferta
@@ -299,7 +289,8 @@ class Script:
                         level   = log.DEBUG, 
                         datefmt = '%Y/%m/%d %I:%M:%S %p', 
                         format  = '%(asctime)s : %(levelname)s - %(message)s')
-        
+
+    #TODO: esperando cambios en el WebService por el metodo unidades_docentes
     def unidades_docentes_oferta(self,id_oferta):
         """
             Consulta todas las unidades con sus docentes de los planes de estudio de una oferta
@@ -334,7 +325,7 @@ class Script:
                             unidades_docentes.append(dict(
                                 id_unidad=id_unidad, carrera=nombre_carrera, modulo=numero_modulo, paralelo=nombre_paralelo,
                                 seccion=seccion, unidad=unidad, creditos=creditos, horas=horas,
-                                cedula=cedula, nombres=nombres, apellidos=apellidos, titulo=titulo
+                                cedula=cedula, nombres=nombres.title(), apellidos=apellidos.title(), titulo=titulo
                             ))
         return unidades_docentes
 
@@ -353,26 +344,39 @@ class Script:
         # Obtiene todas las carreras vigentes en una oferta dada
         rc = self.sga.wsinstitucional.sgaws_datos_carreras(id_oferta=id_oferta)
         carreras = json.loads(rc)
+        estudiantes_unidades = []        
         if carreras[0] == '_error':
             return dict(error=carreras[1])
         for id_carrera, carrera, modalidad in carreras:
-            log.info("estudiantes_unidades() Carrera: " + carrera)
+            log.info("estudiantes_unidades() leyendo Carrera: " + carrera)
             # Otiene todos los paralelos de la carrera que se itera
             rp = self.sga.wsinstitucional.sgaws_paralelos_carrera(id_oferta=id_oferta, id_carrera=id_carrera)
             jsp = json.loads(rp)
             if jsp[0] != '_error':
                 paralelos_carrera = jsp[4]
                 for id_paralelo, seccion, modulo, paralelo, id_modulo in paralelos_carrera:
+                    datos = dict(carrera=carrera, modulo=modulo, paralelo=paralelo, seccion=seccion)
+                    log.info("estudiantes_unidades() leyendo Paralelo: " + paralelo)
+                    ###tmp???
+                    if len(paralelos_carrera) == 20:
+                        break
+                    
                     # Obtiene información de todos los estudiantes del paralelo que se itera
                     r_ep = self.sga.wsacademica.sgaws_estadoestudiantes_paralelo(id_paralelo=id_paralelo)
-                    js_ep = rup.loads(r_ep)
+                    js_ep = json.loads(r_ep)
                     if js_ep[0] != '_error':
                         estudiantes_paralelo = js_ep[5]
                         estudiantes = []
                         for matricula, apellidos, nombres, cedula, estado in estudiantes_paralelo:
+                            log.info("estudiantes_unidades() leyendo Estudiante: %s %s %s" % (cedula,nombres,apellidos) ) 
                             estado = estado.replace('EstadoMatricula','')
-                            estudiantes.append(dict(cedula=cedula, nombres=nombres,
-                                                    apellidos=apellidos, matricula=matricula, estado=estado))
+                            ###estudiantes.append(dict(cedula=cedula, nombres=nombres,
+                            ###                        apellidos=apellidos, matricula=matricula, estado=estado))
+                            datos.update(dict(cedula=cedula, nombres=nombres.title(), apellidos=apellidos.title(), matricula=matricula, estado=estado))
+                            ###???
+                            if len(estudiantes_paralelo) == 20:
+                                break
+                            
                     # Obtiene información de todas las unidades del paralelo que se itera
                     r_up = self.sga.wsacademica.sgaws_plan_estudio(id_paralelo=id_paralelo)
                     js_up = json.loads(r_up)
@@ -380,19 +384,14 @@ class Script:
                         unidades_paralelo = js_up[6]
                         unidades = []    
                         for id_unidad, unidad, horas, creditos, obligatoria in unidades_paralelo:
-                            unidades.append(dict(id_unidad=id_unidad, unidad=unidad, horas=horas,
-                                                 creditos=creditos, obligatoria=obligatoria))
-                    estudiantes_unidades = []
-                    # Se unen los datos generales, de estudiantes y de unidades
-                    for dict_estudiante in estudiantes:
-                        for dict_unidad in unidades:
-                            # Datos para anexar a estudiantes y unidades
-                            datos = dict(carrera=carrera, modulo=modulo, paralelo=paralelo, seccion=seccion)
-                            log.info("estudiantes_unidades() añadidos datos generales: " + str(datos))
-                            datos.update(dict_estudiante)
-                            log.info("estudiantes_unidades() añadido estudiante: " + str(dict_estudiante))
-                            datos.update(dict_unidad)
-                            log.info("estudiantes_unidades() añadida unidad: " + str(dict_unidad)) 
+                            log.info("estudiantes_unidades() leyendo Unidad: %s" % (unidad) )             
+                            #unidades.append(dict(id_unidad=id_unidad, unidad=unidad, horas=horas,
+                            #                     creditos=creditos, obligatoria=obligatoria))
+                            datos.update(dict(id_unidad=id_unidad, unidad=unidad, horas=horas, creditos=creditos, obligatoria=obligatoria))
                             estudiantes_unidades.append(datos)
-                            
-
+                                        
+                            ###???
+                            if len(estudiantes_unidades) == 100:
+                                return estudiantes_unidades
+                           
+        return estudiantes_unidades
