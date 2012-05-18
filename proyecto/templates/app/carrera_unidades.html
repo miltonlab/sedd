@@ -7,13 +7,11 @@ Asignaturas:
 
 {% block content %}
 
-{{ estudiante }}
-
 <ul>
 
 {% for asignatura in asignaturas %}
 
-<h1> <li> <a href="/unidad/{{ asignatura.id }}"> asignatura.asignatura </a> </li> <h1>
+<h3> <li> <a href="/unidad/{{ asignatura.id }}"> {{ asignatura.asignatura.nombre }} </a> </li> <h3>
 
 {% endfor %}
 

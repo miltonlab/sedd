@@ -49,7 +49,7 @@ def carreras(request):
     try:
         estudiante = EstudiantePeriodoAcademico.objects.get(periodoAcademico=pa, estudiante=usuario)
         carreras = estudiante.asignaturas.values('asignatura__carrera').distinct()
-        # Al final un diccionario de carreras
+        # Al final un diccionario de carreras en session 
         carreras = [ dict(id_tmp=i, nombre=c['asignatura__carrera']) for i,c in enumerate(carreras) ]
         request.session['estudiante'] = estudiante
         request.session['carreras'] = carreras
@@ -63,9 +63,11 @@ def carreras(request):
 
 def carrera_unidades(request, id_tmp):
     estudiante = request.session['estudiante']
-    carrera = request.session['carreras'][int(id_tmp)]
+    carrera = [c['nombre'] for c in request.session['carreras'] if c['id_tmp'] == int(id_tmp) ][0]
+    logg.info(carrera)
     asignaturas = EstudiantePeriodoAcademicoAsignatura.objects.filter(estudiante=estudiante, asignatura__carrera=carrera).all()
-    logg.info(str(asignaturas))
+    for x in asignaturas:
+        logg.info('-'+x.asignatura.nombre)
     return render_to_response("app/carrera_unidades.html",dict(asignaturas=asignaturas, estudiante=estudiante))
     #return HttpResponse('Unidades: '+ str(estudiante) + str(len(asignaturas)))
 

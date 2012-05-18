@@ -1,33 +1,42 @@
-[
-    {"pk": 1, 
-     "model": "app.ofertaacademicasga", 
-     "fields": {"descripcion": "Cursos Especiales 2011 - 2012", "idSGA": 58}}, 
-    {"pk": 2, 
-     "model": "app.ofertaacademicasga", 
-     "fields": {"descripcion": "Internado Rotativo 2011 - 2012", "idSGA": 46}}, 
-    {"pk": 3, 
-"model": "app.ofertaacademicasga", 
-"fields": {"descripcion": "Pregrado Marzo 2012 Julio 2012", "idSGA": 65}}, 
-{"pk": 4, 
-"model": "app.ofertaacademicasga", 
-"fields": {"descripcion": "Curso de Ingles presencial", "idSGA": 66}},
-
-{"pk": 1, 
-"model": "app.periodoacademico", 
-"fields": {
-"nombre": "Periodo Academico Marzo Julio / 2012", 
-"fin": "2012-07-31", "periodoLectivo": "2011 - 2012", 
-"ofertasAcademicasSGA": [3], 
-"inicio": "2012-03-01"}
-},
-
-{"pk": 1, 
-"model": "app.periodoevaluacion", 
-"fields": {
-"nombre": "Evaluacion Satisfacci\u00f3n Estudiantil", 
-"periodoAcademico": 1, 
-"fin": "2012-05-26", 
-"inicio": "2012-05-18"}
-}
+[ { "fields" : { "descripcion" : "Cursos Especiales 2011 - 2012",
+        "idSGA" : 58
+      },
+    "model" : "app.ofertaacademicasga",
+    "pk" : 1
+  },
+  { "fields" : { "descripcion" : "Internado Rotativo 2011 - 2012",
+        "idSGA" : 46
+      },
+    "model" : "app.ofertaacademicasga",
+    "pk" : 2
+  },
+  { "fields" : { "descripcion" : "Pregrado Marzo 2012 Julio 2012",
+        "idSGA" : 65
+      },
+    "model" : "app.ofertaacademicasga",
+    "pk" : 3
+  },
+  { "fields" : { "descripcion" : "Curso de Ingles presencial",
+        "idSGA" : 66
+      },
+    "model" : "app.ofertaacademicasga",
+    "pk" : 4
+  },
+  { "fields" : { "fin" : "2012-07-31",
+        "inicio" : "2012-03-01",
+        "nombre" : "Periodo Academico Marzo Julio / 2012",
+        "ofertasAcademicasSGA" : [ 3 ],
+        "periodoLectivo" : "2011 - 2012"
+      },
+    "model" : "app.periodoacademico",
+    "pk" : 1
+  },
+  { "fields" : { "fin" : "2012-05-26",
+        "inicio" : "2012-05-18",
+        "nombre" : "Evaluacion Satisfacción Estudiantil",
+        "periodoAcademico" : 1
+      },
+    "model" : "app.periodoevaluacion",
+    "pk" : 1
+  }
 ]
-
