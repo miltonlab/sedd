@@ -1,0 +1,19 @@
+{#%  extends "admin/base_site.html" %#}
+{#  extends "base.html" #}
+
+<!--link rel="stylesheet" type="text/css" href="/static/admin/css/base.css" /-->
+
+Carreras:
+
+{% block content %}
+
+<ul>
+{% for carrera in request.session.carreras %}
+
+<h1> <li> <a href="/carrera/unidades/{{carrera.id_tmp}}"> {{ carrera.nombre }} </a> </li> <h1>
+
+{% endfor %}
+</ul>
+
+{% endblock %}
+

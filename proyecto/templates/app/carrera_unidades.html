@@ -1,0 +1,22 @@
+{#%  extends "admin/base_site.html" %#}
+{#  extends "base.html" #}
+
+<!--link rel="stylesheet" type="text/css" href="/static/admin/css/base.css" /-->
+
+Asignaturas:
+
+{% block content %}
+
+{{ estudiante }}
+
+<ul>
+
+{% for asignatura in asignaturas %}
+
+<h1> <li> <a href="/unidad/{{ asignatura.id }}"> asignatura.asignatura </a> </li> <h1>
+
+{% endfor %}
+
+</ul>
+
+{% endblock %}
