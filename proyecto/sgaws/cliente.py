@@ -1,5 +1,5 @@
 #!/usr/bin/env python
-#-*- encoding:utf-8 -*-
+#-*- encoding: utf-8 -*-
 
 from SOAPpy import Config, HTTPTransport, SOAPAddress, WSDL
 import json
@@ -9,13 +9,9 @@ import json
     Modulo que obtiene toda la información academica necesaria
     para diversos sistemas clientes del SGA  
     @modulo: sgaws.cliente
-    @author: Milton Labanda
+    @author: Silvana Pacheco, Daysi Ordoñez, Milton Labanda
     @date: Enero 2012
 """
-###???
-##from django.conf import settings
-###SGAWS_USER = settings.SGAWS_USER
-###SGAWS_PASS = settings.SGAWS_PASS
 
 class myHTTPTransport (HTTPTransport):
     username = None
@@ -46,14 +42,6 @@ class SGA:
         self.wspersonal = WSDL.Proxy(wsdlFilePersonal, transport=myHTTPTransport)
         self.wsacademica = WSDL.Proxy(wsdlFileAcademica, transport=myHTTPTransport)
         self.wsinstitucional = WSDL.Proxy(wsdlFileInstitucional, transport=myHTTPTransport)
-
-    """
-    def autenticar(self,username,password):
-        print 'en autenticar'
-        login = self.wsvalidacion.sgaws_validar_estudiante(cedula=username,clave=password)
-        print login
-        return True if login == 1 else False
-    """
     
     def autenticar_estudiante(self,username,password):
         login = self.wsvalidacion.sgaws_validar_estudiante(cedula=username,clave=password)
@@ -163,6 +151,26 @@ class SGA:
             docente = dict(nombres=js[0].title(), apellidos=js[1].title(), cedula=js[2], titulo=js[3], tipo=js[4])
         return docente
 
+    def datos_usuario(self,username):
+        """
+        @params: cedula del usuario
+        @return: cedula, nombres, apellidos, tipo_usuario
+        """
+        cadena = self.wspersonal.sgaws_datos_usuario(cedula=username)
+        js=json.loads(cadena)
+        if js[0] == '_error':
+            return js[1]
+        else:
+            usuario = dict(nombres=js[2][0].title(), apellidos=js[2][1].title(), cedula=js[2][2])
+            tipo = []
+            if 'Estudiante' in js:
+                tipo.append('Estudiante')
+            if 'Docente' in js:
+                tipo.append('Docente')
+            usuario.update(dict(tipo=tipo))
+        return usuario
+
+        
     def matriculas_estudiante(self,id_oferta,cedula):
         """
         @params: cedula del estudiante

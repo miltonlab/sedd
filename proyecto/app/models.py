@@ -5,10 +5,6 @@ from sgaws.cliente import SGA
 from django.contrib import auth
 from proyecto import settings
 
-import logging
-
-log = logging.getLogger('logapp')
-
 
 class TipoInformante(models.Model): 
     # TODO: Clase Abstracta
@@ -170,16 +166,15 @@ class PeriodoAcademico(models.Model):
     inicio = models.DateField()
     fin = models.DateField()
     periodoLectivo = models.CharField(max_length=100,db_column='periodo_lectivo')
-    ofertasAcademicasSGA = models.ManyToManyField('OfertaAcademicaSGA', related_name='peridosAcademicos', blank=True, null=True)
+    ofertasAcademicasSGA = models.ManyToManyField('OfertaAcademicaSGA', related_name='peridosAcademicos', blank=True, null=True, verbose_name='Ofertas SGA')
 
     def cargarOfertasSGA(self):
         proxy = SGA(settings.SGAWS_USER, settings.SGAWS_PASS)
         ofertas_dict = proxy.ofertas_academicas(self.inicio, self.fin)
-        ofertas = [OfertaAcademicaSGA(id_sga=oa['id'], descripcion=oa['descripcion'])  for oa in ofertas_dict]
-        log.info(ofertas)
+        ofertas = [OfertaAcademicaSGA(idSGA=oa['id'], descripcion=oa['descripcion'])  for oa in ofertas_dict]
         for oa in ofertas:
             try:
-                OfertaAcademicaSGA.objects.get(id_sga=oa.id_sga)
+                OfertaAcademicaSGA.objects.get(idSGA=oa.idSGA)
             except OfertaAcademicaSGA.DoesNotExist:
                 # Se agregan solo en el caso que no existan aún la oferta académica
                 oa.periodoAcademico = self
@@ -198,12 +193,6 @@ class PeriodoAcademico(models.Model):
         super(PeriodoAcademico, self).save(*args, **kwargs)
         if nuevo:
             self.cargarOfertasSGA()
-
-    def cargarInfoSGA(self):
-        """
-            Carga la información académica (Estudiantes, Docentes y Materias del SGA)
-        """
-        pass
             
     class Meta:
         ordering = ['inicio']
@@ -216,16 +205,18 @@ class PeriodoAcademico(models.Model):
 
 class Asignatura(models.Model):
     area = models.CharField(max_length='20')
+    #TODO: experimento
+    #area = models.CharField(max_length='20', choices=[(a,a) for a in Asignatura.objects.values('area').distinct()] )
     carrera = models.CharField(max_length='100')
     semestre = models.CharField(max_length='10', verbose_name='módulo')
     paralelo = models.CharField(max_length='10')
-    #TODO: agregar columna
-    #seccion = models.CharField(max_length='10')
+    seccion = models.CharField(max_length='10')
     nombre = models.TextField()
     tipo = models.CharField(max_length='15')
     creditos = models.IntegerField(verbose_name='número de créditos')
     duracion = models.FloatField(verbose_name='duración en horas')
-    idSGA = models.CharField(max_length='20', db_column='id_sga')
+    # Campo combinado id_unidad:id_paralelo
+    idSGA = models.CharField(max_length='15', db_column='id_sga')
 
     def getTipo(self):
         tipos = [u'taller',u'curso',u'módulo',u'modulo',u'unidad']
@@ -237,23 +228,23 @@ class Asignatura(models.Model):
         super(Asignatura, self).save(*args, **kwargs)
     
     def __unicode__(self):
-        return "{0} - {1}".format(self.idSGA, self.nombre)
+        return u"{0} - {1}".format(self.idSGA, self.nombre)
 
     
 class EstudiantePeriodoAcademico(models.Model):
     estudiante = models.ForeignKey('Usuario', related_name='estudiantePeriodosAcademicos')
     periodoAcademico = models.ForeignKey('PeriodoAcademico', related_name='estudiantes', verbose_name='Periodo Académico', db_column='periodo_academico_id')
-    #asignaturas = models.ManytoManyField('Asignatura', through='EstudiantePeriodoAcademicoAsignatura', related_name='estudiantes')
 
     class Meta:
         verbose_name = 'Estudiante'
+        unique_together = ('estudiante', 'periodoAcademico')
 
-    def __repr__(self):
-        return self.estudiante.__repr__()
+    def cedula(self):
+        return self.estudiante.cedula
 
-    def __str__(self):
-        return self.estudiante.__str__()
-
+    def __unicode__(self):
+        return self.estudiante.get_full_name()
+    
 
 class EstudiantePeriodoAcademicoAsignatura(models.Model):
     estudiante = models.ForeignKey('EstudiantePeriodoAcademico', related_name='asignaturas')
@@ -263,21 +254,25 @@ class EstudiantePeriodoAcademicoAsignatura(models.Model):
 
     class Meta:
         verbose_name = 'Asignaturas Estudiante'
+        unique_together = ('estudiante','asignatura')
+
+    def __unicode__(self):
+        return u"{0}:{1}".format(self.estudiante, self.asignatura)
 
 
 class DocentePeriodoAcademico(models.Model):
     docente = models.ForeignKey('Usuario', related_name='docentePeriodosAcademicos')
     periodoAcademico = models.ForeignKey('PeriodoAcademico', related_name='docentes', verbose_name='Periodo Académico', db_column='periodo_academico_id')
-    #asignaturas = models.ManyToManyField('Asignatura', related_name='docentes')
-
+    
     class Meta:
         verbose_name = 'Docente'
+        unique_together = ('docente','periodoAcademico')
 
-    def __repr__(self):
-        return self.docente.__repr__()
-
-    def __str__(self):
-        return self.docente.__str__()
+    def cedula(self):
+        return self.docente.cedula
+        
+    def __unicode__(self):
+        return self.docente.get_full_name()
 
 
 class DocentePeriodoAcademicoAsignatura(models.Model):
@@ -286,6 +281,10 @@ class DocentePeriodoAcademicoAsignatura(models.Model):
 
     class Meta:
         verbose_name = 'Asignaturas Docente'
+        unique_together = ('docente','asignatura')
+
+    def __unicode__(self):
+        return u"{0}:{1}".format(self.docente, self.asignatura)
 
 
 #===================================================================================================
@@ -296,17 +295,48 @@ class Usuario(auth.models.User):
     """
     Perfil de Usuario que podrá pertener a los grupos Estudiante y/o Docente
     """
-    ###user = models.ForeignKey(User)
     cedula = models.CharField(max_length='15', unique=True)
     titulo = models.CharField(max_length='60', blank=True, null=True)
-    tipo = models.CharField( max_length=1, choices=(('E','Estudiante'), ('D','Docente')) )
 
-    ###pendiente
-    def saveTMP(self):
-        pass
-    
+    def get_nombres(self):
+        return self.first_name
+
+    def set_nombres(self, nombres):
+        self.first_name = nombres
+
+    def get_apellidos(self):
+        return self.last_name
+
+    def set_apellidos(self, apellidos):
+        self.last_name = apellidos
+
+    nombres = property(get_nombres, set_nombres)
+    apellidos = property(get_apellidos, set_apellidos)
+        
     def __repr__(self):
-        return '<[%s] %s>' % (self.cedula, self.get_full_name());
+        return u'<[{0}] {1}>'.format(self.cedula, self.get_full_name());
 
-    def __str__(self):
+    def __unicode__(self):
         return self.get_full_name()
+
+
+
+class Configuracion(models.Model):
+    """ Configuraciones Globales de la Aplicación """
+    periodoAcademicoActual = models.OneToOneField(PeriodoAcademico, verbose_name='Periodo Académico Actual')
+    periodoEvaluacionActual = models.OneToOneField(PeriodoEvaluacion, verbose_name='Periodo Evaluación Actual')
+
+    @classmethod
+    def getPeriodoAcademicoActual(self):
+        return Configuracion.objects.get(id=1).periodoAcademicoActual
+    
+    @classmethod
+    def getPeriodoEvaluacionActual(self):
+        return Configuracion.objects.get(id=1).periodoEvaluacionActual
+    
+    class Meta:
+        verbose_name = u'Configuraciones'
+        verbose_name_plural = u'Configuraciones'
+
+    def __unicode__(self):
+        return u"Configuraciones de la Aplicación"

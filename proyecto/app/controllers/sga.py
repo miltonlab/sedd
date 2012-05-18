@@ -13,7 +13,9 @@ import logging
 log = logging.getLogger('logapp')
 
 def cargar_ofertas_sga(request, periodoAcademicoId):
-    """ Metodo invocado a través de Ajax. Recarga todas las ofertas """    
+    """ Metodo invocado a través de Ajax. Recarga todas las ofertas """
+    if not periodoAcademicoId:
+        return HttpResponse("Falta Periodo Academico")
     try:
         proxy = SGA(SGAWS_USER, SGAWS_PASS)
         pa = PeriodoAcademico.objects.get(id=periodoAcademicoId)

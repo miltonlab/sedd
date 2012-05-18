@@ -4,10 +4,6 @@ from django.shortcuts import render_to_response
 from app.models import Cuestionario
 from django.core.context_processors import csrf
 
-import logging
-
-log = logging.getLogger('logapp')
-
 def index(request):
     return HttpResponse("<h3>Bienvenido al Sistema de Evaluacion de la UNL</h3>")
 

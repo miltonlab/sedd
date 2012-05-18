@@ -3,6 +3,8 @@
 *~
 *.sql
 #*#
+.#*
 .old
 .bak
 proyecto/db/*
+.txt
