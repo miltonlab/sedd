@@ -61,15 +61,27 @@ def carreras(request):
         except DocentePeriodoAcademico.DoesNotExist:
             return HttpResponse('Fin')
 
-def carrera_unidades(request, id_tmp):
+def carrera_asignaturas(request, id_tmp):
     estudiante = request.session['estudiante']
     carrera = [c['nombre'] for c in request.session['carreras'] if c['id_tmp'] == int(id_tmp) ][0]
+    request.session['carrera'] = carrera;
     logg.info(carrera)
     asignaturas = EstudiantePeriodoAcademicoAsignatura.objects.filter(estudiante=estudiante, asignatura__carrera=carrera).all()
     for x in asignaturas:
         logg.info('-'+x.asignatura.nombre)
-    return render_to_response("app/carrera_unidades.html",dict(asignaturas=asignaturas, estudiante=estudiante))
-    #return HttpResponse('Unidades: '+ str(estudiante) + str(len(asignaturas)))
+    return render_to_response("app/carrera_asignaturas.html",
+                              dict(asignaturas=asignaturas, estudiante=estudiante))
 
+
+def asignaturas_docentes(request, id_asignatura):
+    estudiante = request.session['estudiante']
+    carrera = request.session['carrera'] 
+    logg.info(carrera)
+    #asignaturas = EstudiantePeriodoAcademicoAsignatura.objects.filter(estudiante=estudiante, asignatura__carrera=carrera).all()
+    asignaturas = estudiante.asignaturas.filter(asignatura__carrera=carrera)
+    for x in asignaturas:
+        logg.info('-'+x.asignatura.nombre)
+    return render_to_response("app/asignatura_docentes.html",
+                              dict(asignaturas=asignaturas, id_asignatura=int(id_asignatura)))
 
     
