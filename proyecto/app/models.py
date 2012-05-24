@@ -50,6 +50,17 @@ class Cuestionario(models.Model):
         return self.titulo
 
 
+class Evaluacion(models.Model):
+    fechaInicio = models.DateField()
+    fechaFin = models.DateField()
+    horaInicio = models.TimeField()
+    horaFin = models.TimeField()
+    cuestionario = models.ForeignKey('Cuestionario', related_name='evaluaciones')
+    
+    def __unicode__(self):
+        return u'{0} {1} - {2} {3}'.format(self.fechaInicio, self.fechaFin, self.horaInicio, self.horaFin)
+    
+    
 class TipoPregunta(models.Model):
     # TODO: Clase Abstracta
     tipo = models.CharField(max_length='20', unique=True)
@@ -60,11 +71,22 @@ class TipoPregunta(models.Model):
 
 
 class SeleccionUnica(TipoPregunta):
-    
     def __init__(self):
         TipoPregunta.__init__(self)
         self.tipo = 'SeleccionUnica'
         self.descripcion = 'Se visualiza  radio buttons'
+
+
+class SeleccionUnicaGrupo(TipoPregunta):
+    def __init__(self, longitud=1, numeracion=0):
+        TipoPregunta.__init__(self)
+        self.longitud = longitud
+        self.numeracion = 0
+        self.tipo = 'SeleccionUnicaGrupo'
+        self.descripcion = 'Plantilla para especificar grupos de items'
+
+    class Meta:
+        managed = False
 
 
 class Ensayo(TipoPregunta):
@@ -79,7 +101,8 @@ class Seccion(models.Model):
     titulo = models.CharField(max_length='50')
     descripcion  = models.CharField(max_length='100')
     orden = models.IntegerField()
-    seccionPadre = models.ForeignKey('self', null=True, blank=True, db_column='seccion_padre_id', related_name='subsecciones', verbose_name='Sección Padre')
+    seccionPadre = models.ForeignKey('self', null=True, blank=True, db_column='seccion_padre_id',
+                                     related_name='subsecciones', verbose_name='Sección Padre')
     cuestionario = models.ForeignKey(Cuestionario)
 
     def preguntas_ordenadas(self):
@@ -121,8 +144,7 @@ class ItemPregunta(models.Model):
 
 class Respuesta(models.Model):
     texto = models.CharField(max_length='100')
-    fechaHora = models.DateTimeField(db_column='fecha_hora')
-    itemPregunta = models.ForeignKey(ItemPregunta,db_column='item_pregunta_id', related_name='respuestas')
+    pregunta = models.ForeignKey('Pregunta',related_name='respuestas')
 
     def __unicode__(self):
         return self.texto
@@ -215,9 +237,19 @@ class Asignatura(models.Model):
     tipo = models.CharField(max_length='15')
     creditos = models.IntegerField(verbose_name='número de créditos')
     duracion = models.FloatField(verbose_name='duración en horas')
+    inicio = models.DateField(null=True)
+    fin = models.DateField(null=True)
     # Campo combinado id_unidad:id_paralelo
     idSGA = models.CharField(max_length='15', db_column='id_sga')
 
+    def esVigente(self):
+        """ Determina si la asignatura se dicta dentro del Periodo de Evaluación Actual """
+        periodoEvaluacion = Configuracion.getPeriodoEvaluacionActual()
+        if self.inicio <= periodoEvaluacion.fin and self.fin >= periodoEvaluacion.inicio:
+            return True
+        else:
+            return False
+                
     def getTipo(self):
         tipos = [u'taller',u'curso',u'módulo',u'modulo',u'unidad']
         l = [t for t in tipos if t in self.nombre.lower()]
@@ -232,59 +264,80 @@ class Asignatura(models.Model):
 
     
 class EstudiantePeriodoAcademico(models.Model):
-    estudiante = models.ForeignKey('Usuario', related_name='estudiantePeriodosAcademicos')
-    periodoAcademico = models.ForeignKey('PeriodoAcademico', related_name='estudiantes', verbose_name='Periodo Académico', db_column='periodo_academico_id')
+    usuario = models.ForeignKey('Usuario', related_name='estudiantePeriodosAcademicos')
+    periodoAcademico = models.ForeignKey('PeriodoAcademico', related_name='estudiantes',
+                                         verbose_name='Periodo Académico', db_column='periodo_academico_id')
 
     class Meta:
         verbose_name = 'Estudiante'
-        unique_together = ('estudiante', 'periodoAcademico')
+        unique_together = ('usuario', 'periodoAcademico')
 
     def cedula(self):
-        return self.estudiante.cedula
+        return self.usuario.cedula
+    
+    def get_asignaturas(self):
+        pass
 
     def __unicode__(self):
-        return self.estudiante.get_full_name()
+        return self.usuario.get_full_name()
     
 
-class EstudiantePeriodoAcademicoAsignatura(models.Model):
-    estudiante = models.ForeignKey('EstudiantePeriodoAcademico', related_name='asignaturas')
-    asignatura = models.ForeignKey('Asignatura', related_name='estudiantes')
+class EstudianteAsignaturaDocente(models.Model):
+    estudiante = models.ForeignKey('EstudiantePeriodoAcademico', related_name='asignaturasDocentesEstudiante')
+    # Asignatura-Docente
+    asignaturaDocente = models.ForeignKey('AsignaturaDocente', related_name='estudiantesAsignaturaDocente')
     matricula = models.IntegerField(null=True)    
     estado = models.CharField(max_length='30', blank=True, null=True)
+    evaluacion = models.OneToOneField('Evaluacion', related_name='estudiantes', blank=True, null=True)
 
-    class Meta:
-        verbose_name = 'Asignaturas Estudiante'
-        unique_together = ('estudiante','asignatura')
+    def get_asignatura(self):
+        return self.asignaturaDocente.asignatura
 
-    def __unicode__(self):
-        return u"{0}:{1}".format(self.estudiante, self.asignatura)
-
-
-class DocentePeriodoAcademico(models.Model):
-    docente = models.ForeignKey('Usuario', related_name='docentePeriodosAcademicos')
-    periodoAcademico = models.ForeignKey('PeriodoAcademico', related_name='docentes', verbose_name='Periodo Académico', db_column='periodo_academico_id')
+    def get_docente(self):
+        return self.asignaturaDocente.docente
     
     class Meta:
-        verbose_name = 'Docente'
-        unique_together = ('docente','periodoAcademico')
+        verbose_name = 'Estudiante Asignaturas'
+        unique_together = ('estudiante','asignaturaDocente')
 
-    def cedula(self):
-        return self.docente.cedula
-        
+    def __repr__(self):
+        return u"{0}-{1}".format(self.estudiante, self.asignaturaDocente)
+
     def __unicode__(self):
-        return self.docente.get_full_name()
+        return u"{0}-{1}".format(self.estudiante, self.asignaturaDocente)
 
 
-class DocentePeriodoAcademicoAsignatura(models.Model):
-    docente = models.ForeignKey('DocentePeriodoAcademico', related_name='asignaturas')
-    asignatura = models.ForeignKey('Asignatura', related_name='docentes')
-
+class AsignaturaDocente(models.Model):
+    asignatura = models.ForeignKey('Asignatura', related_name='docentesAsignatura')
+    docente = models.ForeignKey('DocentePeriodoAcademico', related_name='asignaturasDocente')
+    
     class Meta:
-        verbose_name = 'Asignaturas Docente'
+        verbose_name = 'Asignatura Docente'
+        verbose_name_plural = 'Asignaturas y Docentes'
         unique_together = ('docente','asignatura')
 
     def __unicode__(self):
-        return u"{0}:{1}".format(self.docente, self.asignatura)
+        return u"{0} >> {1}".format(self.docente, self.asignatura.nombre)
+
+
+class DocentePeriodoAcademico(models.Model):
+    usuario = models.ForeignKey('Usuario', related_name='docentePeriodosAcademicos')
+    periodoAcademico = models.ForeignKey('PeriodoAcademico', related_name='docentes', verbose_name='Periodo Académico', db_column='periodo_academico_id')
+    esCoordinador = models.BooleanField()
+    
+    
+    class Meta:
+        verbose_name = 'Docente'
+        unique_together = ('usuario','periodoAcademico')
+
+    def get_carrera(self):
+        pass
+    
+    def cedula(self):
+        return self.usuario.cedula
+        
+    def __unicode__(self):
+        return u'{0} {1}'.format(self.usuario.abreviatura, self.usuario.get_full_name())
 
 
 #===================================================================================================
@@ -296,7 +349,7 @@ class Usuario(auth.models.User):
     Perfil de Usuario que podrá pertener a los grupos Estudiante y/o Docente
     """
     cedula = models.CharField(max_length='15', unique=True)
-    titulo = models.CharField(max_length='60', blank=True, null=True)
+    titulo = models.CharField(max_length='100', blank=True, null=True)
 
     def get_nombres(self):
         return self.first_name
@@ -310,8 +363,20 @@ class Usuario(auth.models.User):
     def set_apellidos(self, apellidos):
         self.last_name = apellidos
 
+    def get_abreviatura(self):
+        equivalencias = {'magister':'Mg.', 'ingeniero':'Ing.', 'ingeniera':'Ing.', 'doctor':'Dr.', 'doctora':'Dra.', 'master':'Ms.',
+                         'mg.':'Mg.', 'licenciado':'Lic.', 'licenciada':'Lic.', 'economista':'Eco.', 'eco.':'Eco.', 'medico':'Dr.',
+                         'dra.':'Dra.','dr.':'Dr.','lic.':'Lic.', 'licdo.':'Lic.','ing.':'Ing.', 'phd.':'Phd.',u'médico':'Dr.'
+                         }
+        palabras = self.titulo.split()
+        for p in palabras:
+            if p.lower() in equivalencias.keys():
+                return equivalencias[p.lower()]
+        return ""
+        
     nombres = property(get_nombres, set_nombres)
     apellidos = property(get_apellidos, set_apellidos)
+    abreviatura = property(get_abreviatura)
         
     def __repr__(self):
         return u'<[{0}] {1}>'.format(self.cedula, self.get_full_name());

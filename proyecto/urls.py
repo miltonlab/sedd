@@ -10,9 +10,11 @@ urlpatterns = patterns('',
     url(r'^login/$', 'proyecto.app.controllers.app.login'),
     url(r'^carreras/$', 'proyecto.app.controllers.app.carreras'),
     url(r'^carrera/asignaturas/(\d{1})/$', 'proyecto.app.controllers.app.carrera_asignaturas'),
-    url(r'^carrera/asignatura/docentes/(\d{1,5})/$', 'proyecto.app.controllers.app.asignaturas_docentes'),
+    url(r'^carrera/asignaturas/docentes/(\d{1,5})/$', 'proyecto.app.controllers.app.asignaturas_docentes'),
+    url(r'^encuestas/(\d{1,5})/$', 'proyecto.app.controllers.app.encuestas'), 
     url(r'^sga/cargar_ofertas_sga/(\d{1,3})/$', 'proyecto.app.controllers.sga.cargar_ofertas_sga'),
     url(r'^sga/cargar_info_sga/(\d{1,3})/$', 'proyecto.app.controllers.sga.cargar_info_sga'),
+                       
     url(r'^cuestionarios/$','proyecto.app.controllers.cuestionario.index'),
     url(r'^cuestionarios/responder/(\d+)/$','proyecto.app.controllers.cuestionario.responder'),
     # Examples:

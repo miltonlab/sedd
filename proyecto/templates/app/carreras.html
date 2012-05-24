@@ -4,14 +4,13 @@
 <!--link rel="stylesheet" type="text/css" href="/static/admin/css/base.css" /-->
 
 
-
 {% block content %}
-<h2> Carreras </h2>
+
 <p/>
 <ul>
 {% for carrera in request.session.carreras %}
 
-<h1> <li> <a href="/carrera/asignaturas/{{carrera.id_tmp}}"> {{ carrera.nombre }} </a> </li> <h1>
+<h1> <li> <a href="/carrera/asignaturas/{{carrera.num_carrera}}"> {{ carrera.nombre }} </a> </li> <h1>
 
 {% endfor %}
 </ul>

@@ -13,7 +13,11 @@
 
 {% for asignatura in asignaturas %}
 
-<h3> <li> <a href="/carrera/asignatura/docentes/{{ asignatura.asignatura.id }}"> {{ asignatura.asignatura.nombre }} </a> </li> <h3>
+<h3> 
+  <li> 
+    <a href="{% url proyecto.app.controllers.app.asignaturas_docentes asignatura.id %}"> {{ asignatura.nombre }} </a> 
+  </li> 
+</h3>
 
 {% endfor %}
 

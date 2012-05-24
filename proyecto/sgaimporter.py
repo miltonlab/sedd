@@ -1,8 +1,8 @@
 #-*- encoding:utf-8 -*-
 
-from proyecto.app.models import EstudiantePeriodoAcademicoAsignatura
+from proyecto.app.models import EstudianteAsignaturaDocente
 from proyecto.app.models import EstudiantePeriodoAcademico
-from proyecto.app.models import DocentePeriodoAcademicoAsignatura
+from proyecto.app.models import AsignaturaDocente
 from proyecto.app.models import DocentePeriodoAcademico
 from proyecto.app.models import PeriodoAcademico
 from proyecto.app.models import Asignatura
@@ -40,8 +40,8 @@ def importar(periodoAcademicoId):
             if js_p[0] != '_error':
                 paralelos_carrera = js_p[4]
                 for id_paralelo, seccion, modulo, paralelo, id_modulo in paralelos_carrera:
-                    # Para reutilizarlos en la relacion con estudiantes
-                    asignaturas = []
+                    # Para reutilizarlos en la creacion de las relaciones "EstudianteAsignaturaDocente"
+                    asignaturas_docentes = []
                     """ Migración de Docentes y Asignaguras """
                     r_ud = sga.wsacademica.sgaws_unidades_docentes(id_paralelo=id_paralelo)
                     js_ud = json.loads(r_ud)
@@ -57,29 +57,34 @@ def importar(periodoAcademicoId):
                                 cedula=cedula, titulo=titulo, email=''
                             )
                             (asignatura, nueva) = Asignatura.objects.get_or_create(idSGA=dict_unidad['idSGA'], defaults=dict_unidad)
-                            asignaturas.append(asignatura)
+                            """
                             if nueva == True:
                                 log.info(u'Asignatura Creada: {0}'.format(asignatura))
                             else:
                                 log.info(u'Asignatura ya existe: {0}'.format(asignatura))
+                            """
                             (usuario, nuevo) = Usuario.objects.get_or_create(cedula=cedula, defaults=dict_usuario_docente)
+                            """
                             if nuevo == True:
                                 log.info(u'Usuario Docente Creado: {0}:{1}'.format(usuario, cedula))
                             else:
                                 log.info(u'Usuario Docente ya existe: {0}:{1}'.format(usuario, cedula))
-                            (docentePeriodoAcademico, nuevo) = DocentePeriodoAcademico.objects.get_or_create(docente=usuario, periodoAcademico=pa)
+                            """
+                            (docentePeriodoAcademico, nuevo) = DocentePeriodoAcademico.objects.get_or_create(usuario=usuario, periodoAcademico=pa)
+                            """
                             if nuevo == True:
                                 log.info(u'DocentePeriodoAcademico Creado: {0}'.format(docentePeriodoAcademico))
                             else:
                                 log.info(u'DocentePeriodoAcademico ya existe: {0}'.format(docentePeriodoAcademico))
-                            (docentePeriodoAcademicoAsignatura, nuevo) = DocentePeriodoAcademicoAsignatura.objects.get_or_create(
+                            """
+                            (asignaturaDocente, nuevo) = AsignaturaDocente.objects.get_or_create(
                                 docente=docentePeriodoAcademico, asignatura=asignatura
                             )
                             if nuevo == True:
-                                log.info(u'DocentePeriodoAcademicoAsignatura Creado: {0}'.format(docentePeriodoAcademicoAsignatura))
+                                log.info(u'AsignaturaDocente Creado: {0}'.format(asignaturaDocente))
                             else:
-                                log.info(u'DocentePeriodoAcademicoAsignatura ya existe: {0}'.format(docentePeriodoAcademicoAsignatura))
-                        
+                                log.info(u'AsignaturaDocente ya existe: {0}'.format(asignaturaDocente))
+                            asignaturas_docentes.append(asignaturaDocente)
                     """ Migración de Estudiantes de Paralelo """ 
                     r_ep = sga.wsacademica.sgaws_estadoestudiantes_paralelo(id_paralelo=id_paralelo)
                     js_ep = json.loads(r_ep)
@@ -92,23 +97,28 @@ def importar(periodoAcademicoId):
                                 email=''
                             )
                             (usuario, nuevo) = Usuario.objects.get_or_create(cedula=cedula, defaults=dict_usuario_estudiante)
+                            """
                             if nuevo == True:
                                 log.info(u'Usuario Estudiante Creado: {0}:{1}'.format(usuario, cedula))
+                            
                             else:
                                 log.info(u'Usuario Estudiante ya existe: {0}:{1}'.format(usuario, cedula))
+                            """
                             (estudiantePeriodoAcademico, nuevo) = EstudiantePeriodoAcademico.objects.get_or_create(
-                                estudiante=usuario, periodoAcademico=pa
+                                usuario=usuario, periodoAcademico=pa
                             )
+                            """
                             if nuevo == True:
                                 log.info(u'EstudiantePeriodoAcademico Creado: {0}'.format(estudiantePeriodoAcademico))
                             else:
                                 log.info(u'EstudiantePeriodoAcademico ya existe: {0}'.format(estudiantePeriodoAcademico))
-                            # Retomamos las agisnaturas extraidas en el metodo WS unidades_docentes
-                            for asignatura in asignaturas:
-                                (estudiantePeriodoAcademicoAsignatura, nuevo) = EstudiantePeriodoAcademicoAsignatura.objects.get_or_create(
-                                    estudiante=estudiantePeriodoAcademico, asignatura=asignatura, defaults=dict(matricula=matricula, estado=estado)
+                            """
+                            # Retomamos las asignaturas con docente extraidas en el metodo WS unidades_docentes 
+                            for asignaturaDocente in asignaturas_docentes:
+                                (estudianteAsignaturaDocente, nuevo) = EstudianteAsignaturaDocente.objects.get_or_create(
+                                    estudiante=estudiantePeriodoAcademico, asignaturaDocente=asignaturaDocente, defaults=dict(matricula=matricula, estado=estado)
                                 )
                                 if nuevo == True:
-                                    log.info(u'EstudiantePeriodoAcademicoAsignatura Creado: {0}'.format(estudiantePeriodoAcademicoAsignatura))
+                                    log.info(u'EstudianteAsignaturaDocente Creado: {0}'.format(estudianteAsignaturaDocente))
                                 else:
-                                    log.info(u'EstudiantePeriodoAcademicoAsignatura ya existe: {0}'.format(estudiantePeriodoAcademicoAsignatura))
+                                    log.info(u'EstudianteAsignaturaDocente ya existe: {0}'.format(estudianteAsignaturaDocente))

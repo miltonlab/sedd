@@ -7,10 +7,11 @@ from django.template import RequestContext
 from django.contrib import auth
 from django.forms.forms import NON_FIELD_ERRORS
 
-from proyecto.app.models import DocentePeriodoAcademicoAsignatura
-from proyecto.app.models import EstudiantePeriodoAcademicoAsignatura
+from proyecto.app.models import AsignaturaDocente
+from proyecto.app.models import EstudianteAsignaturaDocente
 from proyecto.app.models import EstudiantePeriodoAcademico
 from proyecto.app.models import DocentePeriodoAcademico
+from proyecto.app.models import Asignatura
 from proyecto.app.models import PeriodoAcademico
 from proyecto.app.models import Configuracion
 
@@ -44,44 +45,58 @@ def login(request):
 
 def carreras(request):
     pa = Configuracion.getPeriodoAcademicoActual()
-    pe = Configuracion.getPeriodoEvaluacionActual()
     usuario = request.user
     try:
-        estudiante = EstudiantePeriodoAcademico.objects.get(periodoAcademico=pa, estudiante=usuario)
-        carreras = estudiante.asignaturas.values('asignatura__carrera').distinct()
+        logg.info(usuario)
+        estudiante = EstudiantePeriodoAcademico.objects.get(periodoAcademico=pa, usuario=usuario)
+        carreras = estudiante.asignaturasDocentesEstudiante.values('asignaturaDocente__asignatura__carrera').distinct()
         # Al final un diccionario de carreras en session 
-        carreras = [ dict(id_tmp=i, nombre=c['asignatura__carrera']) for i,c in enumerate(carreras) ]
+        carreras = [ dict(num_carrera=i, nombre=c['asignaturaDocente__asignatura__carrera']) for i,c in enumerate(carreras) ]
         request.session['estudiante'] = estudiante
         request.session['carreras'] = carreras
-        return render_to_response("app/carreras.html", context_instance=RequestContext(request))
+        return render_to_response("app/carreras.html", dict(title='Carreras'), context_instance=RequestContext(request))
     except EstudiantePeriodoAcademico.DoesNotExist:
         try:
-            docente = DocentePeriodoAcademico.objects.get(periodoAcademico=pa, docente=usuario)
+            docente = DocentePeriodoAcademico.objects.get(periodoAcademico=pa, usuario=usuario)
             return HttpResponse('Ud es docente en el presente periodo')
         except DocentePeriodoAcademico.DoesNotExist:
             return HttpResponse('Fin')
 
-def carrera_asignaturas(request, id_tmp):
+
+def carrera_asignaturas(request, num_carrera):
     estudiante = request.session['estudiante']
-    carrera = [c['nombre'] for c in request.session['carreras'] if c['id_tmp'] == int(id_tmp) ][0]
-    request.session['carrera'] = carrera;
+    carrera = [c['nombre'] for c in request.session['carreras']
+               if c['num_carrera'] == int(num_carrera) ][0]
+    request.session['carrera'] = carrera
     logg.info(carrera)
-    asignaturas = EstudiantePeriodoAcademicoAsignatura.objects.filter(estudiante=estudiante, asignatura__carrera=carrera).all()
-    for x in asignaturas:
-        logg.info('-'+x.asignatura.nombre)
-    return render_to_response("app/carrera_asignaturas.html",
-                              dict(asignaturas=asignaturas, estudiante=estudiante))
+    ids = estudiante.asignaturasDocentesEstudiante.filter(
+        asignaturaDocente__asignatura__carrera=carrera).values_list(
+        'asignaturaDocente__asignatura__id', flat=True).distinct()
+    asignaturas = Asignatura.objects.filter(id__in=ids).order_by('nombre')
+    request.session['asignaturas'] = asignaturas
+    datos = dict(asignaturas=asignaturas, title='Asignaturas de su Carrera')
+    return render_to_response("app/asignaturas_docentes.html", datos)
 
 
 def asignaturas_docentes(request, id_asignatura):
     estudiante = request.session['estudiante']
-    carrera = request.session['carrera'] 
-    logg.info(carrera)
-    #asignaturas = EstudiantePeriodoAcademicoAsignatura.objects.filter(estudiante=estudiante, asignatura__carrera=carrera).all()
-    asignaturas = estudiante.asignaturas.filter(asignatura__carrera=carrera)
-    for x in asignaturas:
-        logg.info('-'+x.asignatura.nombre)
-    return render_to_response("app/asignatura_docentes.html",
-                              dict(asignaturas=asignaturas, id_asignatura=int(id_asignatura)))
+    carrera = request.session['carrera']
+    asignaturas = request.session['asignaturas']
+    asignatura = Asignatura.objects.get(id=int(id_asignatura))
+    request.session['asignatura'] = asignatura
+    docentes =  [ da.docente for da in asignatura.docentesAsignatura.all() ]
+    logg.info(docentes)
+    datos = dict(asignaturas=asignaturas, seleccion=asignatura, docentes=docentes, title='Asignaturas y Docentes')
+    return render_to_response("app/asignaturas_docentes.html", datos)
 
-    
+def encuestas(request, id_docente):
+    periodoEvaluacion = Configuracion.getPeriodoEvaluacionActual()
+    encuestas = []
+    if request.session['estudiante']:
+        asignatura = request.session['asignatura']
+        if asignatura.semestre == u"1":
+            encuestas = [e for e in periodoEvaluacion.cuestionarios.all() if e.informante.tipo == 'EstudianteNovel']
+        else:
+            encuestas = [e for e in periodoEvaluacion.cuestionarios.all() if e.informante.tipo == 'Estudiante']
+    datos = dict(encuestas=encuestas, title='Encuestas Disponibles')
+    return render_to_response("app/encuestas.html", datos)

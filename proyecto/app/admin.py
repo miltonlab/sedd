@@ -21,7 +21,8 @@ class SeccionEnLinea(admin.TabularInline):
 
 class SeccionAdmin(admin.ModelAdmin):
     inlines = [PreguntaEnLinea]
-    fields = ('titulo','descripcion','orden','cuestionario','seccionPadre')
+    fields = ('titulo','descripcion','orden','cuestionario')
+    
 
 class CuestionarioAdmin(admin.ModelAdmin):
     inlines = [SeccionEnLinea]
@@ -40,34 +41,37 @@ class PeriodoAcademicoAdmin(admin.ModelAdmin):
     filter_horizontal = ('ofertasAcademicasSGA',)
 
 
-class EstudiantePeriodoAcademicoAsignaturaEnLinea(admin.TabularInline):
-    model = models.EstudiantePeriodoAcademicoAsignatura
+class EstudianteAsignaturaDocenteEnLinea(admin.TabularInline):
+    model = models.EstudianteAsignaturaDocente
     extra = 1
-    verbose_name = 'Asignaturas Estudiante'
-    raw_id_fields = ("asignatura",)
+    verbose_name = 'Asignaturas de Estudiante'
+    raw_id_fields = ('asignaturaDocente',)
+    exclude = ('preguntas',)
 
 
 class EstudiantePeriodoAcademicoAdmin(admin.ModelAdmin):
     list_display = ('cedula', '__unicode__')
     list_per_page = 20
-    search_fields = ('estudiante__cedula','estudiante__last_name','estudiante__first_name')
-    inlines = [EstudiantePeriodoAcademicoAsignaturaEnLinea]
-    raw_id_fields = ('estudiante',)
+    search_fields = ('usuario__cedula','usuario__last_name','usuario__first_name')
+    inlines = (EstudianteAsignaturaDocenteEnLinea,)
+    raw_id_fields = ('usuario',)
     
+class AsignaturaDocenteAdmin(admin.ModelAdmin):
+    raw_id_fields = ('asignatura','docente',)
 
-class DocentePeriodoAcademicoAsignaturaEnLinea(admin.TabularInline):
-    model = models.DocentePeriodoAcademicoAsignatura
+class AsignaturaDocenteEnLinea(admin.TabularInline):
+    model = models.AsignaturaDocente
     extra = 1
-    verbose_name = 'Asignaturas Docente'
-    raw_id_fields = ("asignatura",)
+    verbose_name = 'Asignaturas de Docente'
+    raw_id_fields = ('asignatura',)
 
     
 class DocentePeriodoAcademicoAdmin(admin.ModelAdmin):
     list_display = ('cedula', '__unicode__')
     list_per_page = 20
-    search_fields = ('docente__cedula','docente__last_name','docente__fisrt_name') 
-    inlines = (DocentePeriodoAcademicoAsignaturaEnLinea,)
-    raw_id_fields = ('docente',)
+    search_fields = ('usuario__cedula','usuario__last_name','usuario__first_name') 
+    inlines = (AsignaturaDocenteEnLinea,)
+    raw_id_fields = ('usuario',)
 
     
 class AsignaturaAdmin(admin.ModelAdmin):
@@ -90,6 +94,9 @@ class AsignaturaAdmin(admin.ModelAdmin):
 
 class UsuarioAdmin(admin.ModelAdmin):
     search_fields = ('username','cedula')
+    list_display = ('cedula','get_full_name',)
+    list_display_links = ('cedula','get_full_name',)
+    list_per_page = 20
 
 class ConfiguracionAdmin(admin.ModelAdmin):
     actions = None
@@ -106,6 +113,7 @@ admin.site.register(models.Pregunta,PreguntaAdmin)
 admin.site.register(models.PeriodoAcademico,PeriodoAcademicoAdmin)
 admin.site.register(models.EstudiantePeriodoAcademico, EstudiantePeriodoAcademicoAdmin)
 admin.site.register(models.DocentePeriodoAcademico, DocentePeriodoAcademicoAdmin)
+admin.site.register(models.AsignaturaDocente, AsignaturaDocenteAdmin)
 admin.site.register(models.Asignatura, AsignaturaAdmin)
 admin.site.register(models.Usuario, UsuarioAdmin)
 admin.site.register(models.Configuracion, ConfiguracionAdmin)
