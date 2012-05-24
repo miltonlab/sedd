@@ -1,0 +1,16 @@
+{% extends "admin/base_site.html" %}
+
+<hr/>
+
+{% block content %}
+
+<p/>
+
+{% for encuesta in encuestas %}
+
+ <a href='/' > {{ encuesta.titulo }} </a> 
+
+
+{% endfor %}
+
+{% endblock %}
