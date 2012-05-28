@@ -1,7 +1,11 @@
-#-*- encoding: utf-8 -*-
+# -*- encoding: utf-8 -*-
 
 from django.contrib import admin
 from proyecto.app import models
+
+import logging
+logg = logging.getLogger('logapp')
+
 
 class ItemPreguntaEnLinea(admin.StackedInline):
     model = models.ItemPregunta
@@ -10,6 +14,25 @@ class ItemPreguntaEnLinea(admin.StackedInline):
 class PreguntaAdmin(admin.ModelAdmin):
     inlines = [ItemPreguntaEnLinea]
     fields = ('texto','orden','tipo','seccion')
+
+    # Sobreescrito
+    def save_model(self, request, obj, form, change):
+        # request es un objeto de tipo WSGIRequest 
+        longitud = request.POST['longitud']
+        numeracion = request.POST['numeracion']
+        if longitud == '' or numeracion == '':
+            return
+        obj.save()
+        longitud = int(longitud)
+        if numeracion == '1':
+            for n in range(1, longitud+1):
+                item = models.ItemPregunta(texto=str(n), pregunta=obj, orden=n)
+                item.save()
+        elif numeracion.lower() == 'a':
+            for i,n in enumerate(letters):
+                item = models.ItemPregunta(texto=n, pregunta=obj, orden=i)
+                item.save()
+          
 
 class PreguntaEnLinea(admin.TabularInline):
     model = models.Pregunta
@@ -46,8 +69,6 @@ class EstudianteAsignaturaDocenteEnLinea(admin.TabularInline):
     extra = 1
     verbose_name = 'Asignaturas de Estudiante'
     raw_id_fields = ('asignaturaDocente',)
-    exclude = ('preguntas',)
-
 
 class EstudiantePeriodoAcademicoAdmin(admin.ModelAdmin):
     list_display = ('cedula', '__unicode__')

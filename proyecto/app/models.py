@@ -1,4 +1,4 @@
-#-*- encoding=utf8 -*-
+# -*- encoding=utf8 -*-
 
 from django.db import models
 from sgaws.cliente import SGA
@@ -76,18 +76,9 @@ class SeleccionUnica(TipoPregunta):
         self.tipo = 'SeleccionUnica'
         self.descripcion = 'Se visualiza  radio buttons'
 
-
-class SeleccionUnicaGrupo(TipoPregunta):
-    def __init__(self, longitud=1, numeracion=0):
-        TipoPregunta.__init__(self)
-        self.longitud = longitud
-        self.numeracion = 0
-        self.tipo = 'SeleccionUnicaGrupo'
-        self.descripcion = 'Plantilla para especificar grupos de items'
-
-    class Meta:
-        managed = False
-
+    def __unicode__(self):
+        return u'Selección Única'
+            
 
 class Ensayo(TipoPregunta):
     
@@ -103,13 +94,13 @@ class Seccion(models.Model):
     orden = models.IntegerField()
     seccionPadre = models.ForeignKey('self', null=True, blank=True, db_column='seccion_padre_id',
                                      related_name='subsecciones', verbose_name='Sección Padre')
-    cuestionario = models.ForeignKey(Cuestionario)
+    cuestionario = models.ForeignKey(Cuestionario, related_name='secciones')
 
     def preguntas_ordenadas(self):
         return self.pregunta_set.order_by('orden')
 
     def __unicode__(self):
-        return self.titulo
+        return u'{0} > Cuestionario: {1}'.format(self.titulo, self.cuestionario)
 
     class Meta:
         ordering = ['orden']
@@ -341,7 +332,7 @@ class DocentePeriodoAcademico(models.Model):
 
 
 #===================================================================================================
-#   Autenticación
+#   Autenticación y Usuarios
 #===================================================================================================
 
 class Usuario(auth.models.User):

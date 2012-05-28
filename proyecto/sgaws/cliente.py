@@ -305,7 +305,7 @@ class Script:
             @params: id de la oferta
             @return: unidades_docentes [
             carrera, modulo, paralelo, seccion,
-            id_unidad, unidad, horas, creditos,
+            id_unidad, unidad, horas, creditos, fecha_inicio, fecha_fin,
             cedula, nombres, apellidos, titulo
             ]
         """
@@ -323,16 +323,16 @@ class Script:
                 paralelos_carrera = jsp[4]
                 for id_paralelo, seccion, numero_modulo, nombre_paralelo, id_modulo in paralelos_carrera:
                     log.info("unidades_docentes() Paralelo: " + nombre_paralelo)
-                    rud = self.sga.wsacademica.sgaws_unidades_docentes(id_paralelo=id_paralelo)
+                    rud = self.sga.wsacademica.sgaws_unidades_docentes_paralelo(id_paralelo=id_paralelo)
                     # Si no hay error al obtener unidades del paralelo
                     jsud = json.loads(rud)
                     if jsud[0] != u'_error':
                         u_d_paralelo = jsud[6]
-                        for id_unidad, unidad, horas, creditos, obligatoria, cedula, nombres, apellidos, titulo  in u_d_paralelo:
+                        for id_unidad, unidad, horas, creditos, obligatoria, inicio, fin, cedula, nombres, apellidos, titulo  in u_d_paralelo:
                             log.info("unidades_docentes() Unidad: " + unidad)
                             unidades_docentes.append(dict(
                                 id_unidad=id_unidad, carrera=nombre_carrera, modulo=numero_modulo, paralelo=nombre_paralelo,
-                                seccion=seccion, unidad=unidad, creditos=creditos, horas=horas,
+                                seccion=seccion, unidad=unidad, creditos=creditos, horas=horas, inicio=inicio, fin=fin,
                                 cedula=cedula, nombres=nombres.title(), apellidos=apellidos.title(), titulo=titulo
                             ))
         return unidades_docentes

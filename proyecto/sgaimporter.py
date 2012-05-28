@@ -43,16 +43,16 @@ def importar(periodoAcademicoId):
                     # Para reutilizarlos en la creacion de las relaciones "EstudianteAsignaturaDocente"
                     asignaturas_docentes = []
                     """ Migración de Docentes y Asignaguras """
-                    r_ud = sga.wsacademica.sgaws_unidades_docentes(id_paralelo=id_paralelo)
+                    r_ud = sga.wsacademica.sgaws_unidades_docentes_paralelo(id_paralelo=id_paralelo)
                     js_ud = json.loads(r_ud)
                     if js_ud[0] != '_error':
                         unidades_docentes = js_ud[6]
-                        for id_unidad, unidad, horas, creditos, obligatoria, cedula, nombres, apellidos, titulo in unidades_docentes:
+                        for id_unidad, unidad, horas, creditos, obligatoria, inicio, fin, cedula, nombres, apellidos, titulo in unidades_docentes:
                             # Tratamiento de los saltos de línea dentro del nombre de la unidad
                             unidad = unidad.replace('\r\n',' ')[0:-1]
                             dict_unidad = dict(
                                 idSGA="{0}:{1}".format(id_unidad, id_paralelo), area=area, carrera=carrera, semestre=modulo,
-                                paralelo=paralelo, seccion=seccion, nombre=unidad, creditos=creditos, duracion=horas
+                                paralelo=paralelo, seccion=seccion, nombre=unidad, creditos=creditos, duracion=horas, inicio=inicio, fin=fin
                             )
                             dict_usuario_docente = dict(
                                 username=cedula, password='', first_name=nombres.title(), last_name=apellidos.title(),
