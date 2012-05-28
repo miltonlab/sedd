@@ -47,8 +47,8 @@
 	}
   },
 
-{"pk": 1, "model": "app.tipopregunta", "fields": {"descripcion": "Se visualiza con un area de texto", "tipo": "Ensayo"}}, {"pk": 2, "model": "app.tipopregunta", "fields": {"descripcion": "Se visualiza  radio buttons", "tipo": "SeleccionUnica"}}
+{"pk": 1, "model": "app.tipopregunta", "fields": {"descripcion": "Se visualiza con un area de texto", "tipo": "Ensayo"}}, {"pk": 2, "model": "app.tipopregunta", "fields": {"descripcion": "Se visualiza  radio buttons", "tipo": "SeleccionUnica"}},
 
-{"pk": 1, "model": "app.tipoinformante", "fields": {"descripcion": "", "tipo": "Estudiante"}}, {"pk": 3, "model": "app.tipoinformante", "fields": {"descripcion": "Estudiante de Primer Semestre", "tipo": "Estudiante Novel"}}, {"pk": 5, "model": "app.tipoinformante", "fields": {"descripcion": "Docente", "tipo": "Docente"}}, {"pk": 6, "model": "app.tipoinformante", "fields": {"descripcion": "Directivos", "tipo": "Directivos"}}
+{"pk": 1, "model": "app.tipoinformante", "fields": {"descripcion": "", "tipo": "Estudiante"}}, {"pk": 3, "model": "app.tipoinformante", "fields": {"descripcion": "Estudiante de Primer Semestre", "tipo": "Estudiante Novel"}}, {"pk": 5, "model": "app.tipoinformante", "fields": {"descripcion": "Docente", "tipo": "Docente"}}, {"pk": 6, "model": "app.tipoinformante", "fields": {"descripcion": "Directivos", "tipo": "Directivos"}},
 
 ]

@@ -1,4 +1,4 @@
-#-*- encoding:utf-8 -*-
+# -*- encoding: utf-8 -*-
 
 from proyecto.app.models import EstudianteAsignaturaDocente
 from proyecto.app.models import EstudiantePeriodoAcademico
@@ -48,6 +48,8 @@ def importar(periodoAcademicoId):
                     if js_ud[0] != '_error':
                         unidades_docentes = js_ud[6]
                         for id_unidad, unidad, horas, creditos, obligatoria, cedula, nombres, apellidos, titulo in unidades_docentes:
+                            # Tratamiento de los saltos de línea dentro del nombre de la unidad
+                            unidad = unidad.replace('\r\n',' ')[0:-1]
                             dict_unidad = dict(
                                 idSGA="{0}:{1}".format(id_unidad, id_paralelo), area=area, carrera=carrera, semestre=modulo,
                                 paralelo=paralelo, seccion=seccion, nombre=unidad, creditos=creditos, duracion=horas
