@@ -1,0 +1,51 @@
+{%  extends "admin/base_site.html" %}
+{#  extends "base.html" #}
+
+<!--link rel="stylesheet" type="text/css" href="/static/admin/css/base.css" /-->
+
+{% block title %} 
+
+Encuesta: {{ cuestionario.titulo }}  
+
+{% endblock %}
+
+
+{% block content %}
+
+{{ cuestionario.encabezado|safe }} 
+  
+
+<form>
+    
+  {% for seccion in cuestionario.secciones %}
+
+  {{ seccion.titulo }}
+  
+  {% for pregunta in seccion.preguntas %}
+  
+    {{ pregunta.orden }}: {{ pregunta.texto}}  
+    
+    {% for item in pregunta.items.all %}
+    
+    {% ifequal pregunta.tipo.tipo 'SeleccionUnica' %}
+    <input type="radio" name="{{ pregunta.id }}" value="{{ item.texto }}" > {{ item.texto }} </input>
+    {% endifequal %}
+    
+    {% ifequal pregunta.tipo.tipo 'Ensayo' %}
+    <br/>
+    <textarea cols="100" rows="10" > </textarea>
+    {% endifequal %}
+
+    {% endfor%}
+  
+  {% endfor %}
+  
+  {% endfor%}
+  
+</form>
+
+<input type="submit" value="GRABAR"/>
+<input type="reset" value="CANCELAR"/>
+
+{% endblock %}
+
