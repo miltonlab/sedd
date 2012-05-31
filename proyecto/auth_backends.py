@@ -1,7 +1,12 @@
+# -*- coding: utf-8 -*-
+
 from django.contrib.auth.models import User
 from django.conf import settings
 from proyecto.app.models import Usuario
 from sgaws import cliente
+import logging
+logg = logging.getLogger('logapp')
+
 
 class SGAAuthBackend(object):
 
@@ -16,7 +21,8 @@ class SGAAuthBackend(object):
                 e = self.sga.datos_estudiante(username)
                 user = Usuario()
                 user.username = e['cedula']
-                user.password = password
+                # De ser necesario metodo de autenticacion por defecto                
+                user.set_password(password)
                 user.first_name = e['nombres']
                 user.last_name = e['apellidos']
                 user.email = e['email']
@@ -29,7 +35,8 @@ class SGAAuthBackend(object):
                 d = self.sga.datos_docente(username)
                 user = Usuario()
                 user.username = d['cedula']
-                user.password = password
+                # De ser necesario metodo de autenticacion por defecto
+                user.set_password(password)
                 user.first_name = d['nombres']
                 user.last_name = d['apellidos']
                 user.cedula = d['cedula']
@@ -55,3 +62,25 @@ class SGAAuthBackend(object):
         else:
             return None
         """
+
+
+class TempAuthBackend(object):
+    """
+    Autenticación Basada en el DNI. Debe utilizarselo en caso de
+    no funcionar la conexión al WebService de autenticación del SGA.
+    """
+    def authenticate(self, username=None, password=None):
+        if username == password:
+            try:
+                user = Usuario.objects.get(username=username)
+            except User.DoesNotExist:
+                user = None
+            return user
+        else:
+            return None
+        
+    def get_user(self,id):
+        try:
+            return Usuario.objects.get(pk=id)
+        except User.DoesNotExist:
+            return None

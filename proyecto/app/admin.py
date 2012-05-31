@@ -1,4 +1,4 @@
-# -*- encoding: utf-8 -*-
+# -*- coding: utf-8 -*-
 
 from django.contrib import admin
 from proyecto.app import models
@@ -17,21 +17,28 @@ class PreguntaAdmin(admin.ModelAdmin):
 
     # Sobreescrito
     def save_model(self, request, obj, form, change):
-        # request es un objeto de tipo WSGIRequest 
-        longitud = request.POST['longitud']
-        numeracion = request.POST['numeracion']
-        if longitud == '' or numeracion == '':
-            return
-        obj.save()
-        longitud = int(longitud)
-        if numeracion == '1':
-            for n in range(1, longitud+1):
-                item = models.ItemPregunta(texto=str(n), pregunta=obj, orden=n)
-                item.save()
-        elif numeracion.lower() == 'a':
-            for i,n in enumerate(letters):
-                item = models.ItemPregunta(texto=n, pregunta=obj, orden=i)
-                item.save()
+        # request es un objeto de tipo WSGIRequest
+        tipo = request.POST['tipo']
+        # Tipo de pregunta:  SeleccionUnica
+        if tipo=='2':
+            longitud = request.POST['longitud']
+            numeracion = request.POST['numeracion']
+            if longitud == '' or numeracion == '':
+                return
+            # Si se trata de una pregunta de Selección por predeterminada
+            obj.save()
+            longitud = int(longitud)
+            if numeracion == '1':
+                for n in range(1, longitud+1):
+                    item = models.ItemPregunta(texto=str(n), pregunta=obj, orden=n)
+                    item.save()
+            elif numeracion.lower() == 'a':
+                for i,n in enumerate(letters):
+                    item = models.ItemPregunta(texto=n, pregunta=obj, orden=i)
+                    item.save()
+        # Cualquier otro tipo de pregunta
+        else:
+            obj.save()
           
 
 class PreguntaEnLinea(admin.TabularInline):
@@ -76,6 +83,17 @@ class EstudiantePeriodoAcademicoAdmin(admin.ModelAdmin):
     search_fields = ('usuario__cedula','usuario__last_name','usuario__first_name')
     inlines = (EstudianteAsignaturaDocenteEnLinea,)
     raw_id_fields = ('usuario',)
+
+    change_form_template = 'admin/app/estudianteperiodoacademico/change_form.html'
+    
+    # Para disponer de información extra en el template
+    def change_view(self, request, object_id, extra_context={}):
+        estudiante = models.EstudiantePeriodoAcademico.objects.get(id=object_id)
+        extra_context['paralelos'] = estudiante.paralelos()
+        logg.info(extra_context['paralelos'])
+        extra_context['prueba'] = 'pruebaaaa'
+        return super(EstudiantePeriodoAcademicoAdmin, self).change_view(request, object_id, extra_context)
+
     
 class AsignaturaDocenteAdmin(admin.ModelAdmin):
     raw_id_fields = ('asignatura','docente',)

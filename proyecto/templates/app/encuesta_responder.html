@@ -1,51 +1,147 @@
 {%  extends "admin/base_site.html" %}
-{#  extends "base.html" #}
 
-<!--link rel="stylesheet" type="text/css" href="/static/admin/css/base.css" /-->
+{% load i18n %}
 
-{% block title %} 
+{% load adminmedia %}
 
-Encuesta: {{ cuestionario.titulo }}  
+{% block extrahead %}
+
+   {{ block.super }}
+
+    <style type="text/css">
+    #encabezado {
+	margin-top: 20px;
+	margin-bottom: 20px;
+	align: center;
+    }
+
+    .seccion{
+	background-color: #EDF3FE;
+	font-weight: bold;
+    }
+    </style>
+
+    <!-- Cambiar en producción -->
+    <script type="text/javascript" src="http://code.jquery.com/jquery-1.6.2.js"> </script>
+
+    <script type="text/javascript">
+    
+function validarSeleccionUnica(){
+    var preguntas = new Array();
+    // Se validan como obligatorias todas las preguntas de Selección Unica
+    // Puede requerirse a futuro validar preguntas de Ensayo también
+    // TODO: $.each($('#formulario [name^="pregunta"]:radio'), function(){
+    $.each($('#formulario input[name^="pregunta"]:radio'), function(){
+	var nombre = $(this).attr("name");
+	preguntas[nombre] = nombre;
+    });
+    for (var pregunta in preguntas){
+	if (! $('#formulario input[name=' + pregunta +']:radio').is(':checked') ){
+	    alert('ERROR: Faltan preguntas por contestar');
+	    return false;
+	}
+    }
+    return true;
+};
+
+
+function grabarEncuesta(){
+    $('#formulario').submit();
+
+    /*$.ajax({
+	url: "/encuesta/grabar/",
+	method: "POST",
+	//data: "periodo_academico_id={{ object_id }}",
+	success: function (data){
+	    alert(data);
+	},
+	error: function(xhr,status,error){
+	    alert("error: " + status + "-" + error);
+	}
+    });*/
+}
+
+$(document).ready(function(){
+    $('#grabar').click(function(){
+	if (validarSeleccionUnica()){
+	    grabarEncuesta();
+	}
+    });
+});
+    </script>
+    
+{% endblock %}
+
+
+{% block content_title %}
+
+<h3> {{ cuestionario.titulo }} </h3>
 
 {% endblock %}
 
 
 {% block content %}
 
-{{ cuestionario.encabezado|safe }} 
-  
 
-<form>
-    
-  {% for seccion in cuestionario.secciones %}
+<div id="encabezado">
+  {{ cuestionario.encabezado|safe }} 
+</div>
 
-  {{ seccion.titulo }}
-  
-  {% for pregunta in seccion.preguntas %}
-  
-    {{ pregunta.orden }}: {{ pregunta.texto}}  
-    
-    {% for item in pregunta.items.all %}
-    
-    {% ifequal pregunta.tipo.tipo 'SeleccionUnica' %}
-    <input type="radio" name="{{ pregunta.id }}" value="{{ item.texto }}" > {{ item.texto }} </input>
-    {% endifequal %}
-    
-    {% ifequal pregunta.tipo.tipo 'Ensayo' %}
-    <br/>
-    <textarea cols="100" rows="10" > </textarea>
-    {% endifequal %}
+<form action="/encuesta/grabar/" method="post" id="formulario" name="formulario" >
 
-    {% endfor%}
-  
-  {% endfor %}
-  
-  {% endfor%}
-  
+  {% csrf_token %}
+
+  <div id="preguntas" style="font-size: +5;">
+    <table width="75%">
+      {% for seccion in cuestionario.secciones.all %}
+      <tr>
+	<td class="seccion" colspan="2" > {{ seccion.titulo|upper }} </td>
+      </tr>
+
+      {% for pregunta in seccion.preguntas.all %}
+      <tr>
+
+	{% ifequal pregunta.tipo.tipo 'Ensayo' %}
+	<td width="100%" colspan="2">
+	  <b> {{ pregunta.orden }}. </b> {{ pregunta.texto}}  
+	  <br/>
+	  <textarea name="pregunta-{{ pregunta.id }}" cols="100" rows="10" > </textarea>
+	</td>
+	{% endifequal %}
+	
+	{% ifequal pregunta.tipo.tipo 'SeleccionUnica' %}
+	<td width="75%">
+	  <b> {{ pregunta.orden }}. </b> {{ pregunta.texto}}  
+	</td>
+	<td width="25%">
+	  <table id="tabla-items">
+	    
+	    {% for item in pregunta.items.all %}
+	    <td>
+	      <input type="radio" name="pregunta-{{ pregunta.id }}" value="{{ item.texto }}" > {{ item.texto }} </input>
+	    </td>
+	    {% endfor%}
+
+	  </table>
+	</td>
+	{% endifequal %}
+
+
+      </tr>
+      {% endfor %}
+      
+      {% endfor%}
+      
+    </table>
+  </div>
+
+  <div id="comandos">
+    <input type="button" id="grabar" name="grabar" value="GRABAR"/>
+    <input type="reset" value="BORRAR"/>
+    <input type="button" id="cancelar" name="cancelar" value="CANCELAR"/>
+  </div>
+
 </form>
-
-<input type="submit" value="GRABAR"/>
-<input type="reset" value="CANCELAR"/>
 
 {% endblock %}
 

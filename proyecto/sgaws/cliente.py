@@ -1,5 +1,5 @@
 #!/usr/bin/env python
-#-*- encoding: utf-8 -*-
+#-*- coding: utf-8 -*-
 
 from SOAPpy import Config, HTTPTransport, SOAPAddress, WSDL
 import json
@@ -130,7 +130,7 @@ class SGA:
         cadena = self.wspersonal.sgaws_datos_estudiante(cedula=username)
         js=json.loads(cadena)
         if js[0] == '_error':
-            return js[1]
+            return None
         else:
             estudiante = dict(cedula=js[0], nombres=js[1].title(), apellidos=js[2].title(),
                               fecha_nacimiento=js[3], telefono=js[4], celular=js[5], direccion_actual=js[6],
@@ -146,7 +146,7 @@ class SGA:
         cadena = self.wspersonal.sgaws_datos_docente(cedula=username)
         js=json.loads(cadena)
         if js[0] == '_error':
-            return js[1]
+            return None
         else:
             docente = dict(nombres=js[0].title(), apellidos=js[1].title(), cedula=js[2], titulo=js[3], tipo=js[4])
         return docente
@@ -159,7 +159,7 @@ class SGA:
         cadena = self.wspersonal.sgaws_datos_usuario(cedula=username)
         js=json.loads(cadena)
         if js[0] == '_error':
-            return js[1]
+            return None
         else:
             usuario = dict(nombres=js[2][0].title(), apellidos=js[2][1].title(), cedula=js[2][2])
             tipo = []

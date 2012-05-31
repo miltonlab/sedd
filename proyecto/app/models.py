@@ -1,4 +1,4 @@
-# -*- encoding=utf8 -*-
+# -*- coding: utf-8 -*-
 
 from django.db import models
 from sgaws.cliente import SGA
@@ -50,15 +50,27 @@ class Cuestionario(models.Model):
         return self.titulo
 
 
+class Contestacion(models.Model):
+    pregunta = models.IntegerField()
+    respuesta = models.TextField()
+    evaluacion = models.ForeignKey('Evaluacion', related_name='contestaciones')
+
+    def __unicode__(self):
+        return u'{0}:{1}'.format(self.pregunta, self.respuesta)
+    
+    
 class Evaluacion(models.Model):
     fechaInicio = models.DateField()
     fechaFin = models.DateField()
     horaInicio = models.TimeField()
     horaFin = models.TimeField()
-    cuestionario = models.ForeignKey('Cuestionario', related_name='evaluaciones')
+    cuestionario = models.OneToOneField('Cuestionario')
+    estudianteAsignaturaDocente = models.ForeignKey('EstudianteAsignaturaDocente', related_name='evaluaciones')
     
     def __unicode__(self):
-        return u'{0} {1} - {2} {3}'.format(self.fechaInicio, self.fechaFin, self.horaInicio, self.horaFin)
+        return u'{0} - {1} - {2}:{3}'.format(self.estudianteAsignaturaDocente.estudiante.cedula(),
+                                           self.estudianteAsignaturaDocente.asignaturaDocente.docente.cedula(),
+                                           self.fechaInicio, self.horaInicio, )
     
     
 class TipoPregunta(models.Model):
@@ -81,7 +93,6 @@ class SeleccionUnica(TipoPregunta):
             
 
 class Ensayo(TipoPregunta):
-    
     def __init__(self):
         TipoPregunta.__init__(self)
         self.tipo = 'Ensayo'
@@ -266,8 +277,15 @@ class EstudiantePeriodoAcademico(models.Model):
     def cedula(self):
         return self.usuario.cedula
     
-    def get_asignaturas(self):
-        pass
+    def paralelos(self):
+        consulta = self.asignaturasDocentesEstudiante.values_list('asignaturaDocente__asignatura__area',
+                                                                  'asignaturaDocente__asignatura__carrera',
+                                                                  'asignaturaDocente__asignatura__semestre',
+                                                                  'asignaturaDocente__asignatura__paralelo',
+                                                                  'asignaturaDocente__asignatura__seccion',).distinct()
+        # Se construye una lista de diccionarios
+        datos = [dict(zip(('area','carrera','modulo','paralelo','seccion'),r)) for r in consulta]
+        return datos
 
     def __unicode__(self):
         return self.usuario.get_full_name()
@@ -279,7 +297,7 @@ class EstudianteAsignaturaDocente(models.Model):
     asignaturaDocente = models.ForeignKey('AsignaturaDocente', related_name='estudiantesAsignaturaDocente')
     matricula = models.IntegerField(null=True)    
     estado = models.CharField(max_length='30', blank=True, null=True)
-    evaluacion = models.OneToOneField('Evaluacion', related_name='estudiantes', blank=True, null=True)
+    ###?evaluacion = models.OneToOneField('Evaluacion', related_name='estudiantes', blank=True, null=True)
 
     def get_asignatura(self):
         return self.asignaturaDocente.asignatura
@@ -291,11 +309,12 @@ class EstudianteAsignaturaDocente(models.Model):
         verbose_name = 'Estudiante Asignaturas'
         unique_together = ('estudiante','asignaturaDocente')
 
-    def __repr__(self):
-        return u"{0}-{1}".format(self.estudiante, self.asignaturaDocente)
+        
+    ###def __repr__(self):
+    ###    return u"{0}-{1}".format(self.estudiante, self.asignaturaDocente)
 
     def __unicode__(self):
-        return u"{0}-{1}".format(self.estudiante, self.asignaturaDocente)
+        return u"{0} >> {1}".format(self.estudiante, self.asignaturaDocente)
 
 
 class AsignaturaDocente(models.Model):
@@ -321,8 +340,13 @@ class DocentePeriodoAcademico(models.Model):
         verbose_name = 'Docente'
         unique_together = ('usuario','periodoAcademico')
 
-    def get_carrera(self):
-        pass
+    def paralelos(self):
+        result = self.asignaturasDocente.values_list('asignatura__area', 'asignatura__carrera',
+                                            'asignatura__semestre','asignatura__paralelo',
+                                            'asignatura__seccion').distinct()
+        datos = [dict(zip(('area','carrera','modulo','paralelo','seccion'),r)) for r in result]
+        return datos
+
     
     def cedula(self):
         return self.usuario.cedula

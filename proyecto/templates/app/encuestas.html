@@ -1,16 +1,19 @@
 {% extends "admin/base_site.html" %}
 
-<hr/>
+{% block content_title %}
+<h3> Encuestas Disponibles </h3>
+{% endblock %}
 
 {% block content %}
 
-<p/>
+<ul>
 
-{% for encuesta in encuestas %}
+  {% for cuestionario in cuestionarios %}
+  <li>
+    <a href="/encuesta/responder/{{ cuestionario.id }} " > {{ cuestionario.titulo }} </a> 
+  </li>
+  {% endfor %}
 
- <a href='/' > {{ encuesta.titulo }} </a> 
-
-
-{% endfor %}
+</ul>
 
 {% endblock %}

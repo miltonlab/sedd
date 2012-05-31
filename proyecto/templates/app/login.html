@@ -2,8 +2,6 @@
 
 {% block title %} Evaluación Docente  {% endblock %}
 
-
-
 {% csrf_token %}
 {% if next %}
     <input type="hidden" name="next" value="{{ next }}" />

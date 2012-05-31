@@ -8,9 +8,9 @@
 <script type="text/javascript">
   (function($){
       $(document).ready(function($){
-	  //$('#id_tipo').append('<option value="grupo_unico"> Selección Unica Agrupada </option> ');
 	  $('#id_tipo').change(function(){
 	      var seleccion=$('#id_tipo option:selected').val();
+	      // Tipo de pregunta: SeleccionUnica
 	      if (seleccion == '2'){
 		  $('#id_tipo').parent().append('<span id="activador"><input type="checkbox" id="tipo_predefinido" name="tipo_predefinido" value="Valor">' + 
 						'Predeterminado </input></span>');
@@ -21,7 +21,7 @@
 			  contenido += '<b> Tamaño: </b> <select name="longitud"> <option value="" selected > ----- </option> ';
 			  for (var i=2; i<10; i++){
 			      var selected = '';
-			      if (i==4){
+			      if ( i==4 ){
 				  selected = 'selected';
 			      }
 			      contenido += '<option value="' + i + '" ' + selected + '>' + i + '</option>';
@@ -37,7 +37,15 @@
 		      }
 		  });
 	      }else{
+		  // Ocultar activador de SeleccionUnica por predeterminada
 		  $('#activador').remove();
+		  // Tipo de pregunta: Ensayo, no tiene items
+		  if (seleccion == 1){
+		      $('#items-group').hide();
+		  } else{
+		      // Cualquier otro tipo de pregunta
+		      $('#items-group').show();
+		  }
 	      }
 	  });
       });

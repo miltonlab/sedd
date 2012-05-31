@@ -7,6 +7,8 @@
     (function($) {
         $(document).ready(function($) {
 	    var logjs = "";
+	    /*
+	      Funcionalidad muy 'pesada', se resolvió hacerla por scripts
 	    $("#link_load_sga").click(function() {
 		var r=confirm("Se va a cargar la información Académica del SGA");
 		if (r == true){
@@ -14,15 +16,15 @@
 			url: "/sga/cargar_info_sga/{{ object_id }}",
 			method: "GET",
 			//data: "periodo_academico_id={{ object_id }}",
-			/*success: function (data){
+			success: function (data){
 			    alert(data);
-			},*/
+			},
 			error: function(xhr,status,error){
 			    alert("error: " + status + "-" + error);
 			}
 		    });
 		}
-	    });
+	    });*/ 
 
 	    $("#link_load_ofertas").click(function() {
 		var r=confirm("Va a recargar ofertas académicas del SGA");
