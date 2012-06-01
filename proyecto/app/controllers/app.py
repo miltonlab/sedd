@@ -167,4 +167,5 @@ def encuesta_grabar(request):
         contestacion = Contestacion(pregunta = id_pregunta, respuesta=v)
         contestacion.evaluacion = evaluacion
         contestacion.save()
-    return HttpResponse('Encuesta Conestada !!! Gracias')
+
+    return render_to_response('app/encuesta_finalizada.html')

@@ -1,4 +1,4 @@
-#-*- encoding: utf-8 -*-
+#-*- coding: utf-8 -*-
 from django.http import HttpResponse
 from django.contrib import messages
 from django.shortcuts import redirect

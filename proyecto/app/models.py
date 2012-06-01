@@ -146,7 +146,7 @@ class ItemPregunta(models.Model):
 
 class Respuesta(models.Model):
     texto = models.CharField(max_length='100')
-    pregunta = models.ForeignKey('Pregunta',related_name='respuestas')
+    ###pregunta = models.ForeignKey('Pregunta',related_name='respuestas')
 
     def __unicode__(self):
         return self.texto

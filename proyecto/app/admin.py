@@ -17,6 +17,9 @@ class PreguntaAdmin(admin.ModelAdmin):
 
     # Sobreescrito
     def save_model(self, request, obj, form, change):
+        if change:
+            obj.save()
+            return
         # request es un objeto de tipo WSGIRequest
         tipo = request.POST['tipo']
         # Tipo de pregunta:  SeleccionUnica
