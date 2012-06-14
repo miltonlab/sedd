@@ -64,7 +64,7 @@ class SGAAuthBackend(object):
         """
 
 
-class TempAuthBackend(object):
+class DNIAuthBackend(object):
     """
     Autenticación Basada en el DNI. Debe utilizarselo en caso de
     no funcionar la conexión al WebService de autenticación del SGA.
