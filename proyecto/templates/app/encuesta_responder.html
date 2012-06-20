@@ -22,7 +22,7 @@
     }
     </style>
 
-    <!-- Cambiar en producción -->
+    <!-- Sitio oficial -->
     <script type="text/javascript" src="http://code.jquery.com/jquery-1.6.2.js"> </script>
 
     <script type="text/javascript">
@@ -90,12 +90,24 @@ $(document).ready(function(){
 
     <table border="1" width="75%">
 
-      <thead>
+      <thead style="margin-bottom: 40px;">
 	<td colspan="2">
 	  <div id="encabezado" width="25%">
 	    {{ cuestionario.encabezado|safe }} 
 	  </div>
 	</td>
+	<div id="datos_academicos" style="line-height: 18px;">
+	  Area: <b> {{ asignaturaDocente.asignatura.area }} </b> <br/>
+	  Carrera: <b> {{ asignaturaDocente.asignatura.carrera }} </b> <br/>
+	  Modulo ( {% ifequal asignaturaDocente.asignatura.tipo "modulo" %} <b>X</b> {% endifequal %}  );
+	  Unidad ( {% ifequal asignaturaDocente.asignatura.tipo "unidad" %} <b>X</b> {% endifequal %}  )
+	  Curso ( {% ifequal asignaturaDocente.asignatura.tipo "curso" %} <b>X</b> {% endifequal %}  )
+	  Taller ( {% ifequal asignaturaDocente.asignatura.tipo "taller" %} <b>X</b> {% endifequal %}  )
+	  Otro ( {% ifequal asignaturaDocente.asignatura.tipo "otro" %} <b>X</b> {% endifequal %}  )
+	  <br/>
+	  Nombre de el/la Docente Evaluado(a): <b> {{ asignaturaDocente.docente }} </b> <br/>
+	  Fecha de Evaluacion: <b> {{ fecha }} </b> <br/>
+	</div>
       </thead>
 
       <tbody>

@@ -1,12 +1,51 @@
 {% extends "admin/base.html" %}
 {% load i18n %}
 
+{% block extrahead %}
+<style>
+  #user-toolsx{
+      
+  }
+</style>
+{% endblock %}
+
 {% block title %} Sistema de Evaluación Docente  {% endblock %}
 
 {% block branding %}
    <h1 id="site-name">  Sistema de Evaluación Docente </h1>
+   {#% if usuario and not usuario.is_anonymous and not usuario.is_staff %#}
+   {% if request.user and not request.user.is_anonymous and not request.user.is_staff %}
+   <div id="user-tools"> 
+     Bienvenido/a,
+     <strong> {{ request.user }} </strong>
+     <a href="/logout/" class="historylink"> [Salir] </a>
+   </div>
+   {% else %}
+   {{ block.supper }}
+   {% endif %}
+{% endblock %}
+
+{% block object_tools %}
+
 {% endblock %}
 
 {% block nav-global %}
+
+{% endblock %}
+
+{% block footer %}
+
+   {% if request.user and not request.user.is_anonymous  %}
+   <div id="pie" style="font-size: 9px; line-height: 10px; color: #666666">
+     <center>
+       <hr style="margin-bottom: 3px;"/>
+       <b> {{ "Universidad Nacional de Loja"|upper }} </b> <br/>
+       Unidad de Telecomunicaciones e Infomacion - Departamento de Desarrollo de Software <br>
+       Correo Sistema de Evaluacion: 
+       <a href="mailto:evaluacion.docente@unl.edu.ec"> <u>evaluacion.docente@unl.edu.ec</u> </a> <br/>
+       Loja - Ecuador
+     </center>
+   </div>
+   {% endif %}
 
 {% endblock %}

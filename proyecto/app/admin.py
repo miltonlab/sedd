@@ -122,7 +122,7 @@ class AsignaturaAdmin(admin.ModelAdmin):
     search_fields = ('area','carrera','semestre','paralelo','nombre',)
     list_filter = ('area','carrera','semestre','paralelo','tipo',)
     list_per_page = 20
-    #TODO: combobox
+    # TODO: combobox
     #readonly_fields = ('area','carrera','semestre','paralelo','tipo',)
     fieldsets = (
         ('Datos Académicos', {
@@ -149,6 +149,20 @@ class ConfiguracionAdmin(admin.ModelAdmin):
     def has_delete_permission(self, request, obj=None):
         return False
 
+class ContestacionEnLinea(admin.TabularInline):
+    model = models.Contestacion
+    extra = 15
+    verbose_name = 'Respuesta'
+    
+class EvaluacionAdmin(admin.ModelAdmin):
+    search_fields = ('estudianteAsignaturaDocente__estudiante__usuario__cedula',
+                     'estudianteAsignaturaDocente__asignaturaDocente__docente__usuario__cedula')
+    inlines = (ContestacionEnLinea,)
+    list_per_page = 30
+
+    def has_add_permission(self, request):
+        return False
+    
 admin.site.register(models.Cuestionario,CuestionarioAdmin)
 admin.site.register(models.Seccion,SeccionAdmin)
 admin.site.register(models.Pregunta,PreguntaAdmin)
@@ -159,3 +173,4 @@ admin.site.register(models.AsignaturaDocente, AsignaturaDocenteAdmin)
 admin.site.register(models.Asignatura, AsignaturaAdmin)
 admin.site.register(models.Usuario, UsuarioAdmin)
 admin.site.register(models.Configuracion, ConfiguracionAdmin)
+admin.site.register(models.Evaluacion, EvaluacionAdmin)

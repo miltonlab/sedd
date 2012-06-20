@@ -3,12 +3,15 @@
 from django.contrib.auth.models import User
 from django.conf import settings
 from proyecto.app.models import Usuario
-from sgaws import cliente
+from tools.sgaws import cliente
 import logging
 logg = logging.getLogger('logapp')
 
 
 class SGAAuthBackend(object):
+
+    supports_object_permissions = False
+    supports_anonymous_user = False
 
     def __init__(self):
         self.sga = cliente.SGA(settings.SGAWS_USER, settings.SGAWS_PASS)
@@ -69,6 +72,8 @@ class DNIAuthBackend(object):
     Autenticación Basada en el DNI. Debe utilizarselo en caso de
     no funcionar la conexión al WebService de autenticación del SGA.
     """
+    supports_object_permissions = False
+
     def authenticate(self, username=None, password=None):
         if username == password:
             try:

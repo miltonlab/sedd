@@ -1,0 +1,46 @@
+{%  extends "admin/base_site.html" %}
+
+{% block content_title %}
+
+{% endblock %}
+
+{% block content %}
+
+<p/>
+{% if request.session.estudiante %}
+<h1> Carreras del Estudiante </h1>
+<ul style="margin-top: 20px;">
+  {% for carrera in request.session.carreras_estudiante %}
+  <h1> <li> <a href="{% url proyecto.app.controllers.estudiante_asignaturas_docentes carrera.num_carrera %}"> {{ carrera.nombre|upper }} </a> </li> <h1>
+  {% endfor %}
+</ul>
+<hr/>
+{% endif %}
+
+{% if request.session.docente %}
+
+<h1> Encuestas para el Docente </h1>
+<ul style="margin-top: 20px;">
+  {% for cuestionario in request.session.cuestionarios_docente %}
+  <h1> <li> <a href="pendiente"> {{ cuestionario.titulo }} </a> </li> <h1>
+  {% empty %}
+  <h3> No existen encuestas para docentes en el presente Periodo.</h3>
+  {% endfor %}
+</ul>  
+<hr/>
+
+{% if request.session.docente.esCoordinador %}
+<h1> Comision Academica de la Carrera </h1>
+<ul style="margin-top: 20px;">
+  {% for carrera in request.session.carreras_docente %}
+  <h3> <li> <a href="/resultados/carrera/{{ carrera.num_carrera }}">  {{ carrera.nombre|upper }} </a> </li> </h3>
+  {% endfor %}
+</ul>
+<hr/>
+{% endif %}
+
+{% endif %}
+
+
+{% endblock %}
+

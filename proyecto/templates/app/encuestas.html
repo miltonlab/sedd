@@ -1,19 +1,37 @@
 {% extends "admin/base_site.html" %}
 
 {% block content_title %}
-<h3> Encuestas Disponibles </h3>
+<h1> Encuestas Disponibles </h1>
 {% endblock %}
 
 {% block content %}
 
-<ul>
+{% if periodo_no_iniciado %}
 
+<ul class="messagelist" style="margin-top: 20px;">
+  <b><li class="warning"> El Periodo de Evaluacion aun no inicia </li></b>
+</ul>
+
+{% else %}
+{% if periodo_finalizado %}
+
+<ul class="messagelist" style="margin-top: 20px;">
+  <b><li class="error"> Lo sentimos, el Periodo de Evaluacion ha Finalizado </li></b>
+</ul>
+
+{% else %}
+
+<ul>
   {% for cuestionario in cuestionarios %}
   <li>
     <a href="/encuesta/responder/{{ cuestionario.id }} " > {{ cuestionario.titulo }} </a> 
   </li>
+  {% empty %}
+  <h3> No existen Encuestas Disponibles </h3>
   {% endfor %}
-
 </ul>
+
+{% endif %}
+{% endif %}
 
 {% endblock %}

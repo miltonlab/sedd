@@ -1,9 +1,10 @@
 # -*- coding: utf-8 -*-
 
 from django.db import models
-from sgaws.cliente import SGA
-from django.contrib import auth
+from proyecto.tools.sgaws.cliente import SGA
 from proyecto import settings
+from django.contrib.auth.models import User
+from datetime import datetime
 
 
 class TipoInformante(models.Model): 
@@ -37,6 +38,10 @@ class InformanteDirectivos(TipoInformante):
         TipoInformante.__init__(self)
         self.tipo = 'Directivos'
 
+class InformanteInstitutoIdiomas(TipoInformante):
+    def __init__(self):
+        TipoInformante.__init__(self)
+        self.tipo = 'InstitutoIdiomas'
 
 class Cuestionario(models.Model):
     titulo = models.CharField(max_length='100')
@@ -55,6 +60,10 @@ class Contestacion(models.Model):
     respuesta = models.TextField()
     evaluacion = models.ForeignKey('Evaluacion', related_name='contestaciones')
 
+    class Meta:
+        verbose_name = 'Respuesta'
+        verbose_name_plural = 'Respuestas'
+        
     def __unicode__(self):
         return u'{0}:{1}'.format(self.pregunta, self.respuesta)
     
@@ -66,13 +75,17 @@ class Evaluacion(models.Model):
     horaFin = models.TimeField()
     cuestionario = models.OneToOneField('Cuestionario')
     estudianteAsignaturaDocente = models.ForeignKey('EstudianteAsignaturaDocente', related_name='evaluaciones')
-    
+
+    class Meta:
+        verbose_name_plural = 'Evaluaciones'
+        
     def __unicode__(self):
         return u'{0} - {1} - {2}:{3}'.format(self.estudianteAsignaturaDocente.estudiante.cedula(),
                                            self.estudianteAsignaturaDocente.asignaturaDocente.docente.cedula(),
                                            self.fechaInicio, self.horaInicio, )
     
-    
+
+        
 class TipoPregunta(models.Model):
     # TODO: Clase Abstracta
     tipo = models.CharField(max_length='20', unique=True)
@@ -163,6 +176,17 @@ class PeriodoEvaluacion(models.Model):
         verbose_name = 'Periodo Evaluación'
         verbose_name_plural = 'Periodos de Evaluación'
         
+    def noIniciado(self):
+        hoy = datetime.today().date()
+        return hoy < self.inicio
+    
+    def vigente(self):
+        hoy = datetime.today().date()
+        return self.inicio >=  hoy <= self.fin 
+
+    def finalizado(self):
+        hoy = datetime.today().date()
+        return hoy > self.fin
 
     def __unicode__(self):
         return self.nombre
@@ -309,10 +333,6 @@ class EstudianteAsignaturaDocente(models.Model):
         verbose_name = 'Estudiante Asignaturas'
         unique_together = ('estudiante','asignaturaDocente')
 
-        
-    ###def __repr__(self):
-    ###    return u"{0}-{1}".format(self.estudiante, self.asignaturaDocente)
-
     def __unicode__(self):
         return u"{0} >> {1}".format(self.estudiante, self.asignaturaDocente)
 
@@ -359,7 +379,9 @@ class DocentePeriodoAcademico(models.Model):
 #   Autenticación y Usuarios
 #===================================================================================================
 
-class Usuario(auth.models.User):
+# from django.contrib.auth.models
+
+class Usuario(User):
     """
     Perfil de Usuario que podrá pertener a los grupos Estudiante y/o Docente
     """

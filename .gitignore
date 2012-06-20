@@ -7,4 +7,5 @@
 .old
 .bak
 proyecto/db/*
-.txt
+proyecto/settings.py
+proyecto/apache/sedd

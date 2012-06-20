@@ -1,37 +1,40 @@
 {%  extends "admin/base_site.html" %}
 {#% extends "base.html" %#}
 
-<!--link rel="stylesheet" type="text/css" href="/static/admin/css/base.css" /-->
-
-{% block content_title %} 
-<h3> Asignaturas y Docentes </h3>
+{% block content_title %}
+<h1>Seleccione el Docente a Evaluar </h1>
 {% endblock %}
 
 {% block content %}
-
-<p/>
-<ul>
-
-{% for asignatura in asignaturas %}
-
-<h3> <li>  <a href="{% url proyecto.app.controllers.app.asignaturas_docentes asignatura.id %}"> {{ asignatura.nombre }}  </a> </li> </h3>
-
-{% if seleccion %}
-
-    {% ifequal asignatura.id seleccion.id %}
-
-    <ul> 
-      {% for docente in docentes %}
-      <h4> <li> <a href="{% url proyecto.app.controllers.app.encuestas docente.id %}">  {{ docente }} </a> </li> </h4>
-      {% endfor%}
-    </ul>
-
-    {% endifequal %}
-
-{% endif %}
-
-{% endfor %}
-
-</ul>
+<table style="margin-top: 20px;">
+  <thead> <th> ASIGNATURA </th> <th> DOCENTES <th/> </thead>
+  <tbody>
+  {% for ad in asignaturas_docentes %}
+  <tr style="border-bottom: 1px solid dotted;">
+    <td>
+      <b>
+	{{ ad.asignatura.nombre }}
+      </b>
+    </td>
+    <td>
+      {% for d in ad.docentes %}
+      <ul class="{% if d.evaluado %} messagelist {% endif %}">
+	<li>
+	  {% if d.evaluado %}
+	     {{ d.docente }} </br>
+	  {% else %}
+	  <b>
+	    {# Se envia ids de asignatura y de docente #}
+	    <a href="{% url proyecto.app.controllers.encuestas ad.asignatura.id d.docente.id %}"> {{ d.docente }} </a> </br>
+	  </b>
+	  {% endif %}
+	</li>
+      </ul>
+      {% endfor %}
+    </td>
+  </tr>
+  {% endfor %}
+  </tbody>
+</table>
 
 {% endblock %}
