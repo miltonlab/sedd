@@ -275,10 +275,13 @@ def cargar_info_sga(request, periodoAcademicoId):
         return HttpResponse("error"+str(e))
 
 
-def resultados_carrera(self, request, carrera):
-    field_carrera = forms.ModelChoiceField(queryset = Asignatura.objects.values_list('carrera').distinct())
+def resultados_carrera(request, id_docente):
+    #field_carrera = forms.ModelChoiceField(queryset = Asignatura.objects.values_list('carrera').distinct())
+    carrera = AsignaturaDocente.objects.filter(docente__id=9).distinct().values_list('asignatura__carrera')[0][0]
+    ids = set([ad.docente.id for ad in AsignaturaDocente.objects.filter(asignatura__carrera=carrera)])
     form = forms.Form()
-    form['carrera'] = field_carrera
-    datos = dict(form=form)
+    form.fields['docentes'] = forms.ModelChoiceField(queryset=DocentePeriodoAcademico.objects.filter(id__in=ids))
+    from proyecto.app.forms import ResultadosESEForm
+    datos = dict(form=form, form2=ResultadosESEForm(),title='>> Comision Academica de la Carrera ' + carrera)
     return render_to_response("app/resultados_carrera.html", datos, context_instance=RequestContext(request))
     

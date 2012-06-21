@@ -83,7 +83,7 @@ class EstudianteAsignaturaDocenteEnLinea(admin.TabularInline):
 class EstudiantePeriodoAcademicoAdmin(admin.ModelAdmin):
     list_display = ('cedula', '__unicode__')
     list_per_page = 20
-    search_fields = ('usuario__cedula','usuario__last_name','usuario__first_name')
+    search_fields = ('usuario_username','usuario__cedula','usuario__last_name','usuario__first_name')
     inlines = (EstudianteAsignaturaDocenteEnLinea,)
     raw_id_fields = ('usuario',)
 
@@ -140,7 +140,7 @@ class AsignaturaAdmin(admin.ModelAdmin):
 
 class UsuarioAdmin(admin.ModelAdmin):
     search_fields = ('username','cedula')
-    list_display = ('cedula','get_full_name',)
+    list_display = ('username','cedula','get_full_name',)
     list_display_links = ('cedula','get_full_name',)
     list_per_page = 20
 

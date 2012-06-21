@@ -1,11 +1,25 @@
 {% extends "admin/base_site.html" %}
 
+{% block extrahead %}
+<style>
+  select {
+      width: 100%;
+      font-size: 15px;
+      font-weight: bold;
+  }
+</style>
+{% endblock %}
+
+
 {% block content_title %}
 <h1> Resultados de la Carrera </h1>
 {% endblock %}
 
 {% block content %}
 
-{{ form }}
+<h3> Seleccione el Docente: </h3>
+<p/>
+{{ form.docentes }}
 
+{{ form2 }}
 {% endblock %}
