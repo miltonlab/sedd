@@ -6,6 +6,8 @@ os.environ['DJANGO_SETTINGS_MODULE'] = 'proyecto.settings'
 from proyecto.app.models import EstudiantePeriodoAcademico
 from proyecto.app.models import DocentePeriodoAcademico
 from proyecto.app.models import Asignatura
+from proyecto.app.models import Usuario
+from proyecto.app.models import User
 
 if proyecto.settings.DEBUG:
     print " * Advertencia: Deshabilite el modo depuracion"
@@ -19,3 +21,14 @@ not Asignatura.objects.count() > 10:
     print " * Advertencia: Al parecer no ha importado la informacion del SGA aun"
 else:
     print " Exito!!!, puede configurar su servidor de produccion"
+    # Eliminar Evaluaciones si existen
+    if Evaluacion.objects.count() > 0:
+        for e in Evaluacion.objects.all():
+            e.delete()
+    try:
+        # Eliminar usuarios de prueba
+        Usuario.objects.get(username='demo').delete()
+        User.objects.get(username='admin').delete()
+    except Exception:
+        pass
+        
