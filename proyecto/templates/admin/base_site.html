@@ -3,8 +3,11 @@
 
 {% block extrahead %}
 <style>
-  #user-toolsx{
-      
+  .contenido {
+      border: 1px solid #ccc;
+      margin-bottom: 5px;
+      background: white;
+      min-height: 400px;
   }
 </style>
 {% endblock %}
@@ -26,12 +29,16 @@
 {% endblock %}
 
 {% block object_tools %}
-
 {% endblock %}
 
 {% block nav-global %}
+{% endblock %}
+
+<div id="contenido" class="contenido">
+{% block content %}
 
 {% endblock %}
+</div>
 
 {% block footer %}
 

@@ -129,8 +129,12 @@ class AsignaturaAdmin(admin.ModelAdmin):
             'fields': ('area', 'carrera', 'semestre', 'paralelo')
             }),
         ('Asignatura', {
-            'fields': ('nombre', 'tipo', 'creditos', 'duracion')
+            'fields': ('nombre', 'tipo', 'creditos')
+            }),
+        ('Duracion', {
+            'fields': ('duracion', 'inicio', 'fin')
             }),        
+        
         )
     
 
@@ -159,7 +163,7 @@ class EvaluacionAdmin(admin.ModelAdmin):
                      'estudianteAsignaturaDocente__asignaturaDocente__docente__usuario__cedula')
     inlines = (ContestacionEnLinea,)
     list_per_page = 30
-    list_filter = ('fechaFin')
+    list_filter = ('fechaFin',)
     date_hierarchy = 'fechaFin'
 
     def has_add_permission(self, request):

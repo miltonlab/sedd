@@ -16,6 +16,7 @@ urlpatterns = patterns('',
     url(r'^encuestas/(\d{1,5})/(\d{1,5})/$', 'proyecto.app.controllers.encuestas'),
     url(r'^encuesta/responder/(\d{1,5})/$', 'proyecto.app.controllers.encuesta_responder'),
     url(r'^encuesta/grabar/$', 'proyecto.app.controllers.encuesta_grabar'),
+    url(r'^resultados/carrera/(\w)/$', 'proyecto.app.controllers.resultados_carrera'),                       
     url(r'^sga/cargar_ofertas_sga/(\d{1,3})/$', 'proyecto.app.controllers.cargar_ofertas_sga'),
     url(r'^sga/cargar_info_sga/(\d{1,3})/$', 'proyecto.app.controllers.cargar_info_sga'),
     # Examples:

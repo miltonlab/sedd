@@ -9,6 +9,7 @@ from proyecto.app.models import EstudiantePeriodoAcademico
 from proyecto.app.models import AsignaturaDocente
 from proyecto.app.models import DocentePeriodoAcademico
 from proyecto.app.models import PeriodoAcademico
+from proyecto.app.models import PeriodoEvaluacion
 from proyecto.app.models import Asignatura
 from proyecto.app.models import Usuario
 from proyecto.tools.sgaws.cliente import SGA
@@ -23,7 +24,7 @@ EXCLUSIONES = {'areas':('MED',), 'modalidades':('semipresencial', 'distancia')}
 
 def importar(periodoAcademicoId, periodoEvaluacionId=None):
     """ Importar unidades en primera instancia"""
-    sga = SGA(settings.SGAWS_USER, settings.SGAWS_PASS)    
+    sga = SGA(proyecto.settings.SGAWS_USER, proyecto.settings.SGAWS_PASS)    
     thetime = datetime.datetime.now().strftime("%Y-%m-%d")
     log.basicConfig(filename= "../tmp/sgaimporter-%s.log" % thetime,
                     level   = log.DEBUG, 
@@ -65,22 +66,28 @@ def importar(periodoAcademicoId, periodoEvaluacionId=None):
                             # Si se ha especificado un periodo de evaluacion
                             # se importa unicamente las unidades que se estan dictando actualmente
                             # TODO: probar snippet
-                            #
-                            # fecha_inicio = datetime.datetime.strptime(inicio,'%d/%m/%Y').date()
-                            # fecha_fin = datetime.datetime.strptime(fin,'%d/%m/%Y').date()
-                            # if not (periodoEvaluacion and fecha_inicio <= periodoEvaluacion.fin and fecha_fin >= periodoEvaluacion.inicio):
-                            #    continue
+                            fecha_inicio = None
+                            fecha_fin = None
+                            if inicio is not None and inicio != 'None':
+                                fecha_inicio = datetime.datetime.strptime(inicio,'%Y-%m-%d').date()
+                            if fin is not None and fin != 'None': 
+                                fecha_fin = datetime.datetime.strptime(fin,'%Y-%m-%d').date()
+                            if fecha_inicio is not None and fecha_fin is not None:
+                                # Si la unidad NO se dicta dentro del Periodo de Evaluacion no se importa
+                                if not (periodoEvaluacion and fecha_inicio <= periodoEvaluacion.fin and fecha_fin >= periodoEvaluacion.inicio):
+                                    continue
 
                             # Tratamiento de los saltos de línea dentro del nombre de la unidad
                             unidad = unidad.replace('\r\n',' ')[0:-1]
                             dict_unidad = dict(
                                 idSGA="{0}:{1}".format(id_unidad, id_paralelo), area=area, carrera=carrera, semestre=modulo,
-                                paralelo=paralelo, seccion=seccion, nombre=unidad, creditos=creditos, duracion=horas, inicio=inicio, fin=fin
+                                paralelo=paralelo, seccion=seccion, nombre=unidad, creditos=creditos, duracion=horas, inicio=fecha_inicio, fin=fecha_fin
                                 )
                             dict_usuario_docente = dict(
                                 username=cedula, password='', first_name=nombres.title(), last_name=apellidos.title(),
                                 cedula=cedula, titulo=titulo, email=''
                                 )
+                            log.info(u'Datos de Unidad a crearse: {0}'.format(dict_unidad))
                             (asignatura, nueva) = Asignatura.objects.get_or_create(idSGA=dict_unidad['idSGA'], defaults=dict_unidad)
                             """
                             if nueva == True:
@@ -153,3 +160,5 @@ if __name__ == '__main__':
         importar( int(sys.argv[1]) )
     elif len(sys.argv) == 3:
         importar( int(sys.argv[1]), int(sys.argv[2]) )
+    else:
+        print "Error: Use sgaimporter id_periodo_academico id_periodo_evaluacion"

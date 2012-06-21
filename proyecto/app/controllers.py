@@ -26,6 +26,8 @@ from proyecto.tools.sgaws.cliente import SGA
 from proyecto.settings import SGAWS_USER, SGAWS_PASS
 
 from datetime import datetime
+from django import forms
+
 import logging
 logg = logging.getLogger('logapp')
 
@@ -35,7 +37,7 @@ def portada(request):
     return render_to_response("app/portada.html",datos)
 
 def login(request):
-    from django import forms
+
     form = forms.Form()
     form.fields['username'] = forms.CharField(label="Username", max_length=30, 
                                               widget=forms.TextInput(attrs={'title': 'Usuario SGA-UNL',}),
@@ -271,3 +273,12 @@ def cargar_info_sga(request, periodoAcademicoId):
     except Exception, e:
         log.error("Error cargando info SGA: "+str(e))
         return HttpResponse("error"+str(e))
+
+
+def resultados_carrera(self, request, carrera):
+    field_carrera = forms.ModelChoiceField(queryset = Asignatura.objects.values_list('carrera').distinct())
+    form = forms.Form()
+    form['carrera'] = field_carrera
+    datos = dict(form=form)
+    return render_to_response("app/resultados_carrera.html", datos, context_instance=RequestContext(request))
+    

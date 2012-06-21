@@ -257,14 +257,14 @@ class Asignatura(models.Model):
     #area = models.CharField(max_length='20', choices=[(a,a) for a in Asignatura.objects.values('area').distinct()] )
     carrera = models.CharField(max_length='100')
     semestre = models.CharField(max_length='10', verbose_name='módulo')
-    paralelo = models.CharField(max_length='10')
+    paralelo = models.CharField(max_length='20')
     seccion = models.CharField(max_length='10')
     nombre = models.TextField()
     tipo = models.CharField(max_length='15')
     creditos = models.IntegerField(verbose_name='número de créditos')
     duracion = models.FloatField(verbose_name='duración en horas')
-    inicio = models.DateField(null=True)
-    fin = models.DateField(null=True)
+    inicio = models.DateField(null=True, verbose_name='inicia')
+    fin = models.DateField(null=True, verbose_name='termina')
     # Campo combinado id_unidad:id_paralelo
     idSGA = models.CharField(max_length='15', db_column='id_sga')
 
