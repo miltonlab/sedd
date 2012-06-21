@@ -2,7 +2,6 @@
 # Para ejecutar el modulo de manerea independiente
 import sys, os
 sys.path.append(os.path.abspath(os.path.dirname(__file__) + '../../'))
-print os.path.abspath(os.path.dirname(__file__) + '../')
 os.environ['DJANGO_SETTINGS_MODULE'] = 'proyecto.settings'
 
 from proyecto.app.models import EstudianteAsignaturaDocente
@@ -26,7 +25,7 @@ def importar(periodoAcademicoId, periodoEvaluacionId=None):
     """ Importar unidades en primera instancia"""
     sga = SGA(settings.SGAWS_USER, settings.SGAWS_PASS)    
     thetime = datetime.datetime.now().strftime("%Y-%m-%d")
-    log.basicConfig(filename= "sgaimporter-%s.log" % thetime,
+    log.basicConfig(filename= "../tmp/sgaimporter-%s.log" % thetime,
                     level   = log.DEBUG, 
                     datefmt = '%Y/%m/%d %I:%M:%S %p', 
                     format  = '%(asctime)s : %(levelname)s - %(message)s')

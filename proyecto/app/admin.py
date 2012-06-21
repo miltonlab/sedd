@@ -159,6 +159,8 @@ class EvaluacionAdmin(admin.ModelAdmin):
                      'estudianteAsignaturaDocente__asignaturaDocente__docente__usuario__cedula')
     inlines = (ContestacionEnLinea,)
     list_per_page = 30
+    list_filter = ('fechaFin')
+    date_hierarchy = 'fechaFin'
 
     def has_add_permission(self, request):
         return False
