@@ -88,74 +88,82 @@ $(document).ready(function(){
 
   {% csrf_token %}
 
-    <table border="1" width="75%">
+    <table border="1" width="75%" id="tabla-contenedor">
 
-      <thead style="margin-bottom: 40px;">
+      <!--thead style="margin-bottom: 40px;"-->
 	<td colspan="2">
-	  <div id="encabezado" width="25%">
+	  <div id="encabezado-cuestionario" width="25%">
 	    {{ cuestionario.encabezado|safe }} 
 	  </div>
+
+	  <div id="datos_academicos" style="line-height: 18px;">
+	    Area: <b> {{ asignaturaDocente.asignatura.area }} </b> <br/>
+	    Carrera: <b> {{ asignaturaDocente.asignatura.carrera }} </b> <br/>
+	    Modulo ( {% ifequal asignaturaDocente.asignatura.tipo "modulo" %} <b>X</b> {% endifequal %}  );
+	    Unidad ( {% ifequal asignaturaDocente.asignatura.tipo "unidad" %} <b>X</b> {% endifequal %}  )
+	    Curso ( {% ifequal asignaturaDocente.asignatura.tipo "curso" %} <b>X</b> {% endifequal %}  )
+	    Taller ( {% ifequal asignaturaDocente.asignatura.tipo "taller" %} <b>X</b> {% endifequal %}  )
+	    Otro ( {% ifequal asignaturaDocente.asignatura.tipo "otro" %} <b>X</b> {% endifequal %}  )
+	    <br/>
+	    Nombre de el/la Docente Evaluado(a): <b> {{ asignaturaDocente.docente }} </b> <br/>
+	    Fecha de Evaluacion: <b> {{ fecha }} </b> <br/>
+	  </div>
 	</td>
-	<div id="datos_academicos" style="line-height: 18px;">
-	  Area: <b> {{ asignaturaDocente.asignatura.area }} </b> <br/>
-	  Carrera: <b> {{ asignaturaDocente.asignatura.carrera }} </b> <br/>
-	  Modulo ( {% ifequal asignaturaDocente.asignatura.tipo "modulo" %} <b>X</b> {% endifequal %}  );
-	  Unidad ( {% ifequal asignaturaDocente.asignatura.tipo "unidad" %} <b>X</b> {% endifequal %}  )
-	  Curso ( {% ifequal asignaturaDocente.asignatura.tipo "curso" %} <b>X</b> {% endifequal %}  )
-	  Taller ( {% ifequal asignaturaDocente.asignatura.tipo "taller" %} <b>X</b> {% endifequal %}  )
-	  Otro ( {% ifequal asignaturaDocente.asignatura.tipo "otro" %} <b>X</b> {% endifequal %}  )
-	  <br/>
-	  Nombre de el/la Docente Evaluado(a): <b> {{ asignaturaDocente.docente }} </b> <br/>
-	  Fecha de Evaluacion: <b> {{ fecha }} </b> <br/>
-	</div>
-      </thead>
+      <!--/thead-->
 
       <tbody>
-	<div id="preguntas" >
+	<!--div id="preguntas"-->
 	  {% for seccion in cuestionario.secciones.all %}
 	  <tr>
-	    <td class="seccion" colspan="2" > <b> {{ seccion.orden }}. {{ seccion.titulo|upper }} </b> 
-	      {{ seccion.descripcion }}  </td>
+	    <td class="seccion" colspan="2" > 
+	      <b> {{ seccion.orden }}. {{ seccion.titulo|upper }} </b> 
+	      {{ seccion.descripcion }}  
+	    </td>
 	  </tr>
 
 	  {% for pregunta in seccion.preguntas.all %}
 	  <tr>
-
-	    {% ifequal pregunta.tipo.tipo 'Ensayo' %}
-	    <td width="100%" colspan="2">
+	    <td width="100%" colspan="{% ifequal pregunta.tipo.tipo 'Ensayo' %} 2 {% endifequal %} ">
 	      {% if cuestionario.secciones.all|length > 1 %} 
 	      <b> {{ seccion.orden }}.{{ pregunta.orden }}. </b> {{ pregunta.texto}}  
 	      {% else %}
 	      <b> {{ pregunta.orden }}. </b> {{ pregunta.texto}}  
 	      {% endif %}
-
+	      
+	      {% ifequal pregunta.tipo.tipo 'Ensayo' %}
 	      <br/>
 	      <textarea name="pregunta-{{ pregunta.id }}" cols="100" rows="10" > </textarea>
-	    </td>
-	    {% endifequal %}
+	      {% endifequal %}
+
+
+	      {% ifequal pregunta.tipo.tipo 'SeleccionUnica' %}
+	      <!--td width="75%">
+	        <b> {#{ pregunta.orden }}. </b> {{ pregunta.texto}#}  
+	      </td-->
 	    
-	    {% ifequal pregunta.tipo.tipo 'SeleccionUnica' %}
-	    <td width="75%">
-	      <b> {{ pregunta.orden }}. </b> {{ pregunta.texto}}  
-	    </td>
-	    <td width="25%">
-	      <table id="tabla-items">
-		
-		{% for item in pregunta.items.all %}
-		<td>
-		  <input type="radio" name="pregunta-{{ pregunta.id }}" value="{{ item.texto }}" > {{ item.texto }} </input>
-		</td>
-		{% endfor%}
+	      <td width="25%">
+		<table id="tabla-items">
+		  <tbody>
+		    <tr>
+		      {% for item in pregunta.items.all %}
+		      <td>
+			<input type="radio" name="pregunta-{{ pregunta.id }}" value="{{ item.texto }}"> 
+			{{ item.texto }}
+			</input>
+		      </td>
+		      {% endfor%}
+		    </tr>
+		  </tbody>
+		</table>
+	      </td>
+	      {% endifequal %}
 
-	      </table>
-	    </td>
-	    {% endifequal %}
+	    </td>  
+	  </tr> <!-- pregunta -->
+	  {% endfor %} <!-- preguntas -->
+	  {% endfor %} <!-- secciones  -->
 
-	  </tr>
-	  {% endfor %}
-	  {% endfor%}
-
-	</div>
+	<!--/div-->
       </tbody>
 
       <tfoot>

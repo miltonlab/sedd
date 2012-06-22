@@ -34,7 +34,8 @@
   { "fields" : { "fin" : "2012-06-29",
         "inicio" : "2012-06-25",
         "nombre" : "Encuesta de Satisfacción Estudiantil",
-        "periodoAcademico" : 1
+        "periodoAcademico" : 1,
+	"tabulacion" : 1
       },
     "model" : "app.periodoevaluacion",
     "pk" : 1
@@ -81,7 +82,7 @@
     "model" : "app.tipoinformante",
     "pk" : 6
   },
-  { "fields" : { "encabezado" : "<center>\r\n<img src=\"http://www.unl.edu.ec/images/unl/web/unl_logo.png\" width=\"80\" height=\"80\"/>\r\n<h3>UNIVERSIDAD NACIONAL DE LOJA</h3>\r\n<i>Comision de Evaluación Interna</i> <br/>\r\nCOMISIÓN TÉCNICA DE EVALUACIÓN <br/>\r\n<p>\r\nEVALUACIÓN DEL DESEMPEÑO DOCENTE <BR/>\r\n</p>\r\n<p>\r\nENCUESTA DE SATISFACCIÓN ESTUDIANTIL <br/>\r\n<B>CUESTIONARIO SED</B>\r\n</p>\r\n</center>\r\n<P>\r\nCuestionario para valorar la satisfacción de los estudiantes con respecto a sus docentes en cada carrera. \r\n</P>\r\n<P>\r\nEstimado (a) estudiante:\r\n</P>\r\n<P>\r\nLa Universidad Nacional de Loja, a través de la Comisión de Evaluación Interna, con la finalidad de asegurar un mejoramiento continuo de la calidad de su formación, aplica la Encuesta de Satisfacción Estudiantil respecto de sus docentes en la enseñanza universitaria.\r\n</P>\r\n<P>\r\nAl agradecer su colaboración, nos permitimos indicarle que la encuesta es confidencial y anónima, y, de gran utilidad para que la institución y las carreras implementen acciones para el mejoramiento de las experiencias educacionales de los estudiantes, por lo que, le solicitamos valore su grado de satisfacción\r\nrespecto a cada uno de los indicadores, con transparencia y sinceridad.\r\n</P>\r\n<P>\r\nSírvase marcar con una <B>X</B> la opción que mejor recoja su valoración, de acuerdo\r\ncon la siguiente escala: (<B>marcar una sola opción</B>)\r\n</P>\r\n<TABLE border=\"2\" width=\"75%\">\r\n<TR>\r\n<Td align=\"center\"><b>Muy satisfecho (a)<b></Td>\r\n<Td align=\"center\"><b>Satisfecho (a) <b></Td>\r\n<Td align=\"center\"> <b>Poco Satisfecho (a) <b></Td>\r\n<Td align=\"center\"> <b>Insatisfecho (a) <b></Td>\r\n\r\n</TR>\r\n<TR>\r\n<TD align=\"center\"> 4 </TD>\r\n<TD align=\"center\"> 3 </TD>\r\n<TD align=\"center\"> 2 </TD>\r\n<TD align=\"center\"> 1 </TD>\r\n</TR>\r\n<TABLE>",
+  { "fields" : { "encabezado" : "<center>\r\n<img src=\"http://www.unl.edu.ec/images/unl/web/unl_logo.png\" width=\"80\" height=\"80\"/>\r\n<h3>UNIVERSIDAD NACIONAL DE LOJA</h3>\r\n<i>Comision de Evaluación Interna</i> <br/>\r\nCOMISIÓN TÉCNICA DE EVALUACIÓN <br/>\r\n<p>\r\nEVALUACIÓN DEL DESEMPEÑO DOCENTE <BR/>\r\n</p>\r\n<p>\r\nENCUESTA DE SATISFACCIÓN ESTUDIANTIL <br/>\r\n<B>CUESTIONARIO SED</B>\r\n</p>\r\n</center>\r\n<P>\r\nCuestionario para valorar la satisfacción de los estudiantes con respecto a sus docentes en cada carrera. \r\n</P>\r\n<P>\r\nEstimado (a) estudiante:\r\n</P>\r\n<P>\r\nLa Universidad Nacional de Loja, a través de la Comisión de Evaluación Interna, con la finalidad de asegurar un mejoramiento continuo de la calidad de su formación, aplica la Encuesta de Satisfacción Estudiantil respecto de sus docentes en la enseñanza universitaria.\r\n</P>\r\n<P>\r\nAl agradecer su colaboración, nos permitimos indicarle que la encuesta es confidencial y anónima, y, de gran utilidad para que la institución y las carreras implementen acciones para el mejoramiento de las experiencias educacionales de los estudiantes, por lo que, le solicitamos valore su grado de satisfacción\r\nrespecto a cada uno de los indicadores, con transparencia y sinceridad.\r\n</P>\r\n<P>\r\nSírvase marcar con una <B>X</B> la opción que mejor recoja su valoración, de acuerdo\r\ncon la siguiente escala: (<B>marcar una sola opción</B>)\r\n</P>\r\n<TABLE border=\"2\" width=\"75%\">\r\n<TR>\r\n<Td align=\"center\"><b>Muy satisfecho (a)<b></Td>\r\n<Td align=\"center\"><b>Satisfecho (a) <b></Td>\r\n<Td align=\"center\"> <b>Poco Satisfecho (a) <b></Td>\r\n<Td align=\"center\"> <b>Insatisfecho (a) <b></Td>\r\n\r\n</TR>\r\n<TR>\r\n<TD align=\"center\"> 4 </TD>\r\n<TD align=\"center\"> 3 </TD>\r\n<TD align=\"center\"> 2 </TD>\r\n<TD align=\"center\"> 1 </TD>\r\n</TR>\r\n</TABLE>",
         "fin" : "2012-06-29 12:00:00",
         "incio" : "2012-06-25 11:52:08",
         "informante" : 1,
@@ -446,5 +447,1042 @@
       },
     "model" : "app.pregunta",
     "pk" : 26
+  },
+ { "fields" : { "orden" : 1,
+        "pregunta" : 7,
+        "texto" : "1"
+      },
+    "model" : "app.itempregunta",
+    "pk" : 17
+  },
+  { "fields" : { "orden" : 1,
+        "pregunta" : 8,
+        "texto" : "1"
+      },
+    "model" : "app.itempregunta",
+    "pk" : 21
+  },
+  { "fields" : { "orden" : 1,
+        "pregunta" : 9,
+        "texto" : "1"
+      },
+    "model" : "app.itempregunta",
+    "pk" : 25
+  },
+  { "fields" : { "orden" : 1,
+        "pregunta" : 10,
+        "texto" : "1"
+      },
+    "model" : "app.itempregunta",
+    "pk" : 29
+  },
+  { "fields" : { "orden" : 1,
+        "pregunta" : 11,
+        "texto" : "1"
+      },
+    "model" : "app.itempregunta",
+    "pk" : 33
+  },
+  { "fields" : { "orden" : 1,
+        "pregunta" : 12,
+        "texto" : "1"
+      },
+    "model" : "app.itempregunta",
+    "pk" : 37
+  },
+  { "fields" : { "orden" : 1,
+        "pregunta" : 13,
+        "texto" : "1"
+      },
+    "model" : "app.itempregunta",
+    "pk" : 41
+  },
+  { "fields" : { "orden" : 1,
+        "pregunta" : 14,
+        "texto" : "1"
+      },
+    "model" : "app.itempregunta",
+    "pk" : 45
+  },
+  { "fields" : { "orden" : 1,
+        "pregunta" : 15,
+        "texto" : "1"
+      },
+    "model" : "app.itempregunta",
+    "pk" : 49
+  },
+  { "fields" : { "orden" : 1,
+        "pregunta" : 16,
+        "texto" : "1"
+      },
+    "model" : "app.itempregunta",
+    "pk" : 53
+  },
+  { "fields" : { "orden" : 1,
+        "pregunta" : 17,
+        "texto" : "1"
+      },
+    "model" : "app.itempregunta",
+    "pk" : 57
+  },
+  { "fields" : { "orden" : 1,
+        "pregunta" : 18,
+        "texto" : "1"
+      },
+    "model" : "app.itempregunta",
+    "pk" : 61
+  },
+  { "fields" : { "orden" : 1,
+        "pregunta" : 19,
+        "texto" : "1"
+      },
+    "model" : "app.itempregunta",
+    "pk" : 65
+  },
+  { "fields" : { "orden" : 1,
+        "pregunta" : 20,
+        "texto" : "1"
+      },
+    "model" : "app.itempregunta",
+    "pk" : 69
+  },
+  { "fields" : { "orden" : 1,
+        "pregunta" : 21,
+        "texto" : "1"
+      },
+    "model" : "app.itempregunta",
+    "pk" : 73
+  },
+  { "fields" : { "orden" : 1,
+        "pregunta" : 22,
+        "texto" : "1"
+      },
+    "model" : "app.itempregunta",
+    "pk" : 77
+  },
+  { "fields" : { "orden" : 1,
+        "pregunta" : 23,
+        "texto" : "1"
+      },
+    "model" : "app.itempregunta",
+    "pk" : 81
+  },
+  { "fields" : { "orden" : 1,
+        "pregunta" : 24,
+        "texto" : "1"
+      },
+    "model" : "app.itempregunta",
+    "pk" : 85
+  },
+  { "fields" : { "orden" : 1,
+        "pregunta" : 25,
+        "texto" : "1"
+      },
+    "model" : "app.itempregunta",
+    "pk" : 89
+  },
+  { "fields" : { "orden" : 1,
+        "pregunta" : 26,
+        "texto" : "1"
+      },
+    "model" : "app.itempregunta",
+    "pk" : 93
+  },
+  { "fields" : { "orden" : 1,
+        "pregunta" : 27,
+        "texto" : "1"
+      },
+    "model" : "app.itempregunta",
+    "pk" : 97
+  },
+  { "fields" : { "orden" : 1,
+        "pregunta" : 28,
+        "texto" : "1"
+      },
+    "model" : "app.itempregunta",
+    "pk" : 101
+  },
+  { "fields" : { "orden" : 1,
+        "pregunta" : 29,
+        "texto" : "1"
+      },
+    "model" : "app.itempregunta",
+    "pk" : 105
+  },
+  { "fields" : { "orden" : 1,
+        "pregunta" : 30,
+        "texto" : "1"
+      },
+    "model" : "app.itempregunta",
+    "pk" : 109
+  },
+  { "fields" : { "orden" : 1,
+        "pregunta" : 31,
+        "texto" : "1"
+      },
+    "model" : "app.itempregunta",
+    "pk" : 113
+  },
+  { "fields" : { "orden" : 1,
+        "pregunta" : 32,
+        "texto" : "1"
+      },
+    "model" : "app.itempregunta",
+    "pk" : 117
+  },
+  { "fields" : { "orden" : 1,
+        "pregunta" : 33,
+        "texto" : "1"
+      },
+    "model" : "app.itempregunta",
+    "pk" : 121
+  },
+  { "fields" : { "orden" : 1,
+        "pregunta" : 34,
+        "texto" : "1"
+      },
+    "model" : "app.itempregunta",
+    "pk" : 125
+  },
+  { "fields" : { "orden" : 1,
+        "pregunta" : 35,
+        "texto" : "1"
+      },
+    "model" : "app.itempregunta",
+    "pk" : 129
+  },
+  { "fields" : { "orden" : 1,
+        "pregunta" : 36,
+        "texto" : "1"
+      },
+    "model" : "app.itempregunta",
+    "pk" : 133
+  },
+  { "fields" : { "orden" : 1,
+        "pregunta" : 37,
+        "texto" : "1"
+      },
+    "model" : "app.itempregunta",
+    "pk" : 137
+  },
+  { "fields" : { "orden" : 1,
+        "pregunta" : 38,
+        "texto" : "1"
+      },
+    "model" : "app.itempregunta",
+    "pk" : 141
+  },
+  { "fields" : { "orden" : 1,
+        "pregunta" : 39,
+        "texto" : "1"
+      },
+    "model" : "app.itempregunta",
+    "pk" : 145
+  },
+  { "fields" : { "orden" : 1,
+        "pregunta" : 40,
+        "texto" : "1"
+      },
+    "model" : "app.itempregunta",
+    "pk" : 149
+  },
+  { "fields" : { "orden" : 1,
+        "pregunta" : 41,
+        "texto" : "1"
+      },
+    "model" : "app.itempregunta",
+    "pk" : 153
+  },
+  { "fields" : { "orden" : 1,
+        "pregunta" : 42,
+        "texto" : "1"
+      },
+    "model" : "app.itempregunta",
+    "pk" : 157
+  },
+  { "fields" : { "orden" : 1,
+        "pregunta" : 43,
+        "texto" : "1"
+      },
+    "model" : "app.itempregunta",
+    "pk" : 161
+  },
+  { "fields" : { "orden" : 2,
+        "pregunta" : 42,
+        "texto" : "2"
+      },
+    "model" : "app.itempregunta",
+    "pk" : 158
+  },
+  { "fields" : { "orden" : 2,
+        "pregunta" : 7,
+        "texto" : "2"
+      },
+    "model" : "app.itempregunta",
+    "pk" : 18
+  },
+  { "fields" : { "orden" : 2,
+        "pregunta" : 36,
+        "texto" : "2"
+      },
+    "model" : "app.itempregunta",
+    "pk" : 134
+  },
+  { "fields" : { "orden" : 2,
+        "pregunta" : 26,
+        "texto" : "2"
+      },
+    "model" : "app.itempregunta",
+    "pk" : 94
+  },
+  { "fields" : { "orden" : 2,
+        "pregunta" : 15,
+        "texto" : "2"
+      },
+    "model" : "app.itempregunta",
+    "pk" : 50
+  },
+  { "fields" : { "orden" : 2,
+        "pregunta" : 34,
+        "texto" : "2"
+      },
+    "model" : "app.itempregunta",
+    "pk" : 126
+  },
+  { "fields" : { "orden" : 2,
+        "pregunta" : 33,
+        "texto" : "2"
+      },
+    "model" : "app.itempregunta",
+    "pk" : 122
+  },
+  { "fields" : { "orden" : 2,
+        "pregunta" : 27,
+        "texto" : "2"
+      },
+    "model" : "app.itempregunta",
+    "pk" : 98
+  },
+  { "fields" : { "orden" : 2,
+        "pregunta" : 20,
+        "texto" : "2"
+      },
+    "model" : "app.itempregunta",
+    "pk" : 70
+  },
+  { "fields" : { "orden" : 2,
+        "pregunta" : 41,
+        "texto" : "2"
+      },
+    "model" : "app.itempregunta",
+    "pk" : 154
+  },
+  { "fields" : { "orden" : 2,
+        "pregunta" : 32,
+        "texto" : "2"
+      },
+    "model" : "app.itempregunta",
+    "pk" : 118
+  },
+  { "fields" : { "orden" : 2,
+        "pregunta" : 28,
+        "texto" : "2"
+      },
+    "model" : "app.itempregunta",
+    "pk" : 102
+  },
+  { "fields" : { "orden" : 2,
+        "pregunta" : 37,
+        "texto" : "2"
+      },
+    "model" : "app.itempregunta",
+    "pk" : 138
+  },
+  { "fields" : { "orden" : 2,
+        "pregunta" : 43,
+        "texto" : "2"
+      },
+    "model" : "app.itempregunta",
+    "pk" : 162
+  },
+  { "fields" : { "orden" : 2,
+        "pregunta" : 40,
+        "texto" : "2"
+      },
+    "model" : "app.itempregunta",
+    "pk" : 150
+  },
+  { "fields" : { "orden" : 2,
+        "pregunta" : 29,
+        "texto" : "2"
+      },
+    "model" : "app.itempregunta",
+    "pk" : 106
+  },
+  { "fields" : { "orden" : 2,
+        "pregunta" : 12,
+        "texto" : "2"
+      },
+    "model" : "app.itempregunta",
+    "pk" : 38
+  },
+  { "fields" : { "orden" : 2,
+        "pregunta" : 31,
+        "texto" : "2"
+      },
+    "model" : "app.itempregunta",
+    "pk" : 114
+  },
+  { "fields" : { "orden" : 2,
+        "pregunta" : 38,
+        "texto" : "2"
+      },
+    "model" : "app.itempregunta",
+    "pk" : 142
+  },
+  { "fields" : { "orden" : 2,
+        "pregunta" : 30,
+        "texto" : "2"
+      },
+    "model" : "app.itempregunta",
+    "pk" : 110
+  },
+  { "fields" : { "orden" : 2,
+        "pregunta" : 21,
+        "texto" : "2"
+      },
+    "model" : "app.itempregunta",
+    "pk" : 74
+  },
+  { "fields" : { "orden" : 2,
+        "pregunta" : 18,
+        "texto" : "2"
+      },
+    "model" : "app.itempregunta",
+    "pk" : 62
+  },
+  { "fields" : { "orden" : 2,
+        "pregunta" : 11,
+        "texto" : "2"
+      },
+    "model" : "app.itempregunta",
+    "pk" : 34
+  },
+  { "fields" : { "orden" : 2,
+        "pregunta" : 17,
+        "texto" : "2"
+      },
+    "model" : "app.itempregunta",
+    "pk" : 58
+  },
+  { "fields" : { "orden" : 2,
+        "pregunta" : 22,
+        "texto" : "2"
+      },
+    "model" : "app.itempregunta",
+    "pk" : 78
+  },
+  { "fields" : { "orden" : 2,
+        "pregunta" : 14,
+        "texto" : "2"
+      },
+    "model" : "app.itempregunta",
+    "pk" : 46
+  },
+  { "fields" : { "orden" : 2,
+        "pregunta" : 10,
+        "texto" : "2"
+      },
+    "model" : "app.itempregunta",
+    "pk" : 30
+  },
+  { "fields" : { "orden" : 2,
+        "pregunta" : 16,
+        "texto" : "2"
+      },
+    "model" : "app.itempregunta",
+    "pk" : 54
+  },
+  { "fields" : { "orden" : 2,
+        "pregunta" : 23,
+        "texto" : "2"
+      },
+    "model" : "app.itempregunta",
+    "pk" : 82
+  },
+  { "fields" : { "orden" : 2,
+        "pregunta" : 13,
+        "texto" : "2"
+      },
+    "model" : "app.itempregunta",
+    "pk" : 42
+  },
+  { "fields" : { "orden" : 2,
+        "pregunta" : 9,
+        "texto" : "2"
+      },
+    "model" : "app.itempregunta",
+    "pk" : 26
+  },
+  { "fields" : { "orden" : 2,
+        "pregunta" : 35,
+        "texto" : "2"
+      },
+    "model" : "app.itempregunta",
+    "pk" : 130
+  },
+  { "fields" : { "orden" : 2,
+        "pregunta" : 24,
+        "texto" : "2"
+      },
+    "model" : "app.itempregunta",
+    "pk" : 86
+  },
+  { "fields" : { "orden" : 2,
+        "pregunta" : 19,
+        "texto" : "2"
+      },
+    "model" : "app.itempregunta",
+    "pk" : 66
+  },
+  { "fields" : { "orden" : 2,
+        "pregunta" : 8,
+        "texto" : "2"
+      },
+    "model" : "app.itempregunta",
+    "pk" : 22
+  },
+  { "fields" : { "orden" : 2,
+        "pregunta" : 39,
+        "texto" : "2"
+      },
+    "model" : "app.itempregunta",
+    "pk" : 146
+  },
+  { "fields" : { "orden" : 2,
+        "pregunta" : 25,
+        "texto" : "2"
+      },
+    "model" : "app.itempregunta",
+    "pk" : 90
+  },
+  { "fields" : { "orden" : 3,
+        "pregunta" : 9,
+        "texto" : "3"
+      },
+    "model" : "app.itempregunta",
+    "pk" : 27
+  },
+  { "fields" : { "orden" : 3,
+        "pregunta" : 16,
+        "texto" : "3"
+      },
+    "model" : "app.itempregunta",
+    "pk" : 55
+  },
+  { "fields" : { "orden" : 3,
+        "pregunta" : 17,
+        "texto" : "3"
+      },
+    "model" : "app.itempregunta",
+    "pk" : 59
+  },
+  { "fields" : { "orden" : 3,
+        "pregunta" : 37,
+        "texto" : "3"
+      },
+    "model" : "app.itempregunta",
+    "pk" : 139
+  },
+  { "fields" : { "orden" : 3,
+        "pregunta" : 18,
+        "texto" : "3"
+      },
+    "model" : "app.itempregunta",
+    "pk" : 63
+  },
+  { "fields" : { "orden" : 3,
+        "pregunta" : 19,
+        "texto" : "3"
+      },
+    "model" : "app.itempregunta",
+    "pk" : 67
+  },
+  { "fields" : { "orden" : 3,
+        "pregunta" : 42,
+        "texto" : "3"
+      },
+    "model" : "app.itempregunta",
+    "pk" : 159
+  },
+  { "fields" : { "orden" : 3,
+        "pregunta" : 20,
+        "texto" : "3"
+      },
+    "model" : "app.itempregunta",
+    "pk" : 71
+  },
+  { "fields" : { "orden" : 3,
+        "pregunta" : 21,
+        "texto" : "3"
+      },
+    "model" : "app.itempregunta",
+    "pk" : 75
+  },
+  { "fields" : { "orden" : 3,
+        "pregunta" : 38,
+        "texto" : "3"
+      },
+    "model" : "app.itempregunta",
+    "pk" : 143
+  },
+  { "fields" : { "orden" : 3,
+        "pregunta" : 22,
+        "texto" : "3"
+      },
+    "model" : "app.itempregunta",
+    "pk" : 79
+  },
+  { "fields" : { "orden" : 3,
+        "pregunta" : 23,
+        "texto" : "3"
+      },
+    "model" : "app.itempregunta",
+    "pk" : 83
+  },
+  { "fields" : { "orden" : 3,
+        "pregunta" : 24,
+        "texto" : "3"
+      },
+    "model" : "app.itempregunta",
+    "pk" : 87
+  },
+  { "fields" : { "orden" : 3,
+        "pregunta" : 25,
+        "texto" : "3"
+      },
+    "model" : "app.itempregunta",
+    "pk" : 91
+  },
+  { "fields" : { "orden" : 3,
+        "pregunta" : 39,
+        "texto" : "3"
+      },
+    "model" : "app.itempregunta",
+    "pk" : 147
+  },
+  { "fields" : { "orden" : 3,
+        "pregunta" : 26,
+        "texto" : "3"
+      },
+    "model" : "app.itempregunta",
+    "pk" : 95
+  },
+  { "fields" : { "orden" : 3,
+        "pregunta" : 27,
+        "texto" : "3"
+      },
+    "model" : "app.itempregunta",
+    "pk" : 99
+  },
+  { "fields" : { "orden" : 3,
+        "pregunta" : 28,
+        "texto" : "3"
+      },
+    "model" : "app.itempregunta",
+    "pk" : 103
+  },
+  { "fields" : { "orden" : 3,
+        "pregunta" : 29,
+        "texto" : "3"
+      },
+    "model" : "app.itempregunta",
+    "pk" : 107
+  },
+  { "fields" : { "orden" : 3,
+        "pregunta" : 40,
+        "texto" : "3"
+      },
+    "model" : "app.itempregunta",
+    "pk" : 151
+  },
+  { "fields" : { "orden" : 3,
+        "pregunta" : 30,
+        "texto" : "3"
+      },
+    "model" : "app.itempregunta",
+    "pk" : 111
+  },
+  { "fields" : { "orden" : 3,
+        "pregunta" : 31,
+        "texto" : "3"
+      },
+    "model" : "app.itempregunta",
+    "pk" : 115
+  },
+  { "fields" : { "orden" : 3,
+        "pregunta" : 32,
+        "texto" : "3"
+      },
+    "model" : "app.itempregunta",
+    "pk" : 119
+  },
+  { "fields" : { "orden" : 3,
+        "pregunta" : 33,
+        "texto" : "3"
+      },
+    "model" : "app.itempregunta",
+    "pk" : 123
+  },
+  { "fields" : { "orden" : 3,
+        "pregunta" : 41,
+        "texto" : "3"
+      },
+    "model" : "app.itempregunta",
+    "pk" : 155
+  },
+  { "fields" : { "orden" : 3,
+        "pregunta" : 34,
+        "texto" : "3"
+      },
+    "model" : "app.itempregunta",
+    "pk" : 127
+  },
+  { "fields" : { "orden" : 3,
+        "pregunta" : 7,
+        "texto" : "3"
+      },
+    "model" : "app.itempregunta",
+    "pk" : 19
+  },
+  { "fields" : { "orden" : 3,
+        "pregunta" : 8,
+        "texto" : "3"
+      },
+    "model" : "app.itempregunta",
+    "pk" : 23
+  },
+  { "fields" : { "orden" : 3,
+        "pregunta" : 35,
+        "texto" : "3"
+      },
+    "model" : "app.itempregunta",
+    "pk" : 131
+  },
+  { "fields" : { "orden" : 3,
+        "pregunta" : 10,
+        "texto" : "3"
+      },
+    "model" : "app.itempregunta",
+    "pk" : 31
+  },
+  { "fields" : { "orden" : 3,
+        "pregunta" : 11,
+        "texto" : "3"
+      },
+    "model" : "app.itempregunta",
+    "pk" : 35
+  },
+  { "fields" : { "orden" : 3,
+        "pregunta" : 43,
+        "texto" : "3"
+      },
+    "model" : "app.itempregunta",
+    "pk" : 163
+  },
+  { "fields" : { "orden" : 3,
+        "pregunta" : 12,
+        "texto" : "3"
+      },
+    "model" : "app.itempregunta",
+    "pk" : 39
+  },
+  { "fields" : { "orden" : 3,
+        "pregunta" : 13,
+        "texto" : "3"
+      },
+    "model" : "app.itempregunta",
+    "pk" : 43
+  },
+  { "fields" : { "orden" : 3,
+        "pregunta" : 36,
+        "texto" : "3"
+      },
+    "model" : "app.itempregunta",
+    "pk" : 135
+  },
+  { "fields" : { "orden" : 3,
+        "pregunta" : 14,
+        "texto" : "3"
+      },
+    "model" : "app.itempregunta",
+    "pk" : 47
+  },
+  { "fields" : { "orden" : 3,
+        "pregunta" : 15,
+        "texto" : "3"
+      },
+    "model" : "app.itempregunta",
+    "pk" : 51
+  },
+  { "fields" : { "orden" : 4,
+        "pregunta" : 34,
+        "texto" : "4"
+      },
+    "model" : "app.itempregunta",
+    "pk" : 128
+  },
+  { "fields" : { "orden" : 4,
+        "pregunta" : 25,
+        "texto" : "4"
+      },
+    "model" : "app.itempregunta",
+    "pk" : 92
+  },
+  { "fields" : { "orden" : 4,
+        "pregunta" : 17,
+        "texto" : "4"
+      },
+    "model" : "app.itempregunta",
+    "pk" : 60
+  },
+  { "fields" : { "orden" : 4,
+        "pregunta" : 7,
+        "texto" : "4"
+      },
+    "model" : "app.itempregunta",
+    "pk" : 20
+  },
+  { "fields" : { "orden" : 4,
+        "pregunta" : 41,
+        "texto" : "4"
+      },
+    "model" : "app.itempregunta",
+    "pk" : 156
+  },
+  { "fields" : { "orden" : 4,
+        "pregunta" : 24,
+        "texto" : "4"
+      },
+    "model" : "app.itempregunta",
+    "pk" : 88
+  },
+  { "fields" : { "orden" : 4,
+        "pregunta" : 13,
+        "texto" : "4"
+      },
+    "model" : "app.itempregunta",
+    "pk" : 44
+  },
+  { "fields" : { "orden" : 4,
+        "pregunta" : 8,
+        "texto" : "4"
+      },
+    "model" : "app.itempregunta",
+    "pk" : 24
+  },
+  { "fields" : { "orden" : 4,
+        "pregunta" : 42,
+        "texto" : "4"
+      },
+    "model" : "app.itempregunta",
+    "pk" : 160
+  },
+  { "fields" : { "orden" : 4,
+        "pregunta" : 23,
+        "texto" : "4"
+      },
+    "model" : "app.itempregunta",
+    "pk" : 84
+  },
+  { "fields" : { "orden" : 4,
+        "pregunta" : 38,
+        "texto" : "4"
+      },
+    "model" : "app.itempregunta",
+    "pk" : 144
+  },
+  { "fields" : { "orden" : 4,
+        "pregunta" : 9,
+        "texto" : "4"
+      },
+    "model" : "app.itempregunta",
+    "pk" : 28
+  },
+  { "fields" : { "orden" : 4,
+        "pregunta" : 16,
+        "texto" : "4"
+      },
+    "model" : "app.itempregunta",
+    "pk" : 56
+  },
+  { "fields" : { "orden" : 4,
+        "pregunta" : 22,
+        "texto" : "4"
+      },
+    "model" : "app.itempregunta",
+    "pk" : 80
+  },
+  { "fields" : { "orden" : 4,
+        "pregunta" : 18,
+        "texto" : "4"
+      },
+    "model" : "app.itempregunta",
+    "pk" : 64
+  },
+  { "fields" : { "orden" : 4,
+        "pregunta" : 10,
+        "texto" : "4"
+      },
+    "model" : "app.itempregunta",
+    "pk" : 32
+  },
+  { "fields" : { "orden" : 4,
+        "pregunta" : 35,
+        "texto" : "4"
+      },
+    "model" : "app.itempregunta",
+    "pk" : 132
+  },
+  { "fields" : { "orden" : 4,
+        "pregunta" : 21,
+        "texto" : "4"
+      },
+    "model" : "app.itempregunta",
+    "pk" : 76
+  },
+  { "fields" : { "orden" : 4,
+        "pregunta" : 15,
+        "texto" : "4"
+      },
+    "model" : "app.itempregunta",
+    "pk" : 52
+  },
+  { "fields" : { "orden" : 4,
+        "pregunta" : 11,
+        "texto" : "4"
+      },
+    "model" : "app.itempregunta",
+    "pk" : 36
+  },
+  { "fields" : { "orden" : 4,
+        "pregunta" : 14,
+        "texto" : "4"
+      },
+    "model" : "app.itempregunta",
+    "pk" : 48
+  },
+  { "fields" : { "orden" : 4,
+        "pregunta" : 30,
+        "texto" : "4"
+      },
+    "model" : "app.itempregunta",
+    "pk" : 112
+  },
+  { "fields" : { "orden" : 4,
+        "pregunta" : 40,
+        "texto" : "4"
+      },
+    "model" : "app.itempregunta",
+    "pk" : 152
+  },
+  { "fields" : { "orden" : 4,
+        "pregunta" : 29,
+        "texto" : "4"
+      },
+    "model" : "app.itempregunta",
+    "pk" : 108
+  },
+  { "fields" : { "orden" : 4,
+        "pregunta" : 20,
+        "texto" : "4"
+      },
+    "model" : "app.itempregunta",
+    "pk" : 72
+  },
+  { "fields" : { "orden" : 4,
+        "pregunta" : 31,
+        "texto" : "4"
+      },
+    "model" : "app.itempregunta",
+    "pk" : 116
+  },
+  { "fields" : { "orden" : 4,
+        "pregunta" : 28,
+        "texto" : "4"
+      },
+    "model" : "app.itempregunta",
+    "pk" : 104
+  },
+  { "fields" : { "orden" : 4,
+        "pregunta" : 43,
+        "texto" : "4"
+      },
+    "model" : "app.itempregunta",
+    "pk" : 164
+  },
+  { "fields" : { "orden" : 4,
+        "pregunta" : 36,
+        "texto" : "4"
+      },
+    "model" : "app.itempregunta",
+    "pk" : 136
+  },
+  { "fields" : { "orden" : 4,
+        "pregunta" : 32,
+        "texto" : "4"
+      },
+    "model" : "app.itempregunta",
+    "pk" : 120
+  },
+  { "fields" : { "orden" : 4,
+        "pregunta" : 27,
+        "texto" : "4"
+      },
+    "model" : "app.itempregunta",
+    "pk" : 100
+  },
+  { "fields" : { "orden" : 4,
+        "pregunta" : 39,
+        "texto" : "4"
+      },
+    "model" : "app.itempregunta",
+    "pk" : 148
+  },
+  { "fields" : { "orden" : 4,
+        "pregunta" : 12,
+        "texto" : "4"
+      },
+    "model" : "app.itempregunta",
+    "pk" : 40
+  },
+  { "fields" : { "orden" : 4,
+        "pregunta" : 33,
+        "texto" : "4"
+      },
+    "model" : "app.itempregunta",
+    "pk" : 124
+  },
+  { "fields" : { "orden" : 4,
+        "pregunta" : 19,
+        "texto" : "4"
+      },
+    "model" : "app.itempregunta",
+    "pk" : 68
+  },
+  { "fields" : { "orden" : 4,
+        "pregunta" : 26,
+        "texto" : "4"
+      },
+    "model" : "app.itempregunta",
+    "pk" : 96
+  },
+  { "fields" : { "orden" : 4,
+        "pregunta" : 37,
+        "texto" : "4"
+      },
+    "model" : "app.itempregunta",
+    "pk" : 140
   }
+
 ]

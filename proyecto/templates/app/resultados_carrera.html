@@ -17,9 +17,15 @@
 
 {% block content %}
 
-<h3> Seleccione el Docente: </h3>
-<p/>
-{{ form.docentes }}
 
-{{ form2 }}
+  Seleccione el Docente: 
+  <p/>
+  {{ form.docentes }}
+
+
+<fieldset style="margin-top: 20px;">
+  {{ form2.as_table }}
+</fieldset>
+
+
 {% endblock %}

@@ -16,11 +16,11 @@
 
 {% block branding %}
    <h1 id="site-name">  Sistema de Evaluación Docente </h1>
-   {#% if usuario and not usuario.is_anonymous and not usuario.is_staff %#}
    {% if request.user and not request.user.is_anonymous and not request.user.is_staff %}
    <div id="user-tools"> 
      Bienvenido/a,
      <strong> {{ request.user }} </strong>
+     <a href="javascript:window.history.back();"> [Regresar]  </a>
      <a href="/logout/" class="historylink"> [Salir] </a>
    </div>
    {% else %}
@@ -34,11 +34,11 @@
 {% block nav-global %}
 {% endblock %}
 
-<div id="contenido" class="contenido">
+
 {% block content %}
 
 {% endblock %}
-</div>
+
 
 {% block footer %}
 

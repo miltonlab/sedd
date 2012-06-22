@@ -19,6 +19,7 @@ from proyecto.app.models import EstudiantePeriodoAcademico
 from proyecto.app.models import DocentePeriodoAcademico
 from proyecto.app.models import Asignatura
 from proyecto.app.models import PeriodoAcademico
+from proyecto.app.models import TabulacionSatisfaccion2012
 from proyecto.app.models import OfertaAcademicaSGA
 from proyecto.app.models import Configuracion
 
@@ -39,10 +40,10 @@ def portada(request):
 def login(request):
 
     form = forms.Form()
-    form.fields['username'] = forms.CharField(label="Username", max_length=30, 
+    form.fields['username'] = forms.CharField(label="Cedula", max_length=30, 
                                               widget=forms.TextInput(attrs={'title': 'Usuario SGA-UNL',}),
                                               error_messages={'required':'Ingrese nombre de usuario'})
-    form.fields['password'] = forms.CharField(label="Password", 
+    form.fields['password'] = forms.CharField(label="Clave SGA", 
                                               widget=forms.PasswordInput(attrs={'title': 'Clave del SGA-UNL',}),
                                               error_messages={'required':'Ingrese el password'})
     data = dict(form=form)    
@@ -164,6 +165,11 @@ def encuestas(request, id_asignatura, id_docente):
     periodo_finalizado = False
     periodo_no_iniciado = False
 
+    logg.info("antes de validar  vigecia")
+    logg.info(periodoEvaluacionActual)
+    logg.info(periodoEvaluacionActual.noIniciado())
+    logg.info(periodoEvaluacionActual.vigente())
+    logg.info(periodoEvaluacionActual.finalizado())
     # Periodo no iniciado aun
     if periodoEvaluacionActual.noIniciado():
         periodo_no_iniciado = True
@@ -281,7 +287,16 @@ def resultados_carrera(request, id_docente):
     ids = set([ad.docente.id for ad in AsignaturaDocente.objects.filter(asignatura__carrera=carrera)])
     form = forms.Form()
     form.fields['docentes'] = forms.ModelChoiceField(queryset=DocentePeriodoAcademico.objects.filter(id__in=ids))
-    from proyecto.app.forms import ResultadosESEForm
-    datos = dict(form=form, form2=ResultadosESEForm(),title='>> Comision Academica de la Carrera ' + carrera)
+    periodoEvaluacion = Configuracion.getPeriodoEvaluacionActual()
+    if periodoEvaluacion.tabulacion.tipo == 'ESE2012':
+        tabulacion = TabulacionSatisfaccion2012()
+    from proyecto.app.forms import ResultadosESE2012Form
+    datos = dict(form=form, form2=ResultadosESE2012Form(tabulacion),
+    #datos = dict(form=form, form2=crear_form_ese2012(tabulacion),
+                 title='>> Comision Academica de la Carrera ' + carrera,
+                 tabulacion=tabulacion )
     return render_to_response("app/resultados_carrera.html", datos, context_instance=RequestContext(request))
     
+def crear_form_ese2012():
+    from django.forms import Form
+    form = Form()

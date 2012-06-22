@@ -170,6 +170,7 @@ class PeriodoEvaluacion(models.Model):
     inicio = models.DateField()
     fin = models.DateField()
     periodoAcademico = models.ForeignKey('PeriodoAcademico', related_name='periodosEvaluacion')
+    tabulacion = models.OneToOneField('Tabulacion')
     
     class Meta:
         ordering = ['inicio']
@@ -182,7 +183,7 @@ class PeriodoEvaluacion(models.Model):
     
     def vigente(self):
         hoy = datetime.today().date()
-        return self.inicio >=  hoy <= self.fin 
+        return self.inicio <=  hoy <= self.fin 
 
     def finalizado(self):
         hoy = datetime.today().date()
@@ -192,6 +193,63 @@ class PeriodoEvaluacion(models.Model):
         return self.nombre
 
 
+class Tabulacion(models.Model):
+    """
+    Superclase que permite procesar la informacion generada por un
+    conjunto de encuestas pertenecientes a un Periodo de Evaluación.
+    """
+    descripcion = models.CharField(max_length='250')
+    tipo = models.CharField(max_length='20', unique=True)
+    
+    def __unicode__(self):
+        return self.descripcion
+
+    
+class TabulacionSatisfaccion2012(Tabulacion):
+    # Se hecha de menos las clases Abstractas y el polimorfismo
+    def __init__(self):
+        Tabulacion.__init__(self)
+        self.tipo = u'ESE2012'
+        self.descripcion = u'Encuesta de Satisfacción Estudiantil 2012'
+        self.calculos = (
+            # codigo, descripcion, metodo 
+            ('a',u'La valoracion global de la Satisfacción Estudiantil por docente',
+            self.por_docente),
+            ('b',u'La valoracion global de la Satisfacción Estudiantil por carrera',
+             self.por_carrera),
+            ('c',u'La valoracion  de la Satisfacción Estudiantil en cada uno de los campos, por carrera',
+             self.por_campos),
+            ('d',u'La valoración Estudiantil en cada uno de los indicadores por carrera',
+             self.por_indicador),
+            ('e',u'Los 10 indicadores de mayor satisfacción en la Carrera',
+             self.mayor_satisfaccion),
+            ('f',u'Los 10 indicadores de mayor satisfacción en la Carrera',
+             self.mayor_satisfaccion),
+        )
+        
+    def por_docente(self):
+        """ docccc """
+        print 'por docente'
+
+    def por_carrera(self):
+        print 'por docente' 
+
+    def por_campos(self):
+        print 'por docente' 
+
+    def por_indicador(self):
+        print 'por docente' 
+
+    def por_docente(self):
+        print 'por docente' 
+
+    def mayor_satisfaccion(self):
+        print 'por docente' 
+
+    def mayor_insatisfaccion(self):
+        print 'por docente' 
+
+    
 #===================================================================================================
 #   Información Académica
 #===================================================================================================
@@ -257,7 +315,7 @@ class Asignatura(models.Model):
     #area = models.CharField(max_length='20', choices=[(a,a) for a in Asignatura.objects.values('area').distinct()] )
     carrera = models.CharField(max_length='100')
     semestre = models.CharField(max_length='10', verbose_name='módulo')
-    paralelo = models.CharField(max_length='20')
+    paralelo = models.CharField(max_length='50')
     seccion = models.CharField(max_length='10')
     nombre = models.TextField()
     tipo = models.CharField(max_length='15')
