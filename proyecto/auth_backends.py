@@ -20,6 +20,9 @@ class SGAAuthBackend(object):
         if self.sga.autenticar_estudiante(username, password):
             try:
                 user = Usuario.objects.get(username=username)
+            except Exception, ex:
+                print "Error, revise los datos y la conexion al WebService del SGA: " + str(ex)
+                user = None
             except User.DoesNotExist:
                 e = self.sga.datos_estudiante(username)
                 user = Usuario()

@@ -73,7 +73,7 @@ class Evaluacion(models.Model):
     fechaFin = models.DateField()
     horaInicio = models.TimeField()
     horaFin = models.TimeField()
-    cuestionario = models.OneToOneField('Cuestionario')
+    cuestionario = models.ForeignKey('Cuestionario', related_name='evaluaciones')
     estudianteAsignaturaDocente = models.ForeignKey('EstudianteAsignaturaDocente', related_name='evaluaciones')
 
     class Meta:
@@ -167,10 +167,11 @@ class Respuesta(models.Model):
 
 class PeriodoEvaluacion(models.Model):
     nombre = models.CharField(max_length='100')
+    descripcion = models.TextField(null=True)
     inicio = models.DateField()
     fin = models.DateField()
     periodoAcademico = models.ForeignKey('PeriodoAcademico', related_name='periodosEvaluacion')
-    tabulacion = models.OneToOneField('Tabulacion')
+    tabulacion = models.OneToOneField('Tabulacion', parent_link=True)
     
     class Meta:
         ordering = ['inicio']
@@ -227,9 +228,27 @@ class TabulacionSatisfaccion2012(Tabulacion):
              self.mayor_satisfaccion),
         )
         
-    def por_docente(self):
-        """ docccc """
-        print 'por docente'
+    def por_docente(self, docente_id):
+        periodoEvaluacion = Configuracion.getPeriodoEvaluacionActual()
+        num_evaluaciones = Evaluacion.objects.filter(
+            estudianteAsignaturaDocente__asignaturaDocente__docente__id=docente_id).filter(
+            cuestionario__periodoEvaluacion=periodoEvaluacion).count()
+        muy_satisfecho=Contestacion.objects.filter(
+            evaluacion__estudianteAsignaturaDocente__asignaturaDocente__docente__id=docente_id).filter(
+            evaluacion__cuestionario__periodoEvaluacion=periodoEvaluacion).filter(respuesta='4').count()
+        satisfecho=Contestacion.objects.filter(
+            evaluacion__estudianteAsignaturaDocente__asignaturaDocente__docente__id=docente_id).filter(
+            evaluacion__cuestionario__periodoEvaluacion=periodoEvaluacion).filter(respuesta='3').count()
+        poco_satisfecho=Contestacion.objects.filter(
+            evaluacion__estudianteAsignaturaDocente__asignaturaDocente__docente__id=docente_id).filter(
+            evaluacion__cuestionario__periodoEvaluacion=periodoEvaluacion).filter(respuesta='2').count()
+        insatisfecho=Contestacion.objects.filter(
+            evaluacion__estudianteAsignaturaDocente__asignaturaDocente__docente__id=docente_id).filter(
+            evaluacion__cuestionario__periodoEvaluacion=periodoEvaluacion).filter(respuesta='1').count()
+        # Se devuelven porcentajes
+        return (muy_satisfecho/num_evaluaciones, satisfecho/num_evaluaciones,
+                poco_satisfecho/num_evaluaciones, insatisfecho/num_evaluaciones)
+        
 
     def por_carrera(self):
         print 'por docente' 
@@ -238,9 +257,6 @@ class TabulacionSatisfaccion2012(Tabulacion):
         print 'por docente' 
 
     def por_indicador(self):
-        print 'por docente' 
-
-    def por_docente(self):
         print 'por docente' 
 
     def mayor_satisfaccion(self):

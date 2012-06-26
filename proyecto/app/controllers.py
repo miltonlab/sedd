@@ -41,10 +41,10 @@ def login(request):
 
     form = forms.Form()
     form.fields['username'] = forms.CharField(label="Cedula", max_length=30, 
-                                              widget=forms.TextInput(attrs={'title': 'Usuario SGA-UNL',}),
+                                              widget=forms.TextInput(attrs={'title': 'Cedula',}),
                                               error_messages={'required':'Ingrese nombre de usuario'})
     form.fields['password'] = forms.CharField(label="Clave SGA", 
-                                              widget=forms.PasswordInput(attrs={'title': 'Clave del SGA-UNL',}),
+                                              widget=forms.PasswordInput(attrs={'title': 'Clave SGA-UNL',}),
                                               error_messages={'required':'Ingrese el password'})
     data = dict(form=form)    
     if request.POST:
@@ -53,7 +53,7 @@ def login(request):
         user = auth.authenticate(username=username, password=password)        
         if user is not None and user.is_active:
             auth.login(request, user)
-            return redirect('/')
+            return redirect('/index')
         else:
             form.full_clean()
             form._errors[NON_FIELD_ERRORS] = form.error_class(['Error de usuario o contraseña'])
@@ -63,7 +63,7 @@ def login(request):
 
 def logout(request):
     auth.logout(request)
-    return redirect('/portada')
+    return redirect('/')
 
 
 @login_required(login_url='/login/')
@@ -296,7 +296,13 @@ def resultados_carrera(request, id_docente):
                  title='>> Comision Academica de la Carrera ' + carrera,
                  tabulacion=tabulacion )
     return render_to_response("app/resultados_carrera.html", datos, context_instance=RequestContext(request))
-    
+
+def mostrar_resultados(request, docente_id, tipo_resultados):
+    periodoEvaluacion = Configuracion.getPeriodoEvaluacionActual()
+    if periodoEvaluacion.tabulacion.tipo == 'ESE2012':
+        tabulacion = TabulacionSatisfaccion2012()
+        return render_to_response("app/resultados_carrera.html",  context_instance=RequestContext(request))
+
 def crear_form_ese2012():
     from django.forms import Form
     form = Form()

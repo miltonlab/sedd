@@ -1,15 +1,83 @@
-<!DOCTYPE html PUBLIC "-//W3C//DTD HTML5.01//EN" "http://w3.org/TR/html4/strict.dtd">
-<html lang="en">
-  <head>
-    <meta http-equiv="Content-Type" content="text/html; charset=utf-8"/>
-    <title> Sistema de Evaluacion Docente - UNL </title>
-  </head>
-  
-  <body>
-    <h1>Bienvenidos al Sistema de Evaluacion de los Docentes de la Universidad Nacional de Loja</h3>
-<p/>
-    <ul>
-      <li> <a href="/"> {{ periodoEvaluacionActual }} </a> </li>
-    </ul>
-  </body>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd"> 
+<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en"> 
+<head> 
+<meta http-equiv="content-type" content="text/html; charset=utf-8" /> 
+
+<!-- Title --> 
+<title>SEED-UNL</title>
+
+<!-- Link to the stylesheet -->
+<link href="/static/style.css" type="text/css" rel="stylesheet" /> 
+<!-- Scripts in js -->
+<!--script type="text/javascript" src="/static/js/jquery-1.7.2.min.js"></script-->
+<script type="text/javascript" src="/static/js/jquery-1.6.2.min.js"></script>
+<script type="text/javascript" src="/static/js/efectos.js"></script>
+	
+</head>
+<body>
+
+<!-- Main Block -->
+<div id="wrapper">
+
+	<!-- Header -->
+	<div id="header">
+		<div id="logo">
+			<a href="#"><img src="/static/images/logo.jpg" /></a>
+		</div>
+		<div id="slogan">
+			<img src="/static/images/slogan.jpg" />
+		</div>
+	</div>
+	<!-- End header -->
+
+	<!-- Content -->
+	<div id="content">
+	
+		<!-- Menu -->
+		<div id="menu">
+			<ul>
+				<li><a href="#">Inicio</a></li>
+				<li><a href="/login/">Acceso al sistema</a></li>
+				<li><a href="http://www.utpl.edu.ec">Acerca de...</a></li>	
+			</ul>
+		</div>
+		<!-- End menu -->
+
+		<!-- Left column -->
+		<div id="left">
+			<h1>Bienvenidos al sistema de evaluación de docentes de la UNL</h1>
+			<p> 
+			  <a href="{% url proyecto.app.controllers.login %}"> 
+			    >>> <b> {{ periodoEvaluacionActual }} </b>
+			  </a> 
+			</p>
+			<p>
+			  {{ periodoEvaluacionActual.descripcion }}
+			</p>
+
+		</div>
+		<!-- End left column -->
+		
+		<!-- Right column -->
+		<div id="right">
+			<img src="/static/images/coffe.jpg" />
+			<div id="caption">
+					<p>&quot;En los tesoros de la sabiduría está la glorificación de la vida&quot;.</p>
+			</div>
+		</div>
+		<!-- End right column -->
+		<div class="clear"></div>
+	</div>
+	<!-- End content -->
+	
+	<!-- Footer -->
+	<div id="footer">
+		<p>2012 &copy; Design by Iceman.</p>
+	</div>
+	<!-- End footer -->
+	
+</div>
+<!-- End Main Block -->
+
+</body>
 </html>

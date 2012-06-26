@@ -6,10 +6,11 @@ from django.contrib import admin
 admin.autodiscover()
 
 urlpatterns = patterns('',
-    url(r'^$', 'proyecto.app.controllers.index'),
+    url(r'^$', 'proyecto.app.controllers.portada'),                        
     url(r'^login/$', 'proyecto.app.controllers.login'),
+    url(r'^index/$', 'proyecto.app.controllers.index'),                       
     url(r'^logout/$', 'proyecto.app.controllers.logout'),
-    url(r'^portada/$', 'proyecto.app.controllers.portada'), 
+
     # Recibe como parametro el numero de carrera
     url(r'^estudiante/asignaturas/docentes/(\d{1})/$', 
         'proyecto.app.controllers.estudiante_asignaturas_docentes'),

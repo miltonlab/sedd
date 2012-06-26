@@ -17,15 +17,19 @@
 
 {% block content %}
 
-
+<form action="" target="_blank">
   Seleccione el Docente: 
   <p/>
   {{ form.docentes }}
+  
 
+  <fieldset style="margin-top: 20px;">
+    {{ form2.as_table }}
+  </fieldset>
 
-<fieldset style="margin-top: 20px;">
-  {{ form2.as_table }}
-</fieldset>
+  <input type="submit" value="Ver Resultados"/>
+
+</form>
 
 
 {% endblock %}

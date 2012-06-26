@@ -1,0 +1,41 @@
+* { margin:0; padding:0; } /*Sets all margins to 0*/
+body, html { 
+	background:#87a738 url('/static/images/bg.jpg') repeat-x;
+	font-family:Arial, Helvetica, sans-serif; 
+	font-size:16px; 
+	line-height:36px; 
+	color:#000; 
+} /*Background color, fonts and leading*/
+
+img { border:none; } /*No border /static/images*/
+
+a { color:#6a8e00; text-decoration:none; } /*Hyperlink styling*/
+
+#wrapper { margin:0 auto; width:900px; } /*Centers the content*/
+#header { height:222px; background:url('/static/images/header.jpg') no-repeat; } /*The header*/
+#logo { position:absolute; margin-top:47px; margin-left:47px; } /*Setting up logo margins*/
+#slogan { position:absolute; margin-top:73px; margin-left:314px; } /*Slogan margins*/
+
+#content { background:#fefefe; } /*Content background*/
+#menu { background:url('/static/images/menu.jpg') no-repeat; height:68px; padding:15px 50px 0 140px; } /*Menu background & padding*/
+#menu ul li { font-size:22px; list-style-type:none; float:left; margin-right:50px; } /*Menu item*/
+#menu ul li a { color:#000; } /*Menu link*/
+#menu ul li.active a { color:#6a8e00; } /*Active link*/
+
+p { margin-bottom:20px; } /*Paragraph margins*/
+.clear { clear:both; } /*Fixes the background*/
+#left { clear:both; margin-top:20px; padding:0 30px 20px 50px; width:370px; border-right:1px solid #ccc; float:left; } /*Left column*/
+#left p { font-family:Georgia, Times, serif; color:#4f4f4f; line-height:30px; } /*Left paragraphs*/
+h1 { font-size:26px; font-weight:bold; margin-bottom:20px; } /*Title styling*/
+h2 { font-size:22px; text-align:center; } /*Secondary title*/
+.read-more { background:url('../images/button.jpg') no-repeat; padding:2px 5px 5px 5px; font-size:16px; font-weight:bold; text-transform:uppercase; } /*"Read More" button*/
+.read-more a { color:#fff; } /*Read More link*/
+.about-us{ position:absolute; margin-left:135px; margin-top:-40px; color:#000; font-size:14px; } /*About us line*/
+
+#right { width:350px; float:right; padding:0 50px 20px 0; } /*Right column*/
+#caption { background:url('../images/caption.jpg') no-repeat; width:250px; color:#fff; padding:10px 15px 10px 15px; } /*Caption styling*/
+#right p { font-family:Georgia, Times, serif; font-style:italic; color:#fff; line-height:24px; } /*Right paragraphs*/
+#right img { margin-left:20px; } /*Moving the image to the right*/
+
+#footer { clear:both; background:url('images/footer.jpg') no-repeat top center; padding:20px 50px; } /*Footer styling*/
+#footer p { font-size:14px; color:#5e5d5d; } /*Footer paragraph*/

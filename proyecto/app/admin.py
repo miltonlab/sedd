@@ -61,6 +61,9 @@ class CuestionarioAdmin(admin.ModelAdmin):
     inlines = [SeccionEnLinea]
     save_as = True
 
+    class Media:
+        js = ['js/tiny_mce/tiny_mce.js', 'js/tmce_config.js',]
+    
 class OfertaAcademicaSGAEnLinea(admin.TabularInline):
     model = models.OfertaAcademicaSGA
     extra = 1
@@ -83,13 +86,14 @@ class EstudianteAsignaturaDocenteEnLinea(admin.TabularInline):
 class EstudiantePeriodoAcademicoAdmin(admin.ModelAdmin):
     list_display = ('cedula', '__unicode__')
     list_per_page = 20
-    search_fields = ('usuario_username','usuario__cedula','usuario__last_name','usuario__first_name')
+    search_fields = ('usuario__username','usuario__cedula','usuario__last_name','usuario__first_name')
     inlines = (EstudianteAsignaturaDocenteEnLinea,)
     raw_id_fields = ('usuario',)
 
     change_form_template = 'admin/app/estudianteperiodoacademico/change_form.html'
     
     # Para disponer de información extra en el template
+    ### En desarrollo
     def change_view(self, request, object_id, extra_context={}):
         estudiante = models.EstudiantePeriodoAcademico.objects.get(id=object_id)
         extra_context['paralelos'] = estudiante.paralelos()
