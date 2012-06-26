@@ -112,6 +112,7 @@ def estudiante_asignaturas_docentes(request, num_carrera):
     carrera = [c['nombre'] for c in request.session['carreras_estudiante']
                if c['num_carrera'] == int(num_carrera) ][0]
     request.session['carrera'] = carrera
+    request.session['num_carrera'] = num_carrera
     # Obtenemos los id de las AsignaturasDocente
     ids = estudiante.asignaturasDocentesEstudiante.filter(
         asignaturaDocente__asignatura__carrera=carrera).values_list(
@@ -246,8 +247,8 @@ def encuesta_grabar(request):
         contestacion = Contestacion(pregunta = id_pregunta, respuesta=v)
         contestacion.evaluacion = evaluacion
         contestacion.save()
-
-    return render_to_response('app/encuesta_finalizada.html', context_instance=RequestContext(request))
+    datos = dict(num_carrera=request.session['num_carrera'])
+    return render_to_response('app/encuesta_finalizada.html', datos, context_instance=RequestContext(request))
 
 
 def cargar_ofertas_sga(request, periodoAcademicoId):

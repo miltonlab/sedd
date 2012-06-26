@@ -73,3 +73,18 @@
 [INFO 2012-06-22 12:34:11,585 controllers]:  False
 [INFO 2012-06-22 12:34:11,585 controllers]:  True
 [INFO 2012-06-22 12:34:11,585 controllers]:  False
+[INFO 2012-06-24 00:44:18,764 controllers]:  antes de validar  vigecia
+[INFO 2012-06-24 00:44:18,765 controllers]:  Encuesta de Satisfacción Estudiantil
+[INFO 2012-06-24 00:44:18,766 controllers]:  True
+[INFO 2012-06-24 00:44:18,770 controllers]:  False
+[INFO 2012-06-24 00:44:18,770 controllers]:  False
+[INFO 2012-06-24 01:07:35,593 controllers]:  antes de validar  vigecia
+[INFO 2012-06-24 01:07:35,606 controllers]:  Encuesta de Satisfacción Estudiantil
+[INFO 2012-06-24 01:07:35,606 controllers]:  True
+[INFO 2012-06-24 01:07:35,606 controllers]:  False
+[INFO 2012-06-24 01:07:35,607 controllers]:  False
+[INFO 2012-06-24 01:20:05,239 controllers]:  antes de validar  vigecia
+[INFO 2012-06-24 01:20:05,242 controllers]:  Encuesta de Satisfacción Estudiantil
+[INFO 2012-06-24 01:20:05,242 controllers]:  False
+[INFO 2012-06-24 01:20:05,243 controllers]:  True
+[INFO 2012-06-24 01:20:05,243 controllers]:  False
