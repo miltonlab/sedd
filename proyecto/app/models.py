@@ -393,7 +393,7 @@ class EstudianteAsignaturaDocente(models.Model):
     estudiante = models.ForeignKey('EstudiantePeriodoAcademico', related_name='asignaturasDocentesEstudiante')
     # Asignatura-Docente
     asignaturaDocente = models.ForeignKey('AsignaturaDocente', related_name='estudiantesAsignaturaDocente')
-    matricula = models.IntegerField(null=True)    
+    matricula = models.IntegerField(blank=True, null=True)    
     estado = models.CharField(max_length='30', blank=True, null=True)
     ###?evaluacion = models.OneToOneField('Evaluacion', related_name='estudiantes', blank=True, null=True)
 

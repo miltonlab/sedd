@@ -27,45 +27,5 @@
       },
     "model" : "app.estudianteperiodoacademico",
     "pk" : 7770
-  },
-  { "fields" : { "asignaturaDocente" : 1305,
-        "estado" : "matriculada",
-        "estudiante" : 7770,
-        "matricula" : 22222222
-      },
-    "model" : "app.estudianteasignaturadocente",
-    "pk" : 31430
-  },
-  { "fields" : { "asignaturaDocente" : 885,
-        "estado" : "matriculada",
-        "estudiante" : 7770,
-        "matricula" : 1111111
-      },
-    "model" : "app.estudianteasignaturadocente",
-    "pk" : 21991
-  },
-  { "fields" : { "asignaturaDocente" : 898,
-        "estado" : "matriculada",
-        "estudiante" : 7770,
-        "matricula" : 1111111
-      },
-    "model" : "app.estudianteasignaturadocente",
-    "pk" : 21990
-  },
-  { "fields" : { "asignaturaDocente" : 907,
-        "estado" : "matriculada",
-        "estudiante" : 7770,
-        "matricula" : 1111111
-      },
-    "model" : "app.estudianteasignaturadocente",
-    "pk" : 21989
-  },
-  { "fields" : { "asignaturaDocente" : 913,
-        "estado" : "matriculada",
-        "estudiante" : 7770,
-        "matricula" : 1111111
-      },
-    "model" : "app.estudianteasignaturadocente",
-    "pk" : 21988
   }
 ]
