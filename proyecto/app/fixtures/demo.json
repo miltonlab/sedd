@@ -1,13 +1,29 @@
-[ { "fields" : { "cedula" : "demo",
+[{ "fields" : { "date_joined" : "2012-06-21 12:44:04",
+      "email" : "",
+      "first_name" : "Juan Pepe",
+      "groups" : [  ],
+      "is_active" : true,
+      "is_staff" : false,
+      "is_superuser" : false,
+      "last_login" : "2012-06-26 09:24:06",
+      "last_name" : "Perez Pasantes",
+      "password" : "sha1$103b3$fa8fea0043101788191a6f816c160645e8874ccb",
+      "user_permissions" : [  ],
+      "username" : "demo"
+    },
+  "model" : "auth.user",
+  "pk" : 100000
+  }, 
+  { "fields" : { "cedula" : "demo",
         "groups" : [  ],
         "titulo" : "",
         "user_permissions" : [  ]
       },
     "model" : "app.usuario",
-    "pk" : 8184
+    "pk" : 100000
   },
   { "fields" : { "periodoAcademico" : 1,
-        "usuario" : 8184
+        "usuario" : 100000
       },
     "model" : "app.estudianteperiodoacademico",
     "pk" : 7770
