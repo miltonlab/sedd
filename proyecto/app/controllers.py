@@ -235,8 +235,13 @@ def encuesta_responder(request, id_cuestionario):
 
 def encuesta_grabar(request):
     evaluacion = request.session['evaluacion']
-    ###estudianteAsignaturaDocente = request.session['estudianteAsignaturaDocente']
-    ###evaluacion.estudianteAsignaturaDocente = estudianteAsignaturaDocente
+    estudianteAsignaturaDocente = request.session['estudianteAsignaturaDocente']
+    datos = dict(num_carrera=request.session['num_carrera'])
+    # Si se regresa a grabar otra vez la misma encuesta
+    if Evaluacion.objects.filter(estudianteAsignaturaDocente = estudianteAsignaturaDocente).filter(
+        cuestionario = evaluacion.cuestionario).count() > 0:
+        return render_to_response('app/encuesta_finalizada.html',
+                                  datos, context_instance=RequestContext(request))     
     evaluacion.fechaFin = datetime.now().date()
     evaluacion.horaFin = datetime.now().time()
     evaluacion.save()
@@ -247,7 +252,7 @@ def encuesta_grabar(request):
         contestacion = Contestacion(pregunta = id_pregunta, respuesta=v)
         contestacion.evaluacion = evaluacion
         contestacion.save()
-    datos = dict(num_carrera=request.session['num_carrera'])
+
     return render_to_response('app/encuesta_finalizada.html', datos, context_instance=RequestContext(request))
 
 
