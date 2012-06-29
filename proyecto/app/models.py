@@ -208,6 +208,7 @@ class Tabulacion(models.Model):
     
 class TabulacionSatisfaccion2012(Tabulacion):
     # Se hecha de menos las clases Abstractas y el polimorfismo
+
     def __init__(self):
         Tabulacion.__init__(self)
         self.tipo = u'ESE2012'
@@ -227,31 +228,68 @@ class TabulacionSatisfaccion2012(Tabulacion):
             ('f',u'Los 10 indicadores de mayor satisfacción en la Carrera',
              self.mayor_satisfaccion),
         )
-        
-    def por_docente(self, docente_id):
-        periodoEvaluacion = Configuracion.getPeriodoEvaluacionActual()
-        num_evaluaciones = Evaluacion.objects.filter(
-            estudianteAsignaturaDocente__asignaturaDocente__docente__id=docente_id).filter(
-            cuestionario__periodoEvaluacion=periodoEvaluacion).count()
-        muy_satisfecho=Contestacion.objects.filter(
-            evaluacion__estudianteAsignaturaDocente__asignaturaDocente__docente__id=docente_id).filter(
-            evaluacion__cuestionario__periodoEvaluacion=periodoEvaluacion).filter(respuesta='4').count()
-        satisfecho=Contestacion.objects.filter(
-            evaluacion__estudianteAsignaturaDocente__asignaturaDocente__docente__id=docente_id).filter(
-            evaluacion__cuestionario__periodoEvaluacion=periodoEvaluacion).filter(respuesta='3').count()
-        poco_satisfecho=Contestacion.objects.filter(
-            evaluacion__estudianteAsignaturaDocente__asignaturaDocente__docente__id=docente_id).filter(
-            evaluacion__cuestionario__periodoEvaluacion=periodoEvaluacion).filter(respuesta='2').count()
-        insatisfecho=Contestacion.objects.filter(
-            evaluacion__estudianteAsignaturaDocente__asignaturaDocente__docente__id=docente_id).filter(
-            evaluacion__cuestionario__periodoEvaluacion=periodoEvaluacion).filter(respuesta='1').count()
-        # Se devuelven porcentajes
-        return (muy_satisfecho/num_evaluaciones, satisfecho/num_evaluaciones,
-                poco_satisfecho/num_evaluaciones, insatisfecho/num_evaluaciones)
-        
 
-    def por_carrera(self):
-        print 'por docente' 
+    ###Pendiente terminar        
+    def por_docente(self, id_docente):
+        """
+        Satisfacción Estudiantil por módulo, curso, unidad o taller
+        """
+        periodoEvaluacion = Configuracion.getPeriodoEvaluacionActual()
+        asignaturas = Evaluacion.objects.filter(
+            estudianteAsignaturaDocente__asignaturaDocente__docente__id=id_docente).filter(
+            cuestionario__periodoEvaluacion=periodoEvaluacion).values_list(
+            'estudianteAsignaturaDocente__asignaturaDocente__asignatura__id').distinct()
+        asignaturas = [tupla[0] for tupla in asignaturas]
+        resultados = []
+        return resultados
+
+    # TODO: Usar carrera_id en vez de nombre_carrera
+    def por_carrera(self, nombre_carrera):
+        from django.db.models import Count
+        indicadores=Pregunta.objects.filter(tipo__tipo=u'SeleccionUnica').values_list('id', flat=True)
+
+        conteo_ms=Contestacion.objects.filter(evaluacion__cuestionario__periodoEvaluacion__tabulacion__tipo='ESE2012').filter(
+            evaluacion__estudianteAsignaturaDocente__asignaturaDocente__asignatura__carrera=nombre_carrera).filter(
+            pregunta__in=indicadores).values('pregunta').annotate(ms=Count('respuesta')).filter(
+            respuesta='4').order_by('pregunta')
+
+        conteo_s=Contestacion.objects.filter(evaluacion__cuestionario__periodoEvaluacion__tabulacion__tipo='ESE2012').filter(
+            evaluacion__estudianteAsignaturaDocente__asignaturaDocente__asignatura__carrera=nombre_carrera).filter(
+            pregunta__in=indicadores).values('pregunta').annotate(s=Count('respuesta')).filter(
+            respuesta='3').order_by('pregunta')
+        
+        conteo_ps=Contestacion.objects.filter(evaluacion__cuestionario__periodoEvaluacion__tabulacion__tipo='ESE2012').filter(
+            evaluacion__estudianteAsignaturaDocente__asignaturaDocente__asignatura__carrera=nombre_carrera).filter(
+            pregunta__in=indicadores).values('pregunta').annotate(ps=Count('respuesta')).filter(
+            respuesta='2').order_by('pregunta')
+        
+        conteo_ins=Contestacion.objects.filter(evaluacion__cuestionario__periodoEvaluacion__tabulacion__tipo='ESE2012').filter(
+            evaluacion__estudianteAsignaturaDocente__asignaturaDocente__asignatura__carrera=nombre_carrera).filter(
+            pregunta__in=indicadores).values('pregunta').annotate(ins=Count('respuesta')).filter(
+            respuesta='1').order_by('pregunta')
+
+        lista = []
+        for i in indicadores:
+            conteo = {}            
+            for c in conteo_ms:
+                if c['pregunta'] == i:
+                    conteo.update(c)
+            for c in conteo_s:
+                if c['pregunta'] == i:
+                    conteo.update(c)
+            for c in conteo_ps:
+                if c['pregunta'] == i:
+                    conteo.update(c)
+            for c in conteo_ins:
+                if c['pregunta'] == i:
+                    conteo.update(c)
+            lista.append(conteo)    
+        return lista
+        #return conteo_ms + conteo_s + conteo_ps + conteo_ins
+
+    
+        ###return {'carrera':nombre_carrera,  'MS':muy_satisfecho/float(num_respuestas)*100,  'S':satisfecho/float(num_respuestas)*100,
+        ###        'PS':poco_satisfecho/float(num_respuestas)*100,  'IS':insatisfecho/float(num_respuestas)*100  }
 
     def por_campos(self):
         print 'por docente' 
