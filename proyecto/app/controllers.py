@@ -10,6 +10,7 @@ from django.contrib.auth.decorators import login_required
 from django.forms.forms import NON_FIELD_ERRORS
 from django.contrib import messages
 
+from proyecto.app.models import Configuracion
 from proyecto.app.models import Cuestionario
 from proyecto.app.models import Evaluacion
 from proyecto.app.models import Contestacion
@@ -19,9 +20,10 @@ from proyecto.app.models import EstudiantePeriodoAcademico
 from proyecto.app.models import DocentePeriodoAcademico
 from proyecto.app.models import Asignatura
 from proyecto.app.models import PeriodoAcademico
+from proyecto.app.models import PeriodoEvaluacion
 from proyecto.app.models import TabulacionSatisfaccion2012
 from proyecto.app.models import OfertaAcademicaSGA
-from proyecto.app.models import Configuracion
+from proyecto.app.models import AreaSGA
 
 from proyecto.tools.sgaws.cliente import SGA
 from proyecto.settings import SGAWS_USER, SGAWS_PASS
@@ -53,7 +55,10 @@ def login(request):
         user = auth.authenticate(username=username, password=password)        
         if user is not None and user.is_active:
             auth.login(request, user)
-            return redirect('/index')
+            if not Configuracion.getPeriodoAcademicoActual() or not Configuracion.getPeriodoEvaluacionActual(): 
+                return redirect('/logout')
+            else:
+                return redirect('/index')
         else:
             form.full_clean()
             form._errors[NON_FIELD_ERRORS] = form.error_class(['Error de usuario o contraseña'])
@@ -68,24 +73,31 @@ def logout(request):
 
 @login_required(login_url='/login/')
 def index(request):
-    pa = Configuracion.getPeriodoAcademicoActual()
+    periodoAcademico = Configuracion.getPeriodoAcademicoActual()
     usuario = request.user
     noEstudiante = False
     noDocente = False
+    periodoEvaluacion = Configuracion.getPeriodoEvaluacionActual()
     try:
+        # Se obtiene solo las siglas de las areas del periodo de evaluación
+        areas_periodo = periodoEvaluacion.areasSGA.values_list('siglas', flat=True)
         # Se trata de un Estudiante
-        estudiante = EstudiantePeriodoAcademico.objects.get(periodoAcademico=pa, usuario=usuario)
-        carreras_estudiante = estudiante.asignaturasDocentesEstudiante.values('asignaturaDocente__asignatura__carrera').distinct()
+        estudiante = EstudiantePeriodoAcademico.objects.get(periodoAcademico=periodoAcademico, usuario=usuario)
+        # solo las carreras que están dentro de las areas asignadas al periodo de evaluación
+        carreras_estudiante = estudiante.asignaturasDocentesEstudiante.filter(
+            asignaturaDocente__asignatura__area__in=areas_periodo).values(
+            'asignaturaDocente__asignatura__carrera','asignaturaDocente__asignatura__area').distinct()
         # Al final un diccionario de carreras del estudiante en session 
-        carreras_estudiante = [ dict(num_carrera=i, nombre=c['asignaturaDocente__asignatura__carrera'])
-                     for i,c in enumerate(carreras_estudiante) ]
+        carreras_estudiante = [ dict(num_carrera=i, nombre=c['asignaturaDocente__asignatura__carrera'],
+                                     area=c['asignaturaDocente__asignatura__area'])
+                                for i,c in enumerate(carreras_estudiante) ]
         request.session['estudiante'] = estudiante
         request.session['carreras_estudiante'] = carreras_estudiante
     except EstudiantePeriodoAcademico.DoesNotExist:
         noEstudiante = True
     try:
         # Se trata de un Docente 
-        docente = DocentePeriodoAcademico.objects.get(periodoAcademico=pa, usuario=usuario)
+        docente = DocentePeriodoAcademico.objects.get(periodoAcademico=periodoAcademico, usuario=usuario)
         request.session['docente'] = docente
         periodoEvaluacion = Configuracion.getPeriodoEvaluacionActual()
         cuestionarios_docente = [c for c in periodoEvaluacion.cuestionarios.all() 
@@ -93,8 +105,8 @@ def index(request):
         request.session['cuestionarios_docente'] = cuestionarios_docente
         # Si es coordinador se colocan las carreras del docente en la session
         if docente.esCoordinador:
-            carreras_docente = docente.asignaturasDocente.values('asignatura__carrera').distinct()
-            carreras_docente = [ dict(num_carrera=i, nombre=c['asignatura__carrera'])
+            carreras_docente = docente.asignaturasDocente.values('asignatura__carrera','asignatura__area').distinct()
+            carreras_docente = [ dict(num_carrera=i, nombre=c['asignatura__carrera'],area=c['asignatura__area'])
                                  for i,c in enumerate(carreras_docente) ]
             request.session['carreras_docente'] = carreras_docente
     except DocentePeriodoAcademico.DoesNotExist:
@@ -111,11 +123,14 @@ def estudiante_asignaturas_docentes(request, num_carrera):
     estudiante = request.session['estudiante']
     carrera = [c['nombre'] for c in request.session['carreras_estudiante']
                if c['num_carrera'] == int(num_carrera) ][0]
+    area = [c['area'] for c in request.session['carreras_estudiante']
+               if c['num_carrera'] == int(num_carrera) ][0]
     request.session['carrera'] = carrera
+    request.session['area'] = area
     request.session['num_carrera'] = num_carrera
     # Obtenemos los id de las AsignaturasDocente
     ids = estudiante.asignaturasDocentesEstudiante.filter(
-        asignaturaDocente__asignatura__carrera=carrera).values_list(
+        asignaturaDocente__asignatura__carrera=carrera, asignaturaDocente__asignatura__area=area).values_list(
         'asignaturaDocente__id', flat=True).distinct()
     asignaturasDocentes = AsignaturaDocente.objects.filter(id__in=ids).order_by('asignatura__nombre')
     # Solo asignaturas distintas
@@ -130,17 +145,30 @@ def estudiante_asignaturas_docentes(request, num_carrera):
         # Una asignatura puede tener mas de un docente
         docentes = [ad.docente for ad in asignaturasDocentes if ad.asignatura == a]
         for d in docentes:
-            if a.semestre == u"1":
+            if a.area == 'MED':
+                cuestionarios = [c for c in periodoEvaluacion.cuestionarios.all()
+                                 if c.informante.tipo == 'EstudianteMED']                                 
+            elif a.area == "ACE":
+                cuestionarios = [c for c in periodoEvaluacion.cuestionarios.all() 
+                                 if c.informante.tipo == 'InstitutoIdiomas']
+            # Modalidad Presecial
+            elif a.semestre == u"1":
                 cuestionarios = [c for c in periodoEvaluacion.cuestionarios.all() 
                                  if c.informante.tipo == 'EstudianteNovel']
+                # Si tienen los mismos cuestionarios que el resto de semestres
+                if len(cuestionarios) == 0:
+                    cuestionarios = [c for c in periodoEvaluacion.cuestionarios.all() 
+                                 if c.informante.tipo == 'Estudiante']
             else:
                 cuestionarios = [c for c in periodoEvaluacion.cuestionarios.all() 
                                  if c.informante.tipo == 'Estudiante']
+                
             estudianteAsignaturaDocente = estudiante.asignaturasDocentesEstudiante.get(
                 asignaturaDocente__asignatura=a, asignaturaDocente__docente=d
                 )
             # Si ya ha contestado todos los cuestionario disponibles para el docente 'd'
-            if estudianteAsignaturaDocente.evaluaciones.count() == len(cuestionarios):
+            num_evaluaciones = estudianteAsignaturaDocente.evaluaciones.count()
+            if num_evaluaciones > 0 and num_evaluaciones == len(cuestionarios):
                 diccionario['docentes'].append(dict(docente=d, evaluado=True))
             else:
             # Si no ha contestado aun todos los cuestionario disponibles para el docente 'd'
@@ -148,12 +176,14 @@ def estudiante_asignaturas_docentes(request, num_carrera):
         asignaturas_docentes.append(diccionario)
     # Para regresar posteriormente a esta vista
     request.session['num_carrera'] = str(num_carrera)
-    title = u"{0}".format(carrera)
+    title = u"{0}>>{1}".format(area,carrera)
     datos = dict(asignaturas_docentes=asignaturas_docentes, title=title)
     return render_to_response("app/asignaturas_docentes.html", datos, context_instance=RequestContext(request))
 
 
 def encuestas(request, id_asignatura, id_docente):
+    # Se maneja las siglas del Area en la sesion
+    area = request.session['area']
     carrera = request.session['carrera']
     estudiante = request.session['estudiante']
     asignaturaDocente = AsignaturaDocente.objects.get(docente__id=id_docente, asignatura__id=id_asignatura)
@@ -177,8 +207,12 @@ def encuestas(request, id_asignatura, id_docente):
     # Periodo Vigente
     elif periodoEvaluacionActual.vigente():
         if request.session['estudiante']:
+            if asignaturaDocente.asignatura.area == 'MED':
+                cuestionarios = [c for c in periodoEvaluacionActual.cuestionarios.all()
+                                 if c.informante.tipo == 'EstudianteMED']                                 
+            
             # Estudiante (Asignatura) del Instituto de Idiomas
-            if asignaturaDocente.asignatura.area == "ACE":
+            elif asignaturaDocente.asignatura.area == "ACE":
                 cuestionarios = [c for c in periodoEvaluacionActual.cuestionarios.all() 
                                  if c.informante.tipo == 'InstitutoIdiomas']
             # Estudiante del Primer Semestre
@@ -201,13 +235,14 @@ def encuestas(request, id_asignatura, id_docente):
     #Si ha expirado el periodo de Evaluacion
     elif periodoEvaluacionActual.finalizado():
         periodo_finalizado = True
-    title = u"{0} >> {1} >> {2}".format(carrera, asignaturaDocente.asignatura.nombre, asignaturaDocente.docente) 
+    title = u"{0}>>{1}>>{2}>>{3}".format(area,carrera, asignaturaDocente.asignatura.nombre, asignaturaDocente.docente) 
     datos = dict(cuestionarios=cuestionarios, title=title, 
                  periodo_no_iniciado=periodo_no_iniciado, periodo_finalizado=periodo_finalizado)
     return render_to_response("app/encuestas.html", datos, context_instance=RequestContext(request))
 
 
 def encuesta_responder(request, id_cuestionario):
+    area = request.session['area']
     carrera = request.session['carrera']
     estudianteAsignaturaDocente = request.session['estudianteAsignaturaDocente']
     cuestionario = Cuestionario.objects.get(id=id_cuestionario)
@@ -220,7 +255,7 @@ def encuesta_responder(request, id_cuestionario):
     evaluacion.cuestionario = cuestionario
     evaluacion.estudianteAsignaturaDocente = estudianteAsignaturaDocente
     request.session['evaluacion'] = evaluacion
-    title = u"{0} >> {1} >> {2}".format(carrera,
+    title = u"{0}>>{1}>>{2}>>{3}".format(area,carrera,
                                         estudianteAsignaturaDocente.asignaturaDocente.asignatura.nombre,
                                         estudianteAsignaturaDocente.asignaturaDocente.docente)
     fecha = datetime.now()
@@ -262,8 +297,8 @@ def cargar_ofertas_sga(request, periodoAcademicoId):
         return HttpResponse("Falta Periodo Academico")
     try:
         proxy = SGA(SGAWS_USER, SGAWS_PASS)
-        pa = PeriodoAcademico.objects.get(id=periodoAcademicoId)
-        ofertas_dict = proxy.ofertas_academicas(pa.inicio, pa.fin)
+        periodoAcademico = PeriodoAcademico.objects.get(id=periodoAcademicoId)
+        ofertas_dict = proxy.ofertas_academicas(periodoAcademico.inicio, periodoAcademico.fin)
         ofertas = [OfertaAcademicaSGA(idSGA=oa['id'], descripcion=oa['descripcion'])  for oa in ofertas_dict]
         for oa in ofertas:
             try:
@@ -288,27 +323,60 @@ def cargar_info_sga(request, periodoAcademicoId):
 
 
 def resultados_carrera(request, id_docente):
+    """
+    Consulta los docnetes que pertenece a la misma carrera del docente coordinador (id_docente)
+    """
     #field_carrera = forms.ModelChoiceField(queryset = Asignatura.objects.values_list('carrera').distinct())
-    carrera = AsignaturaDocente.objects.filter(docente__id=9).distinct().values_list('asignatura__carrera')[0][0]
-    ids = set([ad.docente.id for ad in AsignaturaDocente.objects.filter(asignatura__carrera=carrera)])
+    periodoAcademico = Configuracion.getPeriodoAcademicoActual()
+    area_siglas, carrera = AsignaturaDocente.objects.filter(docente__id=id_docente, docente__periodoAcademico=periodoAcademico).distinct(
+        ).values_list('asignatura__area','asignatura__carrera')[0]
+    area = AreaSGA.objects.get(siglas=area_siglas)
+    request.session['carrera'] = carrera
+    request.session['area'] = area_siglas
+    periodosEvaluacion = area.periodosEvaluacion.filter(periodoAcademico=periodoAcademico)
+    # Ids de los docentes de la carrera
+    ids = set([ad.docente.id for ad in AsignaturaDocente.objects.filter(asignatura__carrera=carrera, asignatura__area=area)])
     form = forms.Form()
     form.fields['docentes'] = forms.ModelChoiceField(queryset=DocentePeriodoAcademico.objects.filter(id__in=ids))
-    periodoEvaluacion = Configuracion.getPeriodoEvaluacionActual()
-    if periodoEvaluacion.tabulacion.tipo == 'ESE2012':
-        tabulacion = TabulacionSatisfaccion2012()
-    from proyecto.app.forms import ResultadosESE2012Form
-    datos = dict(form=form, form2=ResultadosESE2012Form(tabulacion),
-    #datos = dict(form=form, form2=crear_form_ese2012(tabulacion),
-                 title='>> Comision Academica de la Carrera ' + carrera,
-                 tabulacion=tabulacion )
+    # Selecciona los peridos de evaluacion en los que se encuentra el area del docente
+    # y a su vez que estén dentro del periodo académico actual.  
+    form.fields['periodos'] = forms.ModelChoiceField(queryset=area.periodosEvaluacion.filter(periodoAcademico=periodoAcademico))
+
+    ###periodoEvaluacion = Configuracion.getPeriodoEvaluacionActual()
+    ###if periodoEvaluacion.tabulacion.tipo == 'ESE2012':
+    ###    tabulacion = TabulacionSatisfaccion2012()
+    ###from proyecto.app.forms import ResultadosESE2012Form
+    datos = dict(form=form,
+                 title='>> Comision Academica de la Carrera ' + carrera
+                )
     return render_to_response("app/resultados_carrera.html", datos, context_instance=RequestContext(request))
 
-def mostrar_resultados(request, docente_id, tipo_resultados):
-    periodoEvaluacion = Configuracion.getPeriodoEvaluacionActual()
-    if periodoEvaluacion.tabulacion.tipo == 'ESE2012':
-        tabulacion = TabulacionSatisfaccion2012()
-        return render_to_response("app/resultados_carrera.html",  context_instance=RequestContext(request))
 
-def crear_form_ese2012():
-    from django.forms import Form
-    form = Form()
+def menu_resultados(request, periodo_evaluacion_id):
+    """
+    Genera el menú de opciones para reportes de acuerdo al periodo de evaluacion
+    y su tipo de tabulación especificamente. Llamado con Ajax.
+    """
+    try:
+        periodoEvaluacion=PeriodoEvaluacion.objects.get(id=periodo_evaluacion_id)
+        if periodoEvaluacion.tabulacion.tipo == 'ESE2012':
+            tabulacion = TabulacionSatisfaccion2012()
+            from proyecto.app.forms import ResultadosESE2012Form
+            return HttpResponse(ResultadosESE2012Form(tabulacion).as_table())
+    except PeriodoEvaluacion.DoesNotExist:
+        return HttpResponse("")
+        
+
+def mostrar_resultados(request):
+    id_periodo = request.POST['periodos']
+    id_docente = request.POST['docentes']
+    opcion = request.POST['opciones']
+    periodoEvaluacion=PeriodoEvaluacion.objects.get(id=id_periodo)
+    tabulacion = periodoEvaluacion.tabulacion
+    docente = DocentePeriodoAcademico.objects.get(id=id_docente)
+    resultados = ""
+    if tabulacion.tipo == 'ESE2012':
+        tabulacion = TabulacionSatisfaccion2012()
+        if opcion=='b':
+            resultados = tabulacion.por_carrera(request.session['carrera'], request.session['area'])
+    return HttpResponse(str(resultados));

@@ -20,7 +20,7 @@ import json
 import logging as log
 
 
-EXCLUSIONES = {'areas':('MED',), 'modalidades':('semipresencial', 'distancia')}
+EXCLUSIONES = {'areas':(,), 'modalidades':('semipresencial')}
 
 def importar(periodoAcademicoId, periodoEvaluacionId=None):
     """ Importar unidades en primera instancia"""
@@ -103,12 +103,6 @@ def importar(periodoAcademicoId, periodoEvaluacionId=None):
                             log.info(u'Usuario Docente ya existe: {0}:{1}'.format(usuario, cedula))
                             """
                             (docentePeriodoAcademico, nuevo) = DocentePeriodoAcademico.objects.get_or_create(usuario=usuario, periodoAcademico=periodoAcademico)
-                            """
-                            if nuevo == True:
-                            log.info(u'DocentePeriodoAcademico Creado: {0}'.format(docentePeriodoAcademico))
-                            else:
-                            log.info(u'DocentePeriodoAcademico ya existe: {0}'.format(docentePeriodoAcademico))
-                            """
                             (asignaturaDocente, nuevo) = AsignaturaDocente.objects.get_or_create(
                                 docente=docentePeriodoAcademico, asignatura=asignatura
                                 )
@@ -129,22 +123,9 @@ def importar(periodoAcademicoId, periodoEvaluacionId=None):
                                 email=''
                                 )
                             (usuario, nuevo) = Usuario.objects.get_or_create(cedula=cedula, defaults=dict_usuario_estudiante)
-                            """
-                            if nuevo == True:
-                            log.info(u'Usuario Estudiante Creado: {0}:{1}'.format(usuario, cedula))
-                            
-                            else:
-                            log.info(u'Usuario Estudiante ya existe: {0}:{1}'.format(usuario, cedula))
-                            """
                             (estudiantePeriodoAcademico, nuevo) = EstudiantePeriodoAcademico.objects.get_or_create(
                                 usuario=usuario, periodoAcademico=periodoAcademico
                                 )
-                            """
-                            if nuevo == True:
-                            log.info(u'EstudiantePeriodoAcademico Creado: {0}'.format(estudiantePeriodoAcademico))
-                            else:
-                            log.info(u'EstudiantePeriodoAcademico ya existe: {0}'.format(estudiantePeriodoAcademico))
-                            """
                             # Retomamos las asignaturas con docente extraidas en el metodo WS unidades_docentes 
                             for asignaturaDocente in asignaturas_docentes:
                                 (estudianteAsignaturaDocente, nuevo) = EstudianteAsignaturaDocente.objects.get_or_create(
@@ -161,4 +142,4 @@ if __name__ == '__main__':
     elif len(sys.argv) == 3:
         importar( int(sys.argv[1]), int(sys.argv[2]) )
     else:
-        print "Error: Use sgaimporter id_periodo_academico id_periodo_evaluacion"
+        print "Error: Use sgaimporter id_periodo_academico [id_periodo_evaluacion]"

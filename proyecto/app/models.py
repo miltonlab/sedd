@@ -43,6 +43,16 @@ class InformanteInstitutoIdiomas(TipoInformante):
         TipoInformante.__init__(self)
         self.tipo = 'InstitutoIdiomas'
 
+class InformanteEstudianteMED(TipoInformante):
+    def __init__(self):
+        TipoInformante.__init__(self)
+        self.tipo = 'EstudianteMED'
+
+class InformanteIdiomasMED(TipoInformante):
+    def __init__(self):
+        TipoInformante.__init__(self)
+        self.tipo = 'IdiomasMED'
+
 class Cuestionario(models.Model):
     titulo = models.CharField(max_length='100')
     encabezado = models.TextField()
@@ -165,13 +175,25 @@ class Respuesta(models.Model):
         return self.texto
 
 
+class AreaSGA(models.Model):
+    siglas = models.CharField(max_length='10')
+    nombre = models.CharField(max_length='256') 
+
+    def __unicode__(self):
+        return self.siglas
+
+    class Meta:
+        ordering=['id']
+
+
 class PeriodoEvaluacion(models.Model):
     nombre = models.CharField(max_length='100')
     descripcion = models.TextField(null=True)
     inicio = models.DateField()
     fin = models.DateField()
-    periodoAcademico = models.ForeignKey('PeriodoAcademico', related_name='periodosEvaluacion')
-    tabulacion = models.OneToOneField('Tabulacion', parent_link=True)
+    periodoAcademico = models.ForeignKey('PeriodoAcademico', related_name='periodosEvaluacion', verbose_name="Periodo Académico")
+    tabulacion = models.ForeignKey('Tabulacion', related_name='periodosEvaluacion', verbose_name="Tipo Tabulación")
+    areasSGA = models.ManyToManyField(AreaSGA, related_name='periodosEvaluacion', verbose_name=u'Areas Académicas SGA')
     
     class Meta:
         ordering = ['inicio']
@@ -244,7 +266,7 @@ class TabulacionSatisfaccion2012(Tabulacion):
         return resultados
 
     # TODO: Usar carrera_id en vez de nombre_carrera
-    def por_carrera(self, nombre_carrera):
+    def por_carrera(self, nombre_carrera, nombre_area):
         from django.db.models import Count
         indicadores=Pregunta.objects.filter(tipo__tipo=u'SeleccionUnica').values_list('id', flat=True)
 
@@ -537,8 +559,8 @@ class Usuario(User):
 
 class Configuracion(models.Model):
     """ Configuraciones Globales de la Aplicación """
-    periodoAcademicoActual = models.OneToOneField(PeriodoAcademico, verbose_name='Periodo Académico Actual')
-    periodoEvaluacionActual = models.OneToOneField(PeriodoEvaluacion, verbose_name='Periodo Evaluación Actual')
+    periodoAcademicoActual = models.OneToOneField(PeriodoAcademico, null=True, blank=True, verbose_name='Periodo Académico Actual')
+    periodoEvaluacionActual = models.OneToOneField(PeriodoEvaluacion, null=True, blank=True, verbose_name='Periodo Evaluación Actual')
 
     @classmethod
     def getPeriodoAcademicoActual(self):

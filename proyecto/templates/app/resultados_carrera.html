@@ -1,33 +1,81 @@
 {% extends "admin/base_site.html" %}
 
 {% block extrahead %}
+
 <style>
-  select {
+  select,.big {
       width: 100%;
       font-size: 15px;
       font-weight: bold;
+      color: #666666;
   }
 </style>
+
+<script type="text/javascript" src="/static/js/jquery-1.6.2.min.js"></script>
+<script type="text/javascript">
+    $(document).ready(function(){
+	$("#procesar").hide();
+	$("#id_docentes").change(function(){
+	    var id_docente = $("#id_docentes option:selected").val();
+	    if (id_docente == ""){
+		$("#procesar").hide();
+	    }else{
+		$("#procesar").show();
+	    }
+	});
+	$("#id_periodos").change(function(){
+	    var id_periodo = $("#id_periodos option:selected").val();
+	    if (id_periodo != ""){
+		$.ajax({
+		    url: "/resultados/menu/" + id_periodo + "/",
+		    method: "GET",
+		    //data: "periodo_academico_id={{ object_id }}",
+		    success: function (data){
+			$("#menu-resultados").html(data);
+			$("#procesar").show();
+		    },
+		    error: function(xhr,status,error){
+			alert("error: " + status + "-" + error);
+		    }
+		});
+	    }else{
+		$("#menu-resultados").html("");
+		$("#procesar").hide();
+	    }
+	    
+	});
+    });
+</script>
+
+{{ block.super }}
+
 {% endblock %}
 
 
 {% block content_title %}
-<h1> Resultados de la Carrera </h1>
+<!--h1> Resultados de la Carrera </h1-->
 {% endblock %}
 
 {% block content %}
 
-<form action="" target="_blank">
-  Seleccione el Docente: 
-  <p/>
+<form action="/resultados/mostrar/" method="POST" target="_blank">
+
+  {% csrf_token %}
+
+  <span class="big"> Periodo de Evaluación </span> 
+  {{ form.periodos }} 
+
+  <span class="big"> Docente </span>
+
   {{ form.docentes }}
-  
 
-  <fieldset style="margin-top: 20px;">
-    {{ form2.as_table }}
+  <fieldset style="margin-top: 20px; min-height: 30px">
+    <legend> Opciones </legend>
+    <div id="menu-resultados"> </div>
   </fieldset>
+  <p/>    
 
-  <input type="submit" value="Ver Resultados"/>
+  <input id="procesar" type="submit" value="Ver Resultados">
 
 </form>
 

@@ -47,9 +47,14 @@
 		<div id="left">
 			<h1>Bienvenidos al sistema de evaluación de docentes de la UNL</h1>
 			<p> 
-			  <a href="{% url proyecto.app.controllers.login %}"> 
+			  {% if periodoEvaluacionActual %}
+			  <a href="{% url proyecto.app.controllers.login %}">
 			    >>> <b> {{ periodoEvaluacionActual }} </b>
-			  </a> 
+			  </a>
+			  {% else %}
+			  >>> <b> No existen Procesos de Evaluacion actualmente </b>
+			  {% endif %}
+
 			</p>
 			<p>
 			  {{ periodoEvaluacionActual.descripcion }}

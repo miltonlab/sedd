@@ -1490,6 +1490,54 @@
     	    },
     "model" : "app.tabulacion",
     "pk" : 1 
+  },
+
+  { "fields" : { "siglas" : "AEIRNNR",
+        "nombre" : "Área de la Energía, las Industrias y los Recursos Naturales no Renovables"
+      },
+    "model" : "app.areasga",
+    "pk"    : 3
+  },
+
+  { "fields" : { "siglas" : "AARNR",
+        "nombre" : "Área Agropecuaria y de Recursos Naturales Renovables"
+      },
+    "model" : "app.areasga",
+    "pk"    : 1
+  },
+
+  { "fields" : { "siglas" : "MED",
+        "nombre" : "Modalidad de Estudios a Distancia"
+      },
+    "model" : "app.areasga",
+    "pk"    : 7
+  },
+
+  { "fields" : { "siglas" : "ACE",
+        "nombre" : "Área de Cursos Especiales"
+      },
+    "model" : "app.areasga",
+    "pk"    : 6
+  },
+
+  { "fields" : { "siglas" : "ASH",
+        "nombre" : "Área de la Salud Humana"
+      },
+    "model" : "app.areasga",
+    "pk"    : 5
+  },
+
+  { "fields" : { "siglas" : "AEAC",
+        "nombre" : "Área de la Educación, Arte y Comunicación"
+      },
+    "model" : "app.areasga",
+    "pk"    : 2
+  },
+  { "fields" : { "siglas" : "AJSA",
+        "nombre" : "Área de la Educación, Arte y Comunicación"
+      },
+    "model" : "app.areasga",
+    "pk"    : 4
   }
 
 ]

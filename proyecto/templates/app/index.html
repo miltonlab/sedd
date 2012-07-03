@@ -8,6 +8,7 @@
 
 <p/>
 {% if request.session.estudiante %}
+{% if request.session.carreras_estudiante|length > 0 %}
 <h1> Carreras del Estudiante </h1>
 <ul style="margin-top: 20px;">
   {% for carrera in request.session.carreras_estudiante %}
@@ -15,6 +16,7 @@
   {% endfor %}
 </ul>
 <hr/>
+{% endif %}
 {% endif %}
 
 {% if request.session.docente %}
@@ -33,7 +35,7 @@
 <h1> Comision Academica de la Carrera </h1>
 <ul style="margin-top: 20px;">
   {% for carrera in request.session.carreras_docente %}
-  <h3> <li> <a href="/resultados/carrera/{{ request.session.docente.id }}">  {{ carrera.nombre|upper }} </a> </li> </h3>
+  <h3> <li> <a href="/resultados/carrera/{{ request.session.docente.id }}">  {{ carrera.nombre|upper }} [{{ carrera.area|upper }}]</a> </li> </h3>
   {% endfor %}
 </ul>
 <hr/>

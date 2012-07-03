@@ -68,12 +68,14 @@ class OfertaAcademicaSGAEnLinea(admin.TabularInline):
     model = models.OfertaAcademicaSGA
     extra = 1
 
-class PeriodoEvaluacionEnLinea(admin.StackedInline):
-    model = models.PeriodoEvaluacion
-    extra = 1
+class PeriodoEvaluacionAdmin(admin.ModelAdmin):
+    filter_horizontal = ('areasSGA',)
+    ###model = models.PeriodoEvaluacion
+    ###extra = 1
+    
 
 class PeriodoAcademicoAdmin(admin.ModelAdmin):
-    inlines = (PeriodoEvaluacionEnLinea,)
+    ###inlines = (PeriodoEvaluacionEnLinea,)
     filter_horizontal = ('ofertasAcademicasSGA',)
 
 
@@ -177,6 +179,7 @@ admin.site.register(models.Cuestionario,CuestionarioAdmin)
 admin.site.register(models.Seccion,SeccionAdmin)
 admin.site.register(models.Pregunta,PreguntaAdmin)
 admin.site.register(models.PeriodoAcademico,PeriodoAcademicoAdmin)
+admin.site.register(models.PeriodoEvaluacion,PeriodoEvaluacionAdmin)
 admin.site.register(models.EstudiantePeriodoAcademico, EstudiantePeriodoAcademicoAdmin)
 admin.site.register(models.DocentePeriodoAcademico, DocentePeriodoAcademicoAdmin)
 admin.site.register(models.AsignaturaDocente, AsignaturaDocenteAdmin)
