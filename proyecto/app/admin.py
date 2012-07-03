@@ -126,7 +126,7 @@ class AsignaturaAdmin(admin.ModelAdmin):
     list_display = ('carrera','semestre','paralelo', '__unicode__')
     list_display_links = ('__unicode__',)
     search_fields = ('area','carrera','semestre','paralelo','nombre',)
-    list_filter = ('area','carrera','semestre','paralelo','tipo',)
+    list_filter = ('area','carrera','semestre','tipo',)
     list_per_page = 20
     # TODO: combobox
     #readonly_fields = ('area','carrera','semestre','paralelo','tipo',)

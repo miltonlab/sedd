@@ -20,7 +20,7 @@ import json
 import logging as log
 
 
-EXCLUSIONES = {'areas':(,), 'modalidades':('semipresencial')}
+EXCLUSIONES = {'areas':('',), 'modalidades':('semipresencial',)}
 
 def importar(periodoAcademicoId, periodoEvaluacionId=None):
     """ Importar unidades en primera instancia"""
@@ -44,17 +44,20 @@ def importar(periodoAcademicoId, periodoEvaluacionId=None):
         rc = sga.wsinstitucional.sgaws_datos_carreras(id_oferta=oa.idSGA)
         carreras = json.loads(rc)
         if carreras[0] == '_error':
-            return dict(error=carreras[1]) 
+	    log.error(dict(error=carreras[1]))
+	    continue
         unidades = []
         for id_carrera, carrera, modalidad, area in carreras:
-            if area in EXCLUSIONES['areas'] or modalidad in EXCLUSIONES['modalidades']:
-                continue
+            ###if area in EXCLUSIONES['areas'] or modalidad in EXCLUSIONES['modalidades']:
+            ###    continue
             r_p = sga.wsinstitucional.sgaws_paralelos_carrera(id_oferta=oa.idSGA, id_carrera=id_carrera)
             js_p = json.loads(r_p)
             # Si hay paralelos en esta carrera y en esta oferta académica
             if js_p[0] != '_error':
-                paralelos_carrera = js_p[4]
+               	paralelos_carrera = js_p[4]
                 for id_paralelo, seccion, modulo, paralelo, id_modulo in paralelos_carrera:
+		    if area == 'MED':
+		    	print area, id_carrera, carrera, modulo, id_paralelo, paralelo, modalidad
                     # Para reutilizarlos en la creacion de las relaciones "EstudianteAsignaturaDocente"
                     asignaturas_docentes = []
                     """ Migración de Docentes y Asignaguras """
@@ -63,6 +66,8 @@ def importar(periodoAcademicoId, periodoEvaluacionId=None):
                     if js_ud[0] != '_error':
                         unidades_docentes = js_ud[6]
                         for id_unidad, unidad, horas, creditos, obligatoria, inicio, fin, cedula, nombres, apellidos, titulo in unidades_docentes:
+			    if area == 'MED':
+			    	print unidad
                             # Si se ha especificado un periodo de evaluacion
                             # se importa unicamente las unidades que se estan dictando actualmente
                             # TODO: probar snippet
@@ -72,11 +77,14 @@ def importar(periodoAcademicoId, periodoEvaluacionId=None):
                                 fecha_inicio = datetime.datetime.strptime(inicio,'%Y-%m-%d').date()
                             if fin is not None and fin != 'None': 
                                 fecha_fin = datetime.datetime.strptime(fin,'%Y-%m-%d').date()
+			    """
+			    TODO: fix bug
                             if fecha_inicio is not None and fecha_fin is not None:
                                 # Si la unidad NO se dicta dentro del Periodo de Evaluacion no se importa
-                                if not (periodoEvaluacion and fecha_inicio <= periodoEvaluacion.fin and fecha_fin >= periodoEvaluacion.inicio):
-                                    continue
-
+                                if periodoEvaluacion:
+				    if not(fecha_inicio <= periodoEvaluacion.fin and fecha_fin >= periodoEvaluacion.inicio):
+                                        continue
+			    """
                             # Tratamiento de los saltos de línea dentro del nombre de la unidad
                             unidad = unidad.replace('\r\n',' ')[0:-1]
                             dict_unidad = dict(

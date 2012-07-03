@@ -454,7 +454,7 @@ class EstudianteAsignaturaDocente(models.Model):
     # Asignatura-Docente
     asignaturaDocente = models.ForeignKey('AsignaturaDocente', related_name='estudiantesAsignaturaDocente')
     matricula = models.IntegerField(blank=True, null=True)    
-    estado = models.CharField(max_length='30', blank=True, null=True)
+    estado = models.CharField(max_length='60', blank=True, null=True)
     ###?evaluacion = models.OneToOneField('Evaluacion', related_name='estudiantes', blank=True, null=True)
 
     def get_asignatura(self):
@@ -539,7 +539,7 @@ class Usuario(User):
                          'mg.':'Mg.', 'licenciado':'Lic.', 'licenciada':'Lic.', 'economista':'Eco.', 'eco.':'Eco.', 'medico':'Dr.',
                          'dra.':'Dra.','dr.':'Dr.','lic.':'Lic.', 'licdo.':'Lic.','ing.':'Ing.', 'phd.':'Phd.',u'médico':'Dr.'
                          }
-        palabras = self.titulo.split()
+        palabras = self.titulo.split() if self.titulo else ""
         for p in palabras:
             if p.lower() in equivalencias.keys():
                 return equivalencias[p.lower()]
