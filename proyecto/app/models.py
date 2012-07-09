@@ -192,7 +192,7 @@ class PeriodoEvaluacion(models.Model):
     inicio = models.DateField()
     fin = models.DateField()
     periodoAcademico = models.ForeignKey('PeriodoAcademico', related_name='periodosEvaluacion', verbose_name="Periodo Académico")
-    tabulacion = models.ForeignKey('Tabulacion', related_name='periodosEvaluacion', verbose_name="Tipo Tabulación")
+    ### tabulacion = models.ForeignKey('Tabulacion', related_name='periodosEvaluacion', verbose_name="Tipo Tabulación")
     areasSGA = models.ManyToManyField(AreaSGA, related_name='periodosEvaluacion', verbose_name=u'Areas Académicas SGA')
     
     class Meta:
@@ -223,12 +223,16 @@ class Tabulacion(models.Model):
     """
     descripcion = models.CharField(max_length='250')
     tipo = models.CharField(max_length='20', unique=True)
-    
+    periodoEvaluacion = models.OneToOneField('PeriodoEvaluacion', related_name='tabulacion', blank=True, null=True)
+
+    class Meta:
+        verbose_name_plural = "Tabulaciones" 
+        
     def __unicode__(self):
         return self.descripcion
 
     
-class TabulacionSatisfaccion2012(Tabulacion):
+class TabulacionSatisfaccion2012():
     # Se hecha de menos las clases Abstractas y el polimorfismo
 
     def __init__(self):

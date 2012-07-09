@@ -419,7 +419,7 @@
   },
   { "fields" : { "orden" : 17,
         "seccion" : 1,
-        "texto" : "El apoyo de la formación que recibe en el módulo, unidad, curso o taller para las prácticas pre-profesionales. ",
+        "texto" : "El apoyo de la formación que recibe en el módulo, unidad, curso o taller para las prácticas profesionales. ",
         "tipo" : 2
       },
     "model" : "app.pregunta",

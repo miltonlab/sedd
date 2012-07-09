@@ -174,7 +174,15 @@ class EvaluacionAdmin(admin.ModelAdmin):
 
     def has_add_permission(self, request):
         return False
+
+
+###class TabulacionSatisfaccion2012Admin(admin.ModelAdmin):
+###    pass
     
+class TabulacionAdmin(admin.ModelAdmin):
+    pass
+
+
 admin.site.register(models.Cuestionario,CuestionarioAdmin)
 admin.site.register(models.Seccion,SeccionAdmin)
 admin.site.register(models.Pregunta,PreguntaAdmin)
@@ -187,3 +195,5 @@ admin.site.register(models.Asignatura, AsignaturaAdmin)
 admin.site.register(models.Usuario, UsuarioAdmin)
 admin.site.register(models.Configuracion, ConfiguracionAdmin)
 admin.site.register(models.Evaluacion, EvaluacionAdmin)
+###admin.site.register(models.TabulacionSatisfaccion2012, TabulacionSatisfaccion2012Admin)
+admin.site.register(models.Tabulacion, TabulacionAdmin)
