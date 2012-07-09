@@ -1,9 +1,10 @@
 
 Instalaci'on:
 ==================================================================
- - Renombrar settings.cfg a settings.py
+ - Renombrar settings.cfg a settings.py y configurar cuentas
  - Modificar y copiar proyecto/apache/sedd.cfg a /etc/apache2/sites-enabled 
- - Reinciar apache
+ - Aumentar el tamaño de first_name y last_name en el modelo auth.User 
+ - Reiniciar apache (por cada cambio)
 
 
 Requerimientos: 

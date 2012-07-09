@@ -35,8 +35,7 @@
         "inicio" : "2012-06-25",
         "nombre" : "Encuesta de Satisfacción Estudiantil 2012",
         "descripcion" : "Sistema de Selección, Recopilación y Procesamiento de la Encuesta de Satisfacción Estudiantil sobre sus Docentes en las Carreras de la Universidad Nacional de Loja",
-        "periodoAcademico" : 1,
-	"tabulacion" : 1
+        "periodoAcademico" : 1
       },
     "model" : "app.periodoevaluacion",
     "pk" : 1
@@ -419,7 +418,7 @@
   },
   { "fields" : { "orden" : 17,
         "seccion" : 1,
-        "texto" : "El apoyo de la formación que recibe en el módulo, unidad, curso o taller para las prácticas profesionales. ",
+        "texto" : "El apoyo de la formación que recibe en el módulo, unidad, curso o taller para sus prácticas profesionales. ",
         "tipo" : 2
       },
     "model" : "app.pregunta",

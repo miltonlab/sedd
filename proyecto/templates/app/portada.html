@@ -38,18 +38,18 @@
 			<ul>
 				<li><a href="#">Inicio</a></li>
 				<li><a href="/login/">Acceso al sistema</a></li>
-				<li><a href="http://www.utpl.edu.ec">Acerca de...</a></li>	
+				<li><a href="http://www.unl.edu.ec">Acerca de...</a></li>	
 			</ul>
 		</div>
 		<!-- End menu -->
 
 		<!-- Left column -->
 		<div id="left">
-			<h1>Bienvenidos al sistema de evaluación de docentes de la UNL</h1>
+			<h1 style="color: #8EAD45;"> Bienvenidos al sistema de evaluación de docentes de la UNL</h1>
 			<p> 
 			  {% if periodoEvaluacionActual %}
 			  <a href="{% url proyecto.app.controllers.login %}">
-			    >>> <b> {{ periodoEvaluacionActual }} </b>
+			    >>> <u> <b style="color: black; font-weight: 250%; font-size: 14px;"> {{ periodoEvaluacionActual|upper }} </b>  </u>
 			  </a>
 			  {% else %}
 			  >>> <b> No existen Procesos de Evaluacion actualmente </b>

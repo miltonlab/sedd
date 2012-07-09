@@ -541,7 +541,8 @@ class Usuario(User):
     def get_abreviatura(self):
         equivalencias = {'magister':'Mg.', 'ingeniero':'Ing.', 'ingeniera':'Ing.', 'doctor':'Dr.', 'doctora':'Dra.', 'master':'Ms.',
                          'mg.':'Mg.', 'licenciado':'Lic.', 'licenciada':'Lic.', 'economista':'Eco.', 'eco.':'Eco.', 'medico':'Dr.',
-                         'dra.':'Dra.','dr.':'Dr.','lic.':'Lic.', 'licdo.':'Lic.','ing.':'Ing.', 'phd.':'Phd.',u'médico':'Dr.'
+                         'dra.':'Dra.','dr.':'Dr.','lic.':'Lic.', 'licdo.':'Lic.','ing.':'Ing.', 'phd.':'Phd.',u'médico':'Dr.',
+                         'odontólogo': 'Odont.', 'odontóloga': 'Odont.', 'odontologo': 'Odont.', 'odontologa': 'Odont.'  
                          }
         palabras = self.titulo.split() if self.titulo else ""
         for p in palabras:

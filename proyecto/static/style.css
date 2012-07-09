@@ -25,8 +25,8 @@ a { color:#6a8e00; text-decoration:none; } /*Hyperlink styling*/
 p { margin-bottom:20px; } /*Paragraph margins*/
 .clear { clear:both; } /*Fixes the background*/
 #left { clear:both; margin-top:20px; padding:0 30px 20px 50px; width:370px; border-right:1px solid #ccc; float:left; } /*Left column*/
-#left p { font-family:Georgia, Times, serif; color:#4f4f4f; line-height:30px; } /*Left paragraphs*/
-h1 { font-size:26px; font-weight:bold; margin-bottom:20px; } /*Title styling*/
+#left p { font-family:Georgia, Times, serif; color: black; line-height:30px; } /*Left paragraphs color:#4f4f4f*/
+h1 { font-size:26px; font-weight:bold; margin-bottom:20px; color: #6B8E00;} /*Title styling*/
 h2 { font-size:22px; text-align:center; } /*Secondary title*/
 .read-more { background:url('../images/button.jpg') no-repeat; padding:2px 5px 5px 5px; font-size:16px; font-weight:bold; text-transform:uppercase; } /*"Read More" button*/
 .read-more a { color:#fff; } /*Read More link*/
@@ -34,7 +34,7 @@ h2 { font-size:22px; text-align:center; } /*Secondary title*/
 
 #right { width:350px; float:right; padding:0 50px 20px 0; } /*Right column*/
 #caption { background:url('../images/caption.jpg') no-repeat; width:250px; color:#fff; padding:10px 15px 10px 15px; } /*Caption styling*/
-#right p { font-family:Georgia, Times, serif; font-style:italic; color:#fff; line-height:24px; } /*Right paragraphs*/
+#right p { font-family:Georgia, Times, serif; font-style:italic; color: black; line-height:24px; } /*Right paragraphs #fff*/
 #right img { margin-left:20px; } /*Moving the image to the right*/
 
 #footer { clear:both; background:url('/static/images/footer.jpg') no-repeat top center; padding:20px 50px; } /*Footer styling*/
