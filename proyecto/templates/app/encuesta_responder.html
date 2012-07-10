@@ -29,8 +29,6 @@
 function validarSeleccionUnica(){
     var preguntas = new Array();
     // Se validan como obligatorias todas las preguntas de Selección Unica
-    // Puede requerirse a futuro validar preguntas de Ensayo también
-    // TODO: $.each($('#formulario [name^="pregunta"]:radio'), function(){
     $.each($('#formulario input[name^="pregunta"]:radio'), function(){
 	var nombre = $(this).attr("name");
 	preguntas[nombre] = nombre;
@@ -40,12 +38,30 @@ function validarSeleccionUnica(){
 	    alert('ERROR: Faltan preguntas por contestar');
 	    return false;
 	}
+	
+    }
+    return true;
+};
+
+function validarEnsayos(){
+    var preguntas = new Array();
+    // Se validan como obligatorias todas las preguntas de Ensayo
+    $.each($('#formulario textarea[name^="pregunta"]'), function(){
+	var nombre = $(this).attr("name");
+	preguntas[nombre] = nombre;
+    });
+    for (var pregunta in preguntas){
+	if ( $('#formulario textarea[name=' + pregunta +']').val().length < 4 ){
+	    alert('ERROR: Faltan preguntas por completar');
+	    return false;
+	}
     }
     return true;
 };
 
 
 function grabarEncuesta(){
+    
     $('#formulario').submit();
 
     /*$.ajax({
@@ -63,7 +79,7 @@ function grabarEncuesta(){
 
 $(document).ready(function(){
     $('#grabar').click(function(){
-	if (validarSeleccionUnica()){
+	if (validarSeleccionUnica() == true && validarEnsayos() == true){
 	    grabarEncuesta();
 	}
     });
@@ -131,7 +147,7 @@ $(document).ready(function(){
 	      
 	      {% ifequal pregunta.tipo.tipo 'Ensayo' %}
 	      <br/>
-	      <textarea name="pregunta-{{ pregunta.id }}" cols="100" rows="10" > </textarea>
+	      <textarea name="pregunta-{{ pregunta.id }}" cols="100" rows="10" ></textarea>
 	      {% endifequal %}
 
 

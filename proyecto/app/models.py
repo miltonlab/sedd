@@ -64,6 +64,13 @@ class Cuestionario(models.Model):
     def __unicode__(self):
         return self.titulo
 
+    def clonar(self):
+        nuevo = Cuestionario()
+        for seccion in self.secciones.all():
+            for pregunta in seccion.preguntas.all():
+                for item in pregunta.items.all():
+                    ItemPregunta()
+                    
 
 class Contestacion(models.Model):
     pregunta = models.IntegerField()
@@ -102,7 +109,7 @@ class TipoPregunta(models.Model):
     descripcion = models.CharField(max_length='100')
 
     def __unicode__(self):
-        return self.tipo
+        return self.tipo, self.descripcion
 
 
 class SeleccionUnica(TipoPregunta):
