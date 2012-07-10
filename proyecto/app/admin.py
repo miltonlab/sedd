@@ -1,6 +1,7 @@
 # -*- coding: utf-8 -*-
 
 from django.contrib import admin
+from django.contrib import messages
 from proyecto.app import models
 
 import logging
@@ -12,9 +13,9 @@ class ItemPreguntaEnLinea(admin.StackedInline):
     extra = 1
 
 class PreguntaAdmin(admin.ModelAdmin):
-    inlines = [ItemPreguntaEnLinea]
-    fields = ('texto','orden','tipo','seccion')
-
+    inlines = (ItemPreguntaEnLinea,)
+    fields = ('seccion','texto','orden','tipo')
+    list_per_page = 30
     # Sobreescrito
     def save_model(self, request, obj, form, change):
         if change:
@@ -53,14 +54,29 @@ class SeccionEnLinea(admin.TabularInline):
     extra = 1
 
 class SeccionAdmin(admin.ModelAdmin):
-    inlines = [PreguntaEnLinea]
-    fields = ('titulo','descripcion','orden','cuestionario')
+    inlines = (PreguntaEnLinea,)
+    fields = ('cuestionario','titulo','descripcion','orden')
     
 
 class CuestionarioAdmin(admin.ModelAdmin):
-    inlines = [SeccionEnLinea]
+    actions = ['clonar_cuestionario']
+    inlines = (SeccionEnLinea,)
     save_as = True
 
+    # Acción para el Admin
+    def clonar_cuestionario(self, request, queryset):
+        cantidad = queryset.count()
+        if cantidad == 1:
+            objeto = queryset.all()[0]
+            objeto.clonar()
+            mensaje = 'Se ha clonado satisfactoriamente el Cuestinario'
+            self.message_user(request, mensaje)
+        else:
+            mensaje = 'Debe seleccionar uno solo Cuestionario! Ha seleccionado %s' % (str(cantidad))
+            messages.error(request, mensaje)
+
+    clonar_cuestionario.short_description = "Crear Copia de Cuestionario"
+    
     class Media:
         js = ['js/tiny_mce/tiny_mce.js', 'js/tmce_config.js',]
     

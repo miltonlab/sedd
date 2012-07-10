@@ -1,5 +1,5 @@
 
-Instalaci'on:
+Instalación:
 ==================================================================
  - Renombrar settings.cfg a settings.py y configurar cuentas
  - Modificar y copiar proyecto/apache/sedd.cfg a /etc/apache2/sites-enabled 
@@ -9,8 +9,8 @@ Instalaci'on:
 
 Requerimientos: 
 ===================================================================
- * Debian squeeze backports
- * django 1.3
+ * Sistema Operativo: Debian squeeze backports
+ * Django 1.3
  * python-soappy 0.12.0
  * python-psycopg2 2.4.2
 

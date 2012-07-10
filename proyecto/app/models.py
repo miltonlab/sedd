@@ -41,36 +41,64 @@ class InformanteDirectivos(TipoInformante):
 class InformanteInstitutoIdiomas(TipoInformante):
     def __init__(self):
         TipoInformante.__init__(self)
-        self.tipo = 'InstitutoIdiomas'
+        self.tipo = 'Instituto Idiomas'
 
 class InformanteEstudianteMED(TipoInformante):
     def __init__(self):
         TipoInformante.__init__(self)
-        self.tipo = 'EstudianteMED'
+        self.tipo = 'Estudiante MED'
 
 class InformanteIdiomasMED(TipoInformante):
     def __init__(self):
         TipoInformante.__init__(self)
-        self.tipo = 'IdiomasMED'
+        self.tipo = 'Idiomas MED'
 
 class Cuestionario(models.Model):
     titulo = models.CharField(max_length='100')
     encabezado = models.TextField()
-    incio = models.DateTimeField('Inicio de la Encuesta')
+    ### TODO: revisar cambio incio por inicio
+    inicio = models.DateTimeField('Inicio de la Encuesta')
     fin=models.DateTimeField('Finalización de la Encuesta')
-    informante = models.ForeignKey(TipoInformante)
-    periodoEvaluacion = models.ForeignKey('PeriodoEvaluacion', related_name='cuestionarios')
+    informante = models.ForeignKey(TipoInformante, blank=True, null=True)
+    periodoEvaluacion = models.ForeignKey('PeriodoEvaluacion', blank=True, null=True, related_name='cuestionarios')
     
     def __unicode__(self):
         return self.titulo
 
     def clonar(self):
+        numero = Cuestionario.objects.count()
         nuevo = Cuestionario()
+        nuevo.titulo = u'{0} (Clonado {1})'.format(self.titulo, str(numero+1))
+        nuevo.encabezado = self.encabezado
+        nuevo.inicio = self.inicio
+        nuevo.fin = self.fin
+        # No se relacionan para mayor flexibilidad
+        nuevo.informante = None
+        nuevo.periodoEvaluacion = None
+        nuevo.save()
         for seccion in self.secciones.all():
+            nuevaSeccion = Seccion()
+            nuevaSeccion.titulo = seccion.titulo
+            nuevaSeccion.descripcion = seccion.descripcion
+            nuevaSeccion.orden = seccion.orden
+            nuevaSeccion.seccionPadre = None
+            nuevaSeccion.cuestionario = nuevo 
+            nuevaSeccion.save()
             for pregunta in seccion.preguntas.all():
+                nuevaPregunta = Pregunta()
+                nuevaPregunta.texto = pregunta.texto
+                nuevaPregunta.orden = pregunta.orden
+                nuevaPregunta.tipo = pregunta.tipo
+                nuevaPregunta.seccion = nuevaSeccion
+                nuevaPregunta.save()
                 for item in pregunta.items.all():
-                    ItemPregunta()
-                    
+                    nuevoItem = ItemPregunta()
+                    nuevoItem.texto = item.texto
+                    nuevoItem.orden = item.orden
+                    nuevoItem.pregunta = nuevaPregunta
+                    nuevoItem.save()
+        return nuevo
+
 
 class Contestacion(models.Model):
     pregunta = models.IntegerField()
@@ -109,7 +137,7 @@ class TipoPregunta(models.Model):
     descripcion = models.CharField(max_length='100')
 
     def __unicode__(self):
-        return self.tipo, self.descripcion
+        return self.tipo
 
 
 class SeleccionUnica(TipoPregunta):
@@ -156,10 +184,10 @@ class Pregunta(models.Model):
     seccion = models.ForeignKey(Seccion, related_name='preguntas')
     
     def __unicode__(self):
-        return self.texto
+        return u'{0} > {1}'.format(self.texto, self.seccion.titulo)
 
     class Meta:
-        ordering = ['orden']
+        ordering = ['seccion__orden','orden']
 
 
 class ItemPregunta(models.Model):
@@ -172,14 +200,6 @@ class ItemPregunta(models.Model):
 
     class Meta:
         ordering = ['orden']
-
-
-class Respuesta(models.Model):
-    texto = models.CharField(max_length='100')
-    ###pregunta = models.ForeignKey('Pregunta',related_name='respuestas')
-
-    def __unicode__(self):
-        return self.texto
 
 
 class AreaSGA(models.Model):
