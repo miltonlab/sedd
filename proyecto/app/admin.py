@@ -2,7 +2,10 @@
 
 from django.contrib import admin
 from django.contrib import messages
+from django import forms
 from proyecto.app import models
+from proyecto.app.forms import EstudianteAsignaturaDocenteAdminForm
+from proyecto.app.forms import AsignaturaDocenteAdminForm
 
 import logging
 logg = logging.getLogger('logapp')
@@ -95,11 +98,13 @@ class PeriodoAcademicoAdmin(admin.ModelAdmin):
     filter_horizontal = ('ofertasAcademicasSGA',)
 
 
-class EstudianteAsignaturaDocenteEnLinea(admin.TabularInline):
+class EstudianteAsignaturaDocenteEnLinea(admin.StackedInline):
     model = models.EstudianteAsignaturaDocente
+    form = EstudianteAsignaturaDocenteAdminForm
     extra = 1
     verbose_name = 'Asignaturas de Estudiante'
     raw_id_fields = ('asignaturaDocente',)
+    fields = ('carrera','semestre','paralelo','asignaturaDocente')
 
 class EstudiantePeriodoAcademicoAdmin(admin.ModelAdmin):
     list_display = ('cedula', '__unicode__')
@@ -119,12 +124,40 @@ class EstudiantePeriodoAcademicoAdmin(admin.ModelAdmin):
         extra_context['prueba'] = 'pruebaaaa'
         return super(EstudiantePeriodoAcademicoAdmin, self).change_view(request, object_id, extra_context)
 
+
+
+        
+class EstudianteAsignaturaDocenteAdmin(admin.ModelAdmin):
+    form = EstudianteAsignaturaDocenteAdminForm
+    raw_id_fields = ('asignaturaDocente','estudiante')
+    search_fields = ('estudiante__usuario__cedula', 'estudiante__usuario__first_name',
+                     'estudiante__usuario__last_name','asignaturaDocente__asignatura__nombre',
+                     'asignaturaDocente__asignatura__carrera', 'asignaturaDocente__asignatura__semestre' )
+    list_per_page = 30
+    list_display = ( 'get_nombre_corto', 'get_area', 'get_carrera', 'get_semestre', 'get_paralelo')
+    # Algunos campos se toman del formulario
+    fields = ('estudiante','asignaturaDocente','carrera','semestre', 'paralelo', 'estado')
+    
+    # Permitir filtros
+    def lookup_allowed(self, key, value):
+        if key in ('asignaturaDocente__asignatura__semestre',):
+            return True
+        return super(EstudianteAsignaturaDocenteAdmin, self).lookup_allowed(key, value)
+
     
 class AsignaturaDocenteAdmin(admin.ModelAdmin):
-    raw_id_fields = ('asignatura','docente',)
+    form = AsignaturaDocenteAdminForm
+    raw_id_fields = ('asignatura','docente')
+    search_fields = ('docente__usuario__cedula', 'docente__usuario__first_name',
+                     'docente__usuario__last_name','asignatura__nombre', 'asignatura__idSGA' )
+    list_per_page = 30
+    list_display = ( 'get_nombre_corto', 'get_carrera', 'get_semestre', 'get_paralelo')
+    fields = ('docente','asignatura','carrera','semestre', 'paralelo')
+
 
 class AsignaturaDocenteEnLinea(admin.TabularInline):
     model = models.AsignaturaDocente
+    form = AsignaturaDocenteAdminForm
     extra = 1
     verbose_name = 'Asignaturas de Docente'
     raw_id_fields = ('asignatura',)
@@ -141,7 +174,7 @@ class DocentePeriodoAcademicoAdmin(admin.ModelAdmin):
 class AsignaturaAdmin(admin.ModelAdmin):
     list_display = ('carrera','semestre','paralelo', '__unicode__')
     list_display_links = ('__unicode__',)
-    search_fields = ('area','carrera','semestre','paralelo','nombre',)
+    search_fields = ('idSGA','area','carrera','semestre','paralelo','nombre',)
     list_filter = ('area','carrera','semestre','tipo',)
     list_per_page = 20
     # TODO: combobox
@@ -181,12 +214,17 @@ class ContestacionEnLinea(admin.TabularInline):
     verbose_name = 'Respuesta'
     
 class EvaluacionAdmin(admin.ModelAdmin):
+    # Muy raro: Si no se especifica fields no se muestra la vista de modificacion
     search_fields = ('estudianteAsignaturaDocente__estudiante__usuario__cedula',
                      'estudianteAsignaturaDocente__asignaturaDocente__docente__usuario__cedula')
-    inlines = (ContestacionEnLinea,)
     list_per_page = 30
     list_filter = ('fechaFin',)
     date_hierarchy = 'fechaFin'
+    # inlines = (ContestacionEnLinea,)
+    # problema al presentar estudianteAsignaturaDocente
+    #fields = ('estudianteAsignaturaDocente', 'cuestionario', 'fechaFin', 'horaFin')
+    fields = ('cuestionario', 'fechaFin', 'horaFin')
+    readonly_fields = ('cuestionario', 'fechaFin', 'horaFin')
 
     def has_add_permission(self, request):
         return False
@@ -206,10 +244,10 @@ admin.site.register(models.PeriodoAcademico,PeriodoAcademicoAdmin)
 admin.site.register(models.PeriodoEvaluacion,PeriodoEvaluacionAdmin)
 admin.site.register(models.EstudiantePeriodoAcademico, EstudiantePeriodoAcademicoAdmin)
 admin.site.register(models.DocentePeriodoAcademico, DocentePeriodoAcademicoAdmin)
+admin.site.register(models.EstudianteAsignaturaDocente, EstudianteAsignaturaDocenteAdmin)
 admin.site.register(models.AsignaturaDocente, AsignaturaDocenteAdmin)
 admin.site.register(models.Asignatura, AsignaturaAdmin)
 admin.site.register(models.Usuario, UsuarioAdmin)
 admin.site.register(models.Configuracion, ConfiguracionAdmin)
 admin.site.register(models.Evaluacion, EvaluacionAdmin)
-###admin.site.register(models.TabulacionSatisfaccion2012, TabulacionSatisfaccion2012Admin)
 admin.site.register(models.Tabulacion, TabulacionAdmin)

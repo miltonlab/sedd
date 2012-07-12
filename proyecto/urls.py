@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 from django.conf.urls.defaults import patterns, include, url
 
 
@@ -6,6 +7,9 @@ from django.contrib import admin
 admin.autodiscover()
 
 urlpatterns = patterns('',
+    # django-chronograph: Aplicacion para comandos de administración
+    ### url(r'^admin/chronograph/job/(?P<pk>\d+)/run/$', 'chronograph.views.job_run', name="admin_chronograph_job_run"),
+                       
     url(r'^$', 'proyecto.app.controllers.portada'),                        
     url(r'^login/$', 'proyecto.app.controllers.login'),
     url(r'^index/$', 'proyecto.app.controllers.index'),                       
@@ -31,6 +35,4 @@ urlpatterns = patterns('',
 
     # Uncomment the next line to enable the admin:
     url(r'^admin/', include(admin.site.urls)),
-    ### url(r'^tinymce/', include('tinymce.urls')), 
-                       
 )

@@ -242,6 +242,10 @@ class PeriodoEvaluacion(models.Model):
     def __unicode__(self):
         return self.nombre
 
+# TODO: Modelar de mejor manera la funcionalidad
+tipos_tabulacion = (
+    (u'ESE2012', u'Tabulación  Satisfacción Estudiantil 2012'),
+)
 
 class Tabulacion(models.Model):
     """
@@ -249,7 +253,7 @@ class Tabulacion(models.Model):
     conjunto de encuestas pertenecientes a un Periodo de Evaluación.
     """
     descripcion = models.CharField(max_length='250')
-    tipo = models.CharField(max_length='20', unique=True)
+    tipo = models.CharField( max_length='20', unique=True, choices= tipos_tabulacion)
     periodoEvaluacion = models.OneToOneField('PeriodoEvaluacion', related_name='tabulacion', blank=True, null=True)
 
     class Meta:
@@ -259,13 +263,19 @@ class Tabulacion(models.Model):
         return self.descripcion
 
     
-class TabulacionSatisfaccion2012():
+class TabulacionSatisfaccion2012:
     # Se hecha de menos las clases Abstractas y el polimorfismo
+    # Esta clase no se persiste
 
-    def __init__(self):
-        Tabulacion.__init__(self)
-        self.tipo = u'ESE2012'
-        self.descripcion = u'Encuesta de Satisfacción Estudiantil 2012'
+    tipo = u'ESE2012'
+    descripcion = u'Encuesta de Satisfacción Estudiantil 2012'
+
+        
+    def __init__(self, periodoEvaluacion=None):
+        self.periodoEvaluacion = periodoEvaluacion
+        #Tabulacion.__init__(self)
+        #self.tipo = u'ESE2012'
+        #self.descripcion = u'Encuesta de Satisfacción Estudiantil 2012'
         self.calculos = (
             # codigo, descripcion, metodo 
             ('a',u'La valoracion global de la Satisfacción Estudiantil por docente',
@@ -282,69 +292,164 @@ class TabulacionSatisfaccion2012():
              self.mayor_satisfaccion),
         )
 
+  
+
     ###Pendiente terminar        
-    def por_docente(self, id_docente):
+    def por_docente(self, nombre_area, nombre_carrera, id_docente):
         """
-        Satisfacción Estudiantil por módulo, curso, unidad o taller
+        Satisfacción Estudiantil de un docente en los  módulos, cursos, unidades o talleres
         """
-        periodoEvaluacion = Configuracion.getPeriodoEvaluacionActual()
-        asignaturas = Evaluacion.objects.filter(
-            estudianteAsignaturaDocente__asignaturaDocente__docente__id=id_docente).filter(
-            cuestionario__periodoEvaluacion=periodoEvaluacion).values_list(
-            'estudianteAsignaturaDocente__asignaturaDocente__asignatura__id').distinct()
-        asignaturas = [tupla[0] for tupla in asignaturas]
-        resultados = []
-        return resultados
-
-    # TODO: Usar carrera_id en vez de nombre_carrera
-    def por_carrera(self, nombre_carrera, nombre_area):
         from django.db.models import Count
-        indicadores=Pregunta.objects.filter(tipo__tipo=u'SeleccionUnica').values_list('id', flat=True)
-
-        conteo_ms=Contestacion.objects.filter(evaluacion__cuestionario__periodoEvaluacion__tabulacion__tipo='ESE2012').filter(
+        # Todas las Secciones de todos los cuestionarios que pertenecen al periodo de evaluación establecido 
+        secciones = Seccion.objects.filter(cuestionario__in=self.periodoEvaluacion.cuestionarios.all())
+        # Para asegurar que se tomen unicamente preguntas que representen indicadores además
+        indicadores=Pregunta.objects.filter(seccion__in=secciones).filter(tipo__tipo=u'SeleccionUnica').values_list('id', flat=True)
+        conteo_ms=Contestacion.objects.filter(evaluacion__cuestionario__periodoEvaluacion=self.periodoEvaluacion).filter(
+            evaluacion__cuestionario__periodoEvaluacion__tabulacion__tipo='ESE2012').filter(
+            evaluacion__estudianteAsignaturaDocente__asignaturaDocente__asignatura__area=nombre_area).filter(
             evaluacion__estudianteAsignaturaDocente__asignaturaDocente__asignatura__carrera=nombre_carrera).filter(
-            pregunta__in=indicadores).values('pregunta').annotate(ms=Count('respuesta')).filter(
+            # Unica diferencia con respecto al método 'por_carrera'
+            evaluacion__estudianteAsignaturaDocente__asignaturaDocente__docente__id=id_docente).filter(            
+            pregunta__in=indicadores).values('pregunta').annotate(MS=Count('respuesta')).filter(
             respuesta='4').order_by('pregunta')
-
-        conteo_s=Contestacion.objects.filter(evaluacion__cuestionario__periodoEvaluacion__tabulacion__tipo='ESE2012').filter(
+        conteo_s=Contestacion.objects.filter(evaluacion__cuestionario__periodoEvaluacion=self.periodoEvaluacion).filter(
+            evaluacion__cuestionario__periodoEvaluacion__tabulacion__tipo='ESE2012').filter(
+            evaluacion__estudianteAsignaturaDocente__asignaturaDocente__asignatura__area=nombre_area).filter(
             evaluacion__estudianteAsignaturaDocente__asignaturaDocente__asignatura__carrera=nombre_carrera).filter(
-            pregunta__in=indicadores).values('pregunta').annotate(s=Count('respuesta')).filter(
+            # Unica diferencia con respecto al método 'por_carrera'
+            evaluacion__estudianteAsignaturaDocente__asignaturaDocente__docente__id=id_docente).filter(            
+            pregunta__in=indicadores).values('pregunta').annotate(S=Count('respuesta')).filter(
             respuesta='3').order_by('pregunta')
-        
-        conteo_ps=Contestacion.objects.filter(evaluacion__cuestionario__periodoEvaluacion__tabulacion__tipo='ESE2012').filter(
+        conteo_ps=Contestacion.objects.filter(evaluacion__cuestionario__periodoEvaluacion=self.periodoEvaluacion).filter(
+            evaluacion__cuestionario__periodoEvaluacion__tabulacion__tipo='ESE2012').filter(
+            evaluacion__estudianteAsignaturaDocente__asignaturaDocente__asignatura__area=nombre_area).filter(
             evaluacion__estudianteAsignaturaDocente__asignaturaDocente__asignatura__carrera=nombre_carrera).filter(
-            pregunta__in=indicadores).values('pregunta').annotate(ps=Count('respuesta')).filter(
+            # Unica diferencia con respecto al método 'por_carrera'
+            evaluacion__estudianteAsignaturaDocente__asignaturaDocente__docente__id=id_docente).filter(            
+            pregunta__in=indicadores).values('pregunta').annotate(PS=Count('respuesta')).filter(
             respuesta='2').order_by('pregunta')
-        
-        conteo_ins=Contestacion.objects.filter(evaluacion__cuestionario__periodoEvaluacion__tabulacion__tipo='ESE2012').filter(
+        conteo_ins=Contestacion.objects.filter(evaluacion__cuestionario__periodoEvaluacion=self.periodoEvaluacion).filter(
+            evaluacion__cuestionario__periodoEvaluacion__tabulacion__tipo='ESE2012').filter(
+            evaluacion__estudianteAsignaturaDocente__asignaturaDocente__asignatura__area=nombre_area).filter(
             evaluacion__estudianteAsignaturaDocente__asignaturaDocente__asignatura__carrera=nombre_carrera).filter(
-            pregunta__in=indicadores).values('pregunta').annotate(ins=Count('respuesta')).filter(
+            # Unica diferencia con respecto al método 'por_carrera'
+            evaluacion__estudianteAsignaturaDocente__asignaturaDocente__docente__id=id_docente).filter(            
+            pregunta__in=indicadores).values('pregunta').annotate(INS=Count('respuesta')).filter(
             respuesta='1').order_by('pregunta')
-
-        lista = []
+        conteos = []
         for i in indicadores:
             conteo = {}            
             for c in conteo_ms:
                 if c['pregunta'] == i:
                     conteo.update(c)
+                    # Se intercambia por el objeto completo por versatilidad
+                    conteo['pregunta'] = Pregunta.objects.get(id=i)
             for c in conteo_s:
                 if c['pregunta'] == i:
                     conteo.update(c)
+                    conteo['pregunta'] = Pregunta.objects.get(id=i)
             for c in conteo_ps:
                 if c['pregunta'] == i:
                     conteo.update(c)
+                    conteo['pregunta'] = Pregunta.objects.get(id=i)
             for c in conteo_ins:
                 if c['pregunta'] == i:
                     conteo.update(c)
-            lista.append(conteo)    
-        return lista
-        #return conteo_ms + conteo_s + conteo_ps + conteo_ins
-
+                    conteo['pregunta'] = Pregunta.objects.get(id=i)
+            for grado in ('MS','S','PS','INS'):
+                if grado not in conteo.keys():
+                    conteo[grado] = 0
+            conteos.append(conteo)
+            totales = {}
+            for grado in ('MS','S','PS','INS'):
+                totales[grado] = sum([c[grado] for c in conteos])
+            universo = Contestacion.objects.filter(evaluacion__cuestionario__periodoEvaluacion=self.periodoEvaluacion).filter(
+                evaluacion__cuestionario__periodoEvaluacion__tabulacion__tipo='ESE2012').filter(
+                evaluacion__estudianteAsignaturaDocente__asignaturaDocente__asignatura__area=nombre_area).filter(
+                evaluacion__estudianteAsignaturaDocente__asignaturaDocente__asignatura__carrera=nombre_carrera).filter(
+                # Unica diferencia con respecto al método 'por_carrera'
+                evaluacion__estudianteAsignaturaDocente__asignaturaDocente__docente__id=id_docente).filter(
+                pregunta__in=indicadores).count()
+            porcentajes = {}
+            for grado in ('MS','S','PS','INS'):
+                numero  = totales[grado] * 100 / float(universo)
+                porcentajes[grado] = '%.2f'%numero
+                
+        return dict(conteos=conteos, totales=totales, porcentajes=porcentajes)
     
-        ###return {'carrera':nombre_carrera,  'MS':muy_satisfecho/float(num_respuestas)*100,  'S':satisfecho/float(num_respuestas)*100,
-        ###        'PS':poco_satisfecho/float(num_respuestas)*100,  'IS':insatisfecho/float(num_respuestas)*100  }
 
-    def por_campos(self):
+    # TODO: Usar carrera_id en vez de nombre_carrera
+    def por_carrera(self, nombre_area, nombre_carrera):
+        from django.db.models import Count
+        # Todas las Secciones de todos los cuestionarios que pertenecen al periodo de evaluación establecido 
+        secciones = Seccion.objects.filter(cuestionario__in=self.periodoEvaluacion.cuestionarios.all())
+        # Para asegurar que se tomen unicamente preguntas que representen indicadores además
+        indicadores=Pregunta.objects.filter(seccion__in=secciones).filter(tipo__tipo=u'SeleccionUnica').values_list('id', flat=True)
+        conteo_ms=Contestacion.objects.filter(evaluacion__cuestionario__periodoEvaluacion=self.periodoEvaluacion).filter(
+            evaluacion__cuestionario__periodoEvaluacion__tabulacion__tipo='ESE2012').filter(
+            evaluacion__estudianteAsignaturaDocente__asignaturaDocente__asignatura__area=nombre_area).filter(
+            evaluacion__estudianteAsignaturaDocente__asignaturaDocente__asignatura__carrera=nombre_carrera).filter(
+            pregunta__in=indicadores).values('pregunta').annotate(MS=Count('respuesta')).filter(
+            respuesta='4').order_by('pregunta')
+        conteo_s=Contestacion.objects.filter(evaluacion__cuestionario__periodoEvaluacion=self.periodoEvaluacion).filter(
+            evaluacion__cuestionario__periodoEvaluacion__tabulacion__tipo='ESE2012').filter(
+            evaluacion__estudianteAsignaturaDocente__asignaturaDocente__asignatura__area=nombre_area).filter(
+            evaluacion__estudianteAsignaturaDocente__asignaturaDocente__asignatura__carrera=nombre_carrera).filter(
+            pregunta__in=indicadores).values('pregunta').annotate(S=Count('respuesta')).filter(
+            respuesta='3').order_by('pregunta')
+        conteo_ps=Contestacion.objects.filter(evaluacion__cuestionario__periodoEvaluacion=self.periodoEvaluacion).filter(
+            evaluacion__cuestionario__periodoEvaluacion__tabulacion__tipo='ESE2012').filter(
+            evaluacion__estudianteAsignaturaDocente__asignaturaDocente__asignatura__area=nombre_area).filter(
+            evaluacion__estudianteAsignaturaDocente__asignaturaDocente__asignatura__carrera=nombre_carrera).filter(
+            pregunta__in=indicadores).values('pregunta').annotate(PS=Count('respuesta')).filter(
+            respuesta='2').order_by('pregunta')
+        conteo_ins=Contestacion.objects.filter(evaluacion__cuestionario__periodoEvaluacion=self.periodoEvaluacion).filter(
+            evaluacion__cuestionario__periodoEvaluacion__tabulacion__tipo='ESE2012').filter(
+            evaluacion__estudianteAsignaturaDocente__asignaturaDocente__asignatura__area=nombre_area).filter(
+            evaluacion__estudianteAsignaturaDocente__asignaturaDocente__asignatura__carrera=nombre_carrera).filter(
+            pregunta__in=indicadores).values('pregunta').annotate(INS=Count('respuesta')).filter(
+            respuesta='1').order_by('pregunta')
+        conteos = []
+        for i in indicadores:
+            conteo = {}            
+            for c in conteo_ms:
+                if c['pregunta'] == i:
+                    conteo.update(c)
+                    # Se intercambia por el objeto completo por versatilidad
+                    conteo['pregunta'] = Pregunta.objects.get(id=i)
+            for c in conteo_s:
+                if c['pregunta'] == i:
+                    conteo.update(c)
+                    conteo['pregunta'] = Pregunta.objects.get(id=i)
+            for c in conteo_ps:
+                if c['pregunta'] == i:
+                    conteo.update(c)
+                    conteo['pregunta'] = Pregunta.objects.get(id=i)
+            for c in conteo_ins:
+                if c['pregunta'] == i:
+                    conteo.update(c)
+                    conteo['pregunta'] = Pregunta.objects.get(id=i)
+            for grado in ('MS','S','PS','INS'):
+                if grado not in conteo.keys():
+                    conteo[grado] = 0
+            conteos.append(conteo)
+            totales = {}
+            for grado in ('MS','S','PS','INS'):
+                totales[grado] = sum([c[grado] for c in conteos])
+            universo = Contestacion.objects.filter(evaluacion__cuestionario__periodoEvaluacion=self.periodoEvaluacion).filter(
+                evaluacion__cuestionario__periodoEvaluacion__tabulacion__tipo='ESE2012').filter(
+                evaluacion__estudianteAsignaturaDocente__asignaturaDocente__asignatura__area=nombre_area).filter(
+                evaluacion__estudianteAsignaturaDocente__asignaturaDocente__asignatura__carrera=nombre_carrera).filter(
+                pregunta__in=indicadores).count()
+            porcentajes = {}
+            for grado in ('MS','S','PS','INS'):
+                numero  = totales[grado] * 100 / float(universo)
+                porcentajes[grado] = '%.2f'%numero
+                
+        return dict(conteos=conteos, totales=totales, porcentajes=porcentajes)
+    
+
+    def por_campos(self, nombre_area, nombre_carrera, campo):
         print 'por docente' 
 
     def por_indicador(self):
@@ -482,20 +587,39 @@ class EstudiantePeriodoAcademico(models.Model):
 
 class EstudianteAsignaturaDocente(models.Model):
     estudiante = models.ForeignKey('EstudiantePeriodoAcademico', related_name='asignaturasDocentesEstudiante')
-    # Asignatura-Docente
-    asignaturaDocente = models.ForeignKey('AsignaturaDocente', related_name='estudiantesAsignaturaDocente')
+    asignaturaDocente = models.ForeignKey('AsignaturaDocente', related_name='estudiantesAsignaturaDocente',
+                                          verbose_name='Asignatura - Docente')
     matricula = models.IntegerField(blank=True, null=True)    
     estado = models.CharField(max_length='60', blank=True, null=True)
-    ###?evaluacion = models.OneToOneField('Evaluacion', related_name='estudiantes', blank=True, null=True)
 
-    def get_asignatura(self):
-        return self.asignaturaDocente.asignatura
+    def get_area(self):
+        return self.asignaturaDocente.asignatura.area
+    get_area.short_description = 'Area'
+        
+    def get_carrera(self):
+        return self.asignaturaDocente.asignatura.carrera[:60]
+    get_carrera.short_description = 'Carrera'
+    
+    def get_semestre(self):
+        return self.asignaturaDocente.asignatura.semestre
+    get_semestre.short_description = 'Semestre'
 
-    def get_docente(self):
-        return self.asignaturaDocente.docente
+    def get_paralelo(self):
+        return self.asignaturaDocente.asignatura.paralelo
+    get_paralelo.short_description = 'Paralelo'
+    
+    def get_nombre_corto(self):
+        return self.__unicode__()[:60]
+    get_nombre_corto.short_description = 'Nombre'
+
+    # Campos para adicionar en el Admin a través del formulario  EstudianteAsignaturaDocenteAdminForm
+    carrera = property(get_carrera,)
+    semestre = property(get_semestre,)
+    paralelo = property(get_paralelo,)
     
     class Meta:
         verbose_name = 'Estudiante Asignaturas'
+        verbose_name_plural = 'Estudiantes y Asignaturas'
         unique_together = ('estudiante','asignaturaDocente')
 
     def __unicode__(self):
@@ -505,6 +629,32 @@ class EstudianteAsignaturaDocente(models.Model):
 class AsignaturaDocente(models.Model):
     asignatura = models.ForeignKey('Asignatura', related_name='docentesAsignatura')
     docente = models.ForeignKey('DocentePeriodoAcademico', related_name='asignaturasDocente')
+
+    def get_idSGA(self):
+        return self.asignatura.idSGA
+
+    def get_carrera(self):
+        return self.asignatura.carrera[:60]
+    get_carrera.short_description = 'Carrera'
+    
+    def get_semestre(self):
+        return self.asignatura.semestre
+    get_semestre.short_description = 'Semestre'
+    
+    def get_paralelo(self):
+        return self.asignatura.paralelo
+    get_paralelo.short_description = 'Paralelo'
+    
+    def get_nombre_corto(self):
+        ancho = 60
+        s = self.__unicode__()
+        return s[:ancho]
+    get_nombre_corto.short_description = 'Nombre'
+
+    # Campos para adicionar en el Admin a través del formulario  EstudianteAsignaturaDocenteAdminForm
+    carrera = property(get_carrera,)
+    semestre = property(get_semestre,)
+    paralelo = property(get_paralelo,)
     
     class Meta:
         verbose_name = 'Asignatura Docente'
@@ -566,10 +716,10 @@ class Usuario(User):
         self.last_name = apellidos
 
     def get_abreviatura(self):
-        equivalencias = {'magister':'Mg.', 'ingeniero':'Ing.', 'ingeniera':'Ing.', 'doctor':'Dr.', 'doctora':'Dra.', 'master':'Ms.',
-                         'mg.':'Mg.', 'licenciado':'Lic.', 'licenciada':'Lic.', 'economista':'Eco.', 'eco.':'Eco.', 'medico':'Dr.',
-                         'dra.':'Dra.','dr.':'Dr.','lic.':'Lic.', 'licdo.':'Lic.','ing.':'Ing.', 'phd.':'Phd.',u'médico':'Dr.',
-                         'odontólogo': 'Odont.', 'odontóloga': 'Odont.', 'odontologo': 'Odont.', 'odontologa': 'Odont.'  
+        equivalencias = {u'magister':u'Mg.', u'ingeniero':u'Ing.', u'ingeniera':u'Ing.', u'doctor':u'Dr.', u'doctora':u'Dra.', u'master':u'Ms.',
+                         u'mg.':u'Mg.', u'licenciado':u'Lic.', u'licenciada':u'Lic.', u'economista':u'Eco.', u'eco.':u'Eco.', u'medico':u'Dr.',
+                         u'dra.':u'Dra.',u'dr.':u'Dr.',u'lic.':u'Lic.', u'licdo.':u'Lic.',u'ing.':u'Ing.', u'phd.':u'Phd.',u'médico':u'Dr.',
+                         u'odontólogo': u'Odont.', u'odontóloga': u'Odont.', u'odontologo': u'Odont.', u'odontologa': u'Odont.'  
                          }
         palabras = self.titulo.split() if self.titulo else ""
         for p in palabras:

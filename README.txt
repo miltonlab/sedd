@@ -14,6 +14,9 @@ Requerimientos:
  * python-soappy 0.12.0
  * python-psycopg2 2.4.2
 
+ * django-chronograph 0.3.1
+ * python-dateutil 1.4.1
+
 Deploying with apache and mod_wsgi
 
  * libapache2-mod-wsgi 3.3

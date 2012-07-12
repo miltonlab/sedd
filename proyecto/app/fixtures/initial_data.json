@@ -1484,12 +1484,7 @@
     "model" : "app.itempregunta",
     "pk" : 140
   },
-  { "fields" : { "descripcion" : "Encuesta de Satisfacción Estudiantil",
-          "tipo" : "ESE2012"
-    	    },
-    "model" : "app.tabulacion",
-    "pk" : 1 
-  },
+
 
   { "fields" : { "siglas" : "AEIRNNR",
         "nombre" : "Área de la Energía, las Industrias y los Recursos Naturales no Renovables"

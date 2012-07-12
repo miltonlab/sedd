@@ -196,11 +196,6 @@ def encuestas(request, id_asignatura, id_docente):
     periodo_finalizado = False
     periodo_no_iniciado = False
 
-    logg.info("antes de validar  vigecia")
-    logg.info(periodoEvaluacionActual)
-    logg.info(periodoEvaluacionActual.noIniciado())
-    logg.info(periodoEvaluacionActual.vigente())
-    logg.info(periodoEvaluacionActual.finalizado())
     # Periodo no iniciado aun
     if periodoEvaluacionActual.noIniciado():
         periodo_no_iniciado = True
@@ -360,7 +355,7 @@ def menu_resultados(request, periodo_evaluacion_id):
     try:
         periodoEvaluacion=PeriodoEvaluacion.objects.get(id=periodo_evaluacion_id)
         if periodoEvaluacion.tabulacion.tipo == 'ESE2012':
-            tabulacion = TabulacionSatisfaccion2012()
+            tabulacion = TabulacionSatisfaccion2012(periodoEvaluacion)
             from proyecto.app.forms import ResultadosESE2012Form
             return HttpResponse(ResultadosESE2012Form(tabulacion).as_table())
     except PeriodoEvaluacion.DoesNotExist:
@@ -376,7 +371,16 @@ def mostrar_resultados(request):
     docente = DocentePeriodoAcademico.objects.get(id=id_docente)
     resultados = ""
     if tabulacion.tipo == 'ESE2012':
-        tabulacion = TabulacionSatisfaccion2012()
-        if opcion=='b':
-            resultados = tabulacion.por_carrera(request.session['carrera'], request.session['area'])
+        tabulacion = TabulacionSatisfaccion2012(periodoEvaluacion)
+        metodo =  [c[2] for c in tabulacion.calculos if c[0] == opcion][0]
+        # Por docente
+        if opcion == 'a':
+            resultados = metodo(request.session['area'], request.session['carrera'], id_docente)
+        elif opcion == 'c':
+            resultados = metodo(request.session['area'], request.session['carrera'], campo)
+        # Para el resto de casos
+        else:
+            resultados = metodo(request.session['area'], request.session['carrera'])
+        ###if opcion=='b':
+        ###    resultados = tabulacion.por_carrera(request.session['carrera'], request.session['area'])
     return HttpResponse(str(resultados));

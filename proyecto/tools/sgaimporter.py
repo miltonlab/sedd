@@ -20,7 +20,9 @@ import json
 import logging as log
 
 
-EXCLUSIONES = {'areas':('',), 'modalidades':('semipresencial',)}
+EXCLUSIONES = {'areas':('',),
+               'modalidades':('semipresencial',),
+               'carreras': ('Taller Educación Física','Taller Educacion Fisica')}
 
 def importar(periodoAcademicoId, periodoEvaluacionId=None):
     """ Importar unidades en primera instancia"""
@@ -48,8 +50,8 @@ def importar(periodoAcademicoId, periodoEvaluacionId=None):
 	    continue
         unidades = []
         for id_carrera, carrera, modalidad, area in carreras:
-            ###if area in EXCLUSIONES['areas'] or modalidad in EXCLUSIONES['modalidades']:
-            ###    continue
+            if area in EXCLUSIONES['areas'] or modalidad in EXCLUSIONES['modalidades'] or carrera in EXCLUSIONES['carreras']:
+                continue
             r_p = sga.wsinstitucional.sgaws_paralelos_carrera(id_oferta=oa.idSGA, id_carrera=id_carrera)
             js_p = json.loads(r_p)
             # Si hay paralelos en esta carrera y en esta oferta académica
@@ -66,8 +68,6 @@ def importar(periodoAcademicoId, periodoEvaluacionId=None):
                     if js_ud[0] != '_error':
                         unidades_docentes = js_ud[6]
                         for id_unidad, unidad, horas, creditos, obligatoria, inicio, fin, cedula, nombres, apellidos, titulo in unidades_docentes:
-			    if area == 'MED':
-			    	print unidad
                             # Si se ha especificado un periodo de evaluacion
                             # se importa unicamente las unidades que se estan dictando actualmente
                             # TODO: probar snippet
