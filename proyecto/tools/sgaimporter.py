@@ -21,8 +21,8 @@ import logging as log
 
 
 EXCLUSIONES = {'areas':('',),
-               'modalidades':('semipresencial',),
-               'carreras': ('Taller Educación Física','Taller Educacion Fisica', 'TALLER EDUCACION FISICA')}
+               'modalidades':(u'semipresencial',),
+               'carreras': (u'Taller Educación Física',u'Taller Educacion Fisica', u'TALLER EDUCACION FISICA')}
 
 def importar(periodoAcademicoId, periodoEvaluacionId=None):
     """ Importar unidades en primera instancia"""
