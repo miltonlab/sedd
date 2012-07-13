@@ -58,7 +58,7 @@ class SeccionEnLinea(admin.TabularInline):
 
 class SeccionAdmin(admin.ModelAdmin):
     inlines = (PreguntaEnLinea,)
-    fields = ('cuestionario','titulo','descripcion','orden')
+    fields = ('cuestionario', 'titulo', 'descripcion', 'orden')
     
 
 class CuestionarioAdmin(admin.ModelAdmin):
@@ -66,7 +66,7 @@ class CuestionarioAdmin(admin.ModelAdmin):
     inlines = (SeccionEnLinea,)
     save_as = True
 
-    # Acción para el Admin
+    # Acción para copiar un cuestionario en el Admin
     def clonar_cuestionario(self, request, queryset):
         cantidad = queryset.count()
         if cantidad == 1:
@@ -112,32 +112,29 @@ class EstudiantePeriodoAcademicoAdmin(admin.ModelAdmin):
     search_fields = ('usuario__username','usuario__cedula','usuario__last_name','usuario__first_name')
     inlines = (EstudianteAsignaturaDocenteEnLinea,)
     raw_id_fields = ('usuario',)
-
+    ###
     change_form_template = 'admin/app/estudianteperiodoacademico/change_form.html'
     
-    # Para disponer de información extra en el template
-    ### En desarrollo
-    def change_view(self, request, object_id, extra_context={}):
-        estudiante = models.EstudiantePeriodoAcademico.objects.get(id=object_id)
-        extra_context['paralelos'] = estudiante.paralelos()
-        logg.info(extra_context['paralelos'])
-        extra_context['prueba'] = 'pruebaaaa'
-        return super(EstudiantePeriodoAcademicoAdmin, self).change_view(request, object_id, extra_context)
-
-
 
         
 class EstudianteAsignaturaDocenteAdmin(admin.ModelAdmin):
+    actions = ['agregar_asignaturadocente']
     form = EstudianteAsignaturaDocenteAdminForm
     raw_id_fields = ('asignaturaDocente','estudiante')
     search_fields = ('estudiante__usuario__cedula', 'estudiante__usuario__first_name',
-                     'estudiante__usuario__last_name','asignaturaDocente__asignatura__nombre',
-                     'asignaturaDocente__asignatura__carrera', 'asignaturaDocente__asignatura__semestre' )
+                     'estudiante__usuario__last_name', 'asignaturaDocente__asignatura__carrera',
+                     'asignaturaDocente__asignatura__semestre' )
     list_per_page = 30
-    list_display = ( 'get_nombre_corto', 'get_area', 'get_carrera', 'get_semestre', 'get_paralelo')
+    list_display = ('estudiante', 'get_asignatura', 'get_area', 'get_carrera', 'get_semestre', 'get_paralelo')
     # Algunos campos se toman del formulario
     fields = ('estudiante','asignaturaDocente','carrera','semestre', 'paralelo', 'estado')
-    
+
+
+    def agregar_asignaturadocente(self, request, queryset):
+        mensaje = request.POST.keys()
+        self.message_user(request, 'holaaa' + ','.join(mensaje))
+    agregar_asignaturadocente.short_description = 'Agregar Asignatura-Docente'
+
     # Permitir filtros
     def lookup_allowed(self, key, value):
         if key in ('asignaturaDocente__asignatura__semestre',):

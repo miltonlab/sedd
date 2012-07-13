@@ -239,6 +239,7 @@ class PeriodoEvaluacion(models.Model):
         hoy = datetime.today().date()
         return hoy > self.fin
 
+
     def __unicode__(self):
         return self.nombre
 
@@ -468,7 +469,7 @@ class TabulacionSatisfaccion2012:
 
 
 class OfertaAcademicaSGA(models.Model):
-    idSGA = models.IntegerField(verbose_name='Id_SGA', unique=True, db_column='id_sga')
+    idSGA = models.IntegerField(verbose_name='Id_SGA', unique=True, db_column='id_sga', null=True, blank=True)
     descripcion = models.CharField(max_length='100', verbose_name='Descripción')
 
     class Meta:
@@ -612,6 +613,9 @@ class EstudianteAsignaturaDocente(models.Model):
         return self.__unicode__()[:60]
     get_nombre_corto.short_description = 'Nombre'
 
+    def get_asignatura(self):
+        return self.asignaturaDocente.asignatura
+        
     # Campos para adicionar en el Admin a través del formulario  EstudianteAsignaturaDocenteAdminForm
     carrera = property(get_carrera,)
     semestre = property(get_semestre,)

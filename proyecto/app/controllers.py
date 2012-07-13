@@ -282,6 +282,7 @@ def encuesta_grabar(request):
         contestacion = Contestacion(pregunta = id_pregunta, respuesta=v)
         contestacion.evaluacion = evaluacion
         contestacion.save()
+    logg.info("Nueva Evaluacion realizada: {0}".format(evaluacion))
 
     return render_to_response('app/encuesta_finalizada.html', datos, context_instance=RequestContext(request))
 

@@ -22,7 +22,7 @@ import logging as log
 
 EXCLUSIONES = {'areas':('',),
                'modalidades':('semipresencial',),
-               'carreras': ('Taller Educación Física','Taller Educacion Fisica')}
+               'carreras': ('Taller Educación Física','Taller Educacion Fisica', 'TALLER EDUCACION FISICA')}
 
 def importar(periodoAcademicoId, periodoEvaluacionId=None):
     """ Importar unidades en primera instancia"""
@@ -97,28 +97,19 @@ def importar(periodoAcademicoId, periodoEvaluacionId=None):
                                 )
                             log.info(u'Datos de Unidad a crearse: {0}'.format(dict_unidad))
                             (asignatura, nueva) = Asignatura.objects.get_or_create(idSGA=dict_unidad['idSGA'], defaults=dict_unidad)
-                            """
                             if nueva == True:
-                            log.info(u'Asignatura Creada: {0}'.format(asignatura))
-                            else:
-                            log.info(u'Asignatura ya existe: {0}'.format(asignatura))
-                            """
+                                log.info(u'Asignatura nueva: {0}'.format(asignatura))
                             (usuario, nuevo) = Usuario.objects.get_or_create(cedula=cedula, defaults=dict_usuario_docente)
-                            """
                             if nuevo == True:
-                            log.info(u'Usuario Docente Creado: {0}:{1}'.format(usuario, cedula))
-                            else:
-                            log.info(u'Usuario Docente ya existe: {0}:{1}'.format(usuario, cedula))
-                            """
+                                log.info(u'Usuario Docente nuevo: {0}:{1}'.format(usuario, cedula))
                             (docentePeriodoAcademico, nuevo) = DocentePeriodoAcademico.objects.get_or_create(usuario=usuario, periodoAcademico=periodoAcademico)
                             (asignaturaDocente, nuevo) = AsignaturaDocente.objects.get_or_create(
                                 docente=docentePeriodoAcademico, asignatura=asignatura
                                 )
                             if nuevo == True:
-                                log.info(u'AsignaturaDocente Creado: {0}'.format(asignaturaDocente))
-                            else:
-                                log.info(u'AsignaturaDocente ya existe: {0}'.format(asignaturaDocente))
+                                log.info(u'AsignaturaDocente nuevo: {0}'.format(asignaturaDocente))
                             asignaturas_docentes.append(asignaturaDocente)
+
                     """ Migración de Estudiantes de Paralelo """ 
                     r_ep = sga.wsacademica.sgaws_estadoestudiantes_paralelo(id_paralelo=id_paralelo)
                     js_ep = json.loads(r_ep)
