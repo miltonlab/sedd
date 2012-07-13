@@ -58,8 +58,6 @@ def importar(periodoAcademicoId, periodoEvaluacionId=None):
             if js_p[0] != '_error':
                	paralelos_carrera = js_p[4]
                 for id_paralelo, seccion, modulo, paralelo, id_modulo in paralelos_carrera:
-		    if area == 'MED':
-		    	print area, id_carrera, carrera, modulo, id_paralelo, paralelo, modalidad
                     # Para reutilizarlos en la creacion de las relaciones "EstudianteAsignaturaDocente"
                     asignaturas_docentes = []
                     """ Migración de Docentes y Asignaguras """
@@ -131,9 +129,7 @@ def importar(periodoAcademicoId, periodoEvaluacionId=None):
                                     estudiante=estudiantePeriodoAcademico, asignaturaDocente=asignaturaDocente, defaults=dict(matricula=matricula, estado=estado)
                                     )
                                 if nuevo == True:
-                                    log.info(u'EstudianteAsignaturaDocente Creado: {0}'.format(estudianteAsignaturaDocente))
-                                else:
-                                    log.info(u'EstudianteAsignaturaDocente ya existe: {0}'.format(estudianteAsignaturaDocente))
+                                    log.info(u'EstudianteAsignaturaDocente Nuevo: {0}'.format(estudianteAsignaturaDocente))
 
 if __name__ == '__main__':
     if len(sys.argv) == 2:

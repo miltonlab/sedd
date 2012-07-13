@@ -118,7 +118,6 @@ class EstudiantePeriodoAcademicoAdmin(admin.ModelAdmin):
 
         
 class EstudianteAsignaturaDocenteAdmin(admin.ModelAdmin):
-    actions = ['agregar_asignaturadocente']
     form = EstudianteAsignaturaDocenteAdminForm
     raw_id_fields = ('asignaturaDocente','estudiante')
     search_fields = ('estudiante__usuario__cedula', 'estudiante__usuario__first_name',
@@ -129,12 +128,6 @@ class EstudianteAsignaturaDocenteAdmin(admin.ModelAdmin):
     # Algunos campos se toman del formulario
     fields = ('estudiante','asignaturaDocente','carrera','semestre', 'paralelo', 'estado')
 
-
-    def agregar_asignaturadocente(self, request, queryset):
-        mensaje = request.POST.keys()
-        self.message_user(request, 'holaaa' + ','.join(mensaje))
-    agregar_asignaturadocente.short_description = 'Agregar Asignatura-Docente'
-
     # Permitir filtros
     def lookup_allowed(self, key, value):
         if key in ('asignaturaDocente__asignatura__semestre',):
@@ -143,13 +136,81 @@ class EstudianteAsignaturaDocenteAdmin(admin.ModelAdmin):
 
     
 class AsignaturaDocenteAdmin(admin.ModelAdmin):
+    actions = ['clonar_asignaturadocente']
     form = AsignaturaDocenteAdminForm
     raw_id_fields = ('asignatura','docente')
     search_fields = ('docente__usuario__cedula', 'docente__usuario__first_name',
-                     'docente__usuario__last_name','asignatura__nombre', 'asignatura__idSGA' )
+                     'docente__usuario__last_name','asignatura__carrera', 'asignatura__nombre',
+                     'asignatura__idSGA' )
     list_per_page = 30
     list_display = ( 'get_nombre_corto', 'get_carrera', 'get_semestre', 'get_paralelo')
     fields = ('docente','asignatura','carrera','semestre', 'paralelo')
+
+    def validar_clonar(self, request, queryset):
+        paralelo = request.POST['paralelo']
+        mensaje = ''
+        if paralelo == '':
+            mensaje = 'Debe especificar un Paralelo'
+            messages.error(request, mensaje)
+            return False
+        cantidad = queryset.count()
+        if cantidad > 1:
+            mensaje = u'Debe seleccionar uno solo Objeto, ha seleccionado %s' % (str(cantidad))
+            messages.error(request, mensaje)
+            return False
+        asignaturaDocente = queryset.all()[0]
+        if paralelo == asignaturaDocente.asignatura.paralelo:
+            mensaje = "Se trata del mismo Paralelo, debe clonar la AsignaturaDocente en uno diferente"
+            messages.error(request, mensaje)
+            return False
+        asignatura = asignaturaDocente.asignatura
+        # Paralelo que tiene el semestre al cual pertenece AsignaturaDocente
+        consulta = models.Asignatura.objects.filter(area=asignatura.area, carrera=asignatura.carrera).filter(semestre=asignatura.semestre)
+        paralelos = consulta.values_list('paralelo', flat=True).distinct()
+        if paralelo not in paralelos:
+            mensaje = "No existe este paralelo en el Semestre {0} de la Carrera {1}".format(asignatura.semestre, asignatura.carrera)
+            messages.error(request, mensaje)
+            return False
+        return True
+        
+    def clonar_asignaturadocente(self, request, queryset):
+        """
+        Permite crear una Asignatura con el Docente respectivo pero en otro paralelo
+        de la misma carrera y el mismo semestre. Funcionalidad creada especialmente para
+        crear aquellas unidades que no existen en el SGA en el caso de las carreras del
+        Area de la Salud Humana.
+        """
+        if self.validar_clonar(request, queryset):
+            paralelo = request.POST['paralelo']
+            asignaturaDocente = queryset.all()[0]
+            asignatura = asignaturaDocente.asignatura
+            docente = asignaturaDocente.docente
+            """ Obtener los estudiantes del paralelo que no tiene esta asignatura """
+            consulta = models.EstudianteAsignaturaDocente.objects.filter(
+                asignaturaDocente__asignatura__area=asignatura.area).filter(
+                asignaturaDocente__asignatura__carrera=asignatura.carrera).filter(
+                asignaturaDocente__asignatura__semestre=asignatura.semestre).filter(
+                asignaturaDocente__asignatura__paralelo=paralelo # El paralelo en el cual se clonará 
+            )
+            estudiantes = set([ead.estudiante for ead in consulta.all()])
+            """ Creación de la Nueva Asignatura y AsignaturaDocente """
+            # Se clona el objeto Asignatura , será una nueva entidad
+            asignatura.pk = None
+            id_unidad = asignatura.idSGA.split(':')[0]
+            asignatura.idSGA = u"{0}:SEDD".format(id_unidad)
+            asignatura.paralelo = paralelo # El Paralelo en el cual se clonará
+            asignatura.nombre = u"{0} (Clonado)".format(asignatura.nombre)
+            # Grabado en la base de datos
+            asignatura.save()
+            # Se graba el nuevo Asignatura-Docente
+            models.AsignaturaDocente.objects.create(docente=docente, asignatura=asignatura)
+            """ Se asigna la nueva Asignatura-Docente a todos los estudiantes del Paralelo """
+            for e in estudiantes:
+                models.EstudianteAsignaturaDocente.objects.create(estudiante=e, asignaturaDocente=asignaturaDocente)
+            mensaje = "Se agregó la asignatura {0} al paralelo {1} (con {2} estudiantes)".format(asignatura,paralelo,len(estudiantes))
+            self.message_user(request, mensaje)        
+                        
+    clonar_asignaturadocente.short_description = u'Clonar Asignatura-Docente en otro Paralelo'
 
 
 class AsignaturaDocenteEnLinea(admin.TabularInline):

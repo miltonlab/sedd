@@ -219,7 +219,6 @@ class PeriodoEvaluacion(models.Model):
     inicio = models.DateField()
     fin = models.DateField()
     periodoAcademico = models.ForeignKey('PeriodoAcademico', related_name='periodosEvaluacion', verbose_name="Periodo Académico")
-    ### tabulacion = models.ForeignKey('Tabulacion', related_name='periodosEvaluacion', verbose_name="Tipo Tabulación")
     areasSGA = models.ManyToManyField(AreaSGA, related_name='periodosEvaluacion', verbose_name=u'Areas Académicas SGA')
     
     class Meta:
@@ -239,7 +238,43 @@ class PeriodoEvaluacion(models.Model):
         hoy = datetime.today().date()
         return hoy > self.fin
 
+    def verificar_estudiante(self, cedula):
+        """
+        Analiza si el Estudiante a realizado todas las evaluaciones
+        que le corresponden en este Periodo de Evaluación.
+        """
+        evaluaciones = Evaluacion.objects.filter(
+            estudianteAsignaturaDocente__estudiante__usuario__cedula=cedula).filter(
+            cuestionario__periodoEvaluacion=self).count()
+        total = EstudianteAsignaturaDocente.objects.filter(
+            estudiante__usuario__cedula=cedula).filter(
+            estudiante__periodoAcademico=self.periodoAcademico).count()
+        restantes = total - evaluaciones
+        mensaje = "{0}: total {1}, evaluados {2}, restan {3} ".format(cedula, total, evaluaciones, restantes)
+        ###logg.info(mensaje)
+        ###print mensaje
+        if restantes == 0:
+            return True
+        else:
+            return False
 
+    def contabilizar_evaluaciones(self, carrera, semestre=None, paralelo=None):
+        consulta = EstudianteAsignaturaDocente.objects.filter(asignaturaDocente__asignatura__carrera=carrera)
+        if semestre:
+            consulta = consulta.filter(asignaturaDocente__asignatura__semestre=semestre)
+        if paralelo:
+            consulta = consulta.filter(asignaturaDocente__asignatura__paralelo=paralelo)
+        estudiantes = [c.estudiante for c in consulta.all()]
+        total = len(estudiantes)
+        completados = 0
+        faltantes = 0
+        for e in estudiantes:
+            if self.verificar_estudiante(e.usuario.cedula):
+                completados += 1
+            else:
+                faltantes +=1
+        return dict(estudiantes=total, completados=completados, faltantes=faltantes)
+        
     def __unicode__(self):
         return self.nombre
 
