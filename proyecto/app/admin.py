@@ -112,9 +112,6 @@ class EstudiantePeriodoAcademicoAdmin(admin.ModelAdmin):
     search_fields = ('usuario__username','usuario__cedula','usuario__last_name','usuario__first_name')
     inlines = (EstudianteAsignaturaDocenteEnLinea,)
     raw_id_fields = ('usuario',)
-    ###
-    change_form_template = 'admin/app/estudianteperiodoacademico/change_form.html'
-    
 
         
 class EstudianteAsignaturaDocenteAdmin(admin.ModelAdmin):
@@ -272,7 +269,7 @@ class ContestacionEnLinea(admin.TabularInline):
     verbose_name = 'Respuesta'
     
 class EvaluacionAdmin(admin.ModelAdmin):
-    # Muy raro: Si no se especifica fields no se muestra la vista de modificacion
+    # Si no se especifica fields no se muestra la vista de modificacion
     search_fields = ('estudianteAsignaturaDocente__estudiante__usuario__cedula',
                      'estudianteAsignaturaDocente__asignaturaDocente__docente__usuario__cedula')
     list_per_page = 30
@@ -287,9 +284,6 @@ class EvaluacionAdmin(admin.ModelAdmin):
     def has_add_permission(self, request):
         return False
 
-
-###class TabulacionSatisfaccion2012Admin(admin.ModelAdmin):
-###    pass
     
 class TabulacionAdmin(admin.ModelAdmin):
     pass

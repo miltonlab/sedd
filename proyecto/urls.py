@@ -25,7 +25,8 @@ urlpatterns = patterns('',
     url(r'^resultados/menu/(\d{1,2})/$', 'proyecto.app.controllers.menu_resultados'),
     url(r'^resultados/mostrar/$', 'proyecto.app.controllers.mostrar_resultados'),                       
     url(r'^sga/cargar_ofertas_sga/(\d{1,3})/$', 'proyecto.app.controllers.cargar_ofertas_sga'),
-    url(r'^sga/cargar_info_sga/(\d{1,3})/$', 'proyecto.app.controllers.cargar_info_sga'),
+    url(r'^admin/resumen/evaluaciones/$', 'proyecto.app.controllers.resumen_evaluaciones'),
+
     # Examples:
 
     # url(r'^proyecto/', include('proyecto.foo.urls')),

@@ -24,12 +24,14 @@ from proyecto.app.models import PeriodoEvaluacion
 from proyecto.app.models import TabulacionSatisfaccion2012
 from proyecto.app.models import OfertaAcademicaSGA
 from proyecto.app.models import AreaSGA
+from proyecto.app.forms import ResultadosESE2012Form
 
 from proyecto.tools.sgaws.cliente import SGA
 from proyecto.settings import SGAWS_USER, SGAWS_PASS
 
 from datetime import datetime
 from django import forms
+from django.utils import simplejson
 
 import logging
 logg = logging.getLogger('logapp')
@@ -305,20 +307,104 @@ def cargar_ofertas_sga(request, periodoAcademicoId):
     except Exception, e:
         log.error("Error recargando ofertas SGA: " + str(e))
         return HttpResponse("error: "+str(e))
-        
-# TODO: muy pesado ejecutar como tarea 'crontab'
-def cargar_info_sga(request, periodoAcademicoId):
-    """ Metodo invocado a través de Ajax """
-    try:
-        pa=PeriodoAcademico.objects.get(pk=periodoAcademicoId)
-        log.info(pa + "pendiente..")
-        return HttpResponse("OK")
-    except Exception, e:
-        log.error("Error cargando info SGA: "+str(e))
-        return HttpResponse("error"+str(e))
 
+# =============================================================================
+# Resumen de Evaluaciones en el Admin
+# ==============================================================================
+
+def resumen_evaluaciones(request):
+    if request.is_ajax():
+        try:
+            id_campo, valor_campo = request.GET['id'], request.GET['valor']
+            if valor_campo == '':
+                return HttpResponse('{"id": "", "valores": []}', mimetype="JSON")
+            id = ""
+            valores = []
+
+            if id_campo == 'id_periodo_academico':
+                request.session['periodoAcademico'] = PeriodoAcademico.objects.get(id=int(valor_campo))                
+                id = 'id_periodo_evaluacion'
+                objetos = PeriodoEvaluacion.objects.filter(periodoAcademico__id=int(valor_campo)).all()
+                valores = [dict(id=o.id, valor=o.nombre) for o in objetos]
+            elif id_campo == 'id_periodo_evaluacion':
+                request.session['periodoEvaluacion'] = PeriodoEvaluacion.objects.get(id=int(valor_campo))
+                id = 'id_area'
+                objetos = PeriodoEvaluacion.objects.get(id=int(valor_campo)).areasSGA.all()
+                valores = [dict(id=o.siglas, valor=o.nombre) for o in objetos]
+            elif id_campo == 'id_area':
+                request.session['areaSGA'] = AreaSGA.objects.get(siglas=valor_campo)
+                id = 'id_carrera'
+                objetos = EstudianteAsignaturaDocente.objects.filter(
+                    estudiante__periodoAcademico=request.session['periodoAcademico']).filter(
+                    asignaturaDocente__asignatura__area=valor_campo).values_list(
+                    'asignaturaDocente__asignatura__carrera', flat=True).distinct()
+                for o in objetos:
+                    carrera = o.encode('utf-8') if isinstance(o, unicode) else o
+                    valores.append(dict(id=carrera, valor=carrera))
+            elif id_campo == 'id_carrera':
+                request.session['carrera'] = valor_campo
+                id = 'id_semestre'
+                objetos = EstudianteAsignaturaDocente.objects.filter(
+                    estudiante__periodoAcademico=request.session['periodoAcademico']).filter(
+                    asignaturaDocente__asignatura__area=request.session['areaSGA'].siglas).filter(
+                    asignaturaDocente__asignatura__carrera=valor_campo).values_list(
+                    'asignaturaDocente__asignatura__semestre', flat=True).distinct()
+                for o in objetos:
+                    semestre = o.encode('utf-8') if isinstance(o, unicode) else o
+                    valores.append(dict(id=semestre, valor=semestre))
+            elif id_campo == 'id_semestre':
+                request.session['semestre'] = valor_campo
+                id = 'id_paralelo'
+                objetos = EstudianteAsignaturaDocente.objects.filter(
+                    estudiante__periodoAcademico=request.session['periodoAcademico']).filter(
+                    asignaturaDocente__asignatura__area=request.session['areaSGA'].siglas).filter(
+                    asignaturaDocente__asignatura__carrera=request.session['carrera']).filter(
+                    asignaturaDocente__asignatura__semestre=valor_campo).values_list(
+                    'asignaturaDocente__asignatura__paralelo', flat=True).distinct()
+                for o in objetos:
+                    paralelo = o.encode('utf-8') if isinstance(o, unicode) else o
+                    valores.append(dict(id=paralelo, valor=paralelo))
+                
+            resultado = {'id':id, 'valores':valores}
+            logg.info(simplejson.dumps(resultado))
+            return HttpResponse(simplejson.dumps(resultado), mimetype='application/json')
+        except Exception, ex:
+            logg.error("error ajax: " + str(ex))
+    else:
+        form = forms.Form()
+        form.fields['periodo_academico'] = forms.ModelChoiceField(queryset=PeriodoAcademico.objects.all())
+        form.fields['periodo_academico'].label = 'Periodos Academicos'
+        form.fields['periodo_evaluacion'] = forms.ModelChoiceField(PeriodoEvaluacion.objects.none())
+        form.fields['periodo_evaluacion'].label = 'Periodos de Evaluacion'
+        form.fields['area'] = forms.ModelChoiceField(AreaSGA.objects.none())
+        form.fields['carrera'] = forms.ModelChoiceField(Asignatura.objects.none())
+        form.fields['semestre'] = forms.ModelChoiceField(Asignatura.objects.none())
+        form.fields['paralelo'] = forms.ModelChoiceField(Asignatura.objects.none())
+        datos = dict(form=form)
+        return render_to_response("admin/app/resumen_evaluaciones.html", datos)
+
+
+def resumen_evaluciones_2(request, id_campo, valor):
+    valores = []
+    if id_campo == 'id_periodo_academico':
+        id_resultado = 'id_periodo_evaluacion'
+        objetos = PeriodoEvaluacion.objects.filter(periodoAcademico__id=int(valor))        
+        valores = [dict(id=o.id, valor=o.nombre) for o in objetos]
+    elif id_campo == 'periodo_evaluacion':
+        id_resultado = 'id_area'
+        objetos = PeriodoEvaluacion.objects.get(id=valor).areasSGA.all()
+        valores = [dict(id=o.siglas, valor=o.nombre) for o in objetos]
+    
+        
+
+        
+
+# =============================================================================
+# Calcular y mostrar resultados de evaluaciones
+# ==============================================================================
 
 def resultados_carrera(request, id_docente):
+    
     """
     Consulta los docnetes que pertenece a la misma carrera del docente coordinador (id_docente)
     """
@@ -357,7 +443,6 @@ def menu_resultados(request, periodo_evaluacion_id):
         periodoEvaluacion=PeriodoEvaluacion.objects.get(id=periodo_evaluacion_id)
         if periodoEvaluacion.tabulacion.tipo == 'ESE2012':
             tabulacion = TabulacionSatisfaccion2012(periodoEvaluacion)
-            from proyecto.app.forms import ResultadosESE2012Form
             return HttpResponse(ResultadosESE2012Form(tabulacion).as_table())
     except PeriodoEvaluacion.DoesNotExist:
         return HttpResponse("")

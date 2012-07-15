@@ -1,0 +1,73 @@
+{% extends "admin/base_site.html" %}
+
+
+{% load i18n %}
+
+{% block extrahead %}
+
+{{ block.super }}
+
+
+<script type="text/javascript" src="/static/js/jquery-1.6.2.min.js"></script>
+<script type="text/javascript">
+    $('#calcular').click(function(){
+	
+    });
+    $(document).ready(function(){
+	var ids = new Array();
+	var cont = 0;
+	$('select').each(function(){
+	    ids[cont++] = $(this).attr('id');
+	});
+	$('select').change(function(){
+	    var valor = $(this).val()
+	    var id = $(this).attr('id');
+	    var indice = -1;
+	    for (var i=0; i<ids.length; i++){
+		if (ids[i] == id){ indice = i; break; }
+	    }
+	    if (valor == ''){
+		return;
+	    }
+	    $.ajax({
+		url: "/admin/resumen/evaluaciones/",
+		method: "GET",
+		data: {id:id, valor:valor},
+		dataType: "JSON",
+		success: function (response){
+		    /* Limpiamos los select que deben ser cambiados */
+		    for (var i=0; i<ids.length; i++){
+			if ( i > indice ){
+			    $('#' + ids[i]).find('option').remove();
+			    $('#' + ids[i]).append(new Option('---------',''));
+			}
+		    }
+		    /* Actualizamos el siguiente campo que le corresponde*/
+		    var valores = response['valores'];
+		    for (var i=0; i<valores.length; i++){
+			var option = new Option(valores[i]['valor'],valores[i]['id']);
+			$('#' + response['id']).append(option);
+		    }
+		},
+		error: function(xhr,status,error){
+		    alert("error: " + status + "-" + error);
+		}
+	    });
+	    
+	});
+    });
+</script>
+{% endblock %}
+
+{% block content %}
+<table>
+{{ form.as_table }}
+</table>
+<hr style="margin-top: 15px; margin-bottom: 10px;"/>
+<button id="calcular"> Calcular </button>
+Total: <input type='text' id='total' size='10'/>
+Han Evaluado: <input type='text' id='completados' size='10'/>
+NO Evaluan: <input type='text' id='faltantes' size='10'/>
+
+
+{% endblock %}
