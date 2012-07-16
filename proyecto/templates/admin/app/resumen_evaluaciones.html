@@ -65,28 +65,32 @@ img {
 	});
 	/* Calculos de los datos de Resumen */
 	$('#calcular').click(function(event){
-	    $('#cargando').show();
-	    $.ajax({
-		method: 'GET',
-		url: '/admin/resumen/calcular',
-		data: {'id_periodo_evaluacion': $('#id_periodo_evaluacion option:selected').val(),
-		       'area': $('#id_area option:selected').val(),
-		       'carrera': $('#id_carrera option:selected').val(),
-		       'semestre': $('#id_semestre option:selected').val(),
-		       'paralelo': $('#id_paralelo option:selected').val()
-		      },
-		dataType: 'JSON',
-		success: function(response){
-		    $('#estudiantes').val(response['estudiantes']);
-		    $('#completados').val(response['completados']);
-		    $('#faltantes').val(response['faltantes']);
-		    $('#cargando').hide();
-		},
-		error: function(xhr,status,error){
-		    alert("error: " + status + "-" + error);
-		}
-	    });
-	    event.preventDefault();
+	    var pa = $('#id_periodo_academico option:selected').val();
+	    var c = $('#id_carrera option:selected').val(); 
+	    if ( pa != '' &&  c != '') {
+		$('#cargando').show();
+		$.ajax({
+		    method: 'GET',
+		    url: '/admin/resumen/calcular',
+		    data: {'id_periodo_evaluacion': $('#id_periodo_evaluacion option:selected').val(),
+			   'area': $('#id_area option:selected').val(),
+			   'carrera': $('#id_carrera option:selected').val(),
+			   'semestre': $('#id_semestre option:selected').val(),
+			   'paralelo': $('#id_paralelo option:selected').val()
+			  },
+		    dataType: 'JSON',
+		    success: function(response){
+			$('#estudiantes').val(response['estudiantes']);
+			$('#completados').val(response['completados']);
+			$('#faltantes').val(response['faltantes']);
+			$('#cargando').hide();
+		    },
+		    error: function(xhr,status,error){
+			alert("error: " + status + "-" + error);
+		    }
+		});
+		event.preventDefault();
+	    } // end if != ''
 	});
     });
 </script>
@@ -96,12 +100,14 @@ img {
 <table>
 {{ form.as_table }}
 </table>
-<hr style="margin-top: 15px; margin-bottom: 10px;"/>
-<button id="calcular"> Calcular </button>
-<img id="cargando" src="/static/images/loading-grey.gif"/>
-Total: <input type='text' id='estudiantes' size='10' readonly='readonly'/>
-Han Evaluado: <input type='text' id='completados' size='10' readonly='readonly'/>
-NO Evaluan: <input type='text' id='faltantes' size='10' readonly='readonly'/>
-
+<hr/>
+<div style="padding-top: 10px;" >
+    <button id="calcular" style="margin-right: 40px;"> Calcular </button>
+  Total: <input type='text' id='estudiantes' size='10' readonly='readonly'/>
+  Han Evaluado: <input type='text' id='completados' size='10' readonly='readonly'/>
+  NO Evaluan: <input type='text' id='faltantes' size='10' readonly='readonly'/>
+  <br/>
+  <img id="cargando" src="/static/images/loading-grey.gif"/>
+</div>
 
 {% endblock %}

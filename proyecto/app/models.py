@@ -262,11 +262,11 @@ class PeriodoEvaluacion(models.Model):
         consulta = EstudianteAsignaturaDocente.objects.filter(
             asignaturaDocente__asignatura__area=area,
             asignaturaDocente__asignatura__carrera=carrera)
-        if semestre:
+        if semestre and semestre != '':
             consulta = consulta.filter(asignaturaDocente__asignatura__semestre=semestre)
-        if paralelo:
+        if paralelo and paralelo != '':
             consulta = consulta.filter(asignaturaDocente__asignatura__paralelo=paralelo)
-        estudiantes = [c.estudiante for c in consulta.all()]
+        estudiantes = set([c.estudiante for c in consulta.all()])
         total = len(estudiantes)
         completados = 0
         faltantes = 0
