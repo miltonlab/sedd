@@ -134,14 +134,15 @@ class EstudianteAsignaturaDocenteAdmin(admin.ModelAdmin):
     
 class AsignaturaDocenteAdmin(admin.ModelAdmin):
     actions = ['clonar_asignaturadocente']
-    form = AsignaturaDocenteAdminForm
+    ### form = AsignaturaDocenteAdminForm
     raw_id_fields = ('asignatura','docente')
     search_fields = ('docente__usuario__cedula', 'docente__usuario__first_name',
                      'docente__usuario__last_name','asignatura__carrera', 'asignatura__nombre',
                      'asignatura__idSGA' )
     list_per_page = 30
     list_display = ( 'get_nombre_corto', 'get_carrera', 'get_semestre', 'get_paralelo')
-    fields = ('docente','asignatura','carrera','semestre', 'paralelo')
+    fields = ('docente','asignatura')
+    ###fields = ('docente','asignatura','carrera','semestre', 'paralelo')
 
     def validar_clonar(self, request, queryset):
         paralelo = request.POST['paralelo']

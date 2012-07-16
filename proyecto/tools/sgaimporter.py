@@ -86,21 +86,24 @@ def importar(periodoAcademicoId, periodoEvaluacionId=None):
                             # Tratamiento de los saltos de línea dentro del nombre de la unidad
                             unidad = unidad.replace('\r\n',' ')[0:-1]
                             dict_unidad = dict(
-                                idSGA="{0}:{1}".format(id_unidad, id_paralelo), area=area, carrera=carrera, semestre=modulo,
-                                paralelo=paralelo, seccion=seccion, nombre=unidad, creditos=creditos, duracion=horas, inicio=fecha_inicio, fin=fecha_fin
+                                idSGA="{0}:{1}".format(id_unidad, id_paralelo), area=area, carrera=carrera,
+                                semestre=modulo, paralelo=paralelo, seccion=seccion, nombre=unidad,
+                                creditos=creditos, duracion=horas, inicio=fecha_inicio, fin=fecha_fin
                                 )
                             dict_usuario_docente = dict(
                                 username=cedula, password='', first_name=nombres.title(), last_name=apellidos.title(),
                                 cedula=cedula, titulo=titulo, email=''
                                 )
                             log.info(u'Datos de Unidad a crearse: {0}'.format(dict_unidad))
-                            (asignatura, nueva) = Asignatura.objects.get_or_create(idSGA=dict_unidad['idSGA'], defaults=dict_unidad)
+                            (asignatura, nueva) = Asignatura.objects.get_or_create(idSGA=dict_unidad['idSGA'],
+                                                                                   defaults=dict_unidad)
                             if nueva == True:
                                 log.info(u'Asignatura nueva: {0}'.format(asignatura))
                             (usuario, nuevo) = Usuario.objects.get_or_create(cedula=cedula, defaults=dict_usuario_docente)
                             if nuevo == True:
                                 log.info(u'Usuario Docente nuevo: {0}:{1}'.format(usuario, cedula))
-                            (docentePeriodoAcademico, nuevo) = DocentePeriodoAcademico.objects.get_or_create(usuario=usuario, periodoAcademico=periodoAcademico)
+                            (docentePeriodoAcademico, nuevo) = DocentePeriodoAcademico.objects.get_or_create(
+                                usuario=usuario, periodoAcademico=periodoAcademico)
                             (asignaturaDocente, nuevo) = AsignaturaDocente.objects.get_or_create(
                                 docente=docentePeriodoAcademico, asignatura=asignatura
                                 )
