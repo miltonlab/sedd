@@ -421,7 +421,7 @@ def resultados_carrera(request, id_docente):
             asignatura__carrera=carrera, asignatura__area=area)])
         form = forms.Form()
         form.fields['docentes'] = forms.ModelChoiceField(queryset=DocentePeriodoAcademico.objects.filter(id__in=ids))
-        # Selecciona los peridos de evaluacion en los que se encuentra el area del docente
+        # Selecciona solo los peridos de evaluacion en los que se encuentra el area del docente
         # y a su vez que estén dentro del periodo académico actual.  
         form.fields['periodos'] = forms.ModelChoiceField(queryset=area.periodosEvaluacion.filter(
             periodoAcademico=periodoAcademico))

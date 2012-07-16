@@ -3,6 +3,7 @@
 from django import forms
 from proyecto.app.models import EstudianteAsignaturaDocente
 from proyecto.app.models import AsignaturaDocente
+from proyecto.app.models import Pregunta
 
 # Para los resultados de la Encuesta de Satisfacción Estudiantil 2012
 class ResultadosESE2012Form(forms.Form):
@@ -12,7 +13,11 @@ class ResultadosESE2012Form(forms.Form):
         forms.Form.__init__(self)
         choices = [(o[0], o[1]) for o in tabulacion.calculos]
         self.fields['opciones'] = forms.ChoiceField(widget=forms.RadioSelect(), choices=choices)
-
+        campos = (('1', 'campo1'), ('2', 'campo 2'), ('3', 'campo3'))
+        self.fields['campos'] = forms.ChoiceField(choices=campos)
+        self.fields['preguntas'] = forms.ModelChoiceField(queryset=Pregunta.objects.filter(
+            seccion__cuestionario__periodoEvaluacion=tabulacion.periodoEvaluacion))
+        
     class Media:
         js = ('/static/js/jquery-1.6.2.min.js', '/static/js/ese2012.js',)
 

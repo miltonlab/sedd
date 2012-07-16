@@ -125,7 +125,7 @@ class Evaluacion(models.Model):
         verbose_name_plural = 'Evaluaciones'
         
     def __unicode__(self):
-        return u'{0} - {1} - {2}:{3}'.format(self.estudianteAsignaturaDocente.estudiante.cedula(),
+        return u'{0} - {1} - {2}::{3}'.format(self.estudianteAsignaturaDocente.estudiante.cedula(),
                                            self.estudianteAsignaturaDocente.asignaturaDocente.docente.cedula(),
                                            self.fechaInicio, self.horaInicio, )
     

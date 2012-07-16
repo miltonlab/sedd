@@ -274,7 +274,7 @@ class EvaluacionAdmin(admin.ModelAdmin):
     search_fields = ('estudianteAsignaturaDocente__estudiante__usuario__cedula',
                      'estudianteAsignaturaDocente__asignaturaDocente__docente__usuario__cedula')
     list_per_page = 30
-    list_filter = ('fechaFin',)
+    list_filter = ('fechaInicio', 'fechaFin',)
     date_hierarchy = 'fechaFin'
     # inlines = (ContestacionEnLinea,)
     # problema al presentar estudianteAsignaturaDocente
