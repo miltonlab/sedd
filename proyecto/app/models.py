@@ -258,8 +258,10 @@ class PeriodoEvaluacion(models.Model):
         else:
             return False
 
-    def contabilizar_evaluaciones(self, carrera, semestre=None, paralelo=None):
-        consulta = EstudianteAsignaturaDocente.objects.filter(asignaturaDocente__asignatura__carrera=carrera)
+    def contabilizar_evaluaciones(self, area, carrera, semestre=None, paralelo=None):
+        consulta = EstudianteAsignaturaDocente.objects.filter(
+            asignaturaDocente__asignatura__area=area,
+            asignaturaDocente__asignatura__carrera=carrera)
         if semestre:
             consulta = consulta.filter(asignaturaDocente__asignatura__semestre=semestre)
         if paralelo:

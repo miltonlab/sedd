@@ -26,6 +26,7 @@ urlpatterns = patterns('',
     url(r'^resultados/mostrar/$', 'proyecto.app.controllers.mostrar_resultados'),                       
     url(r'^sga/cargar_ofertas_sga/(\d{1,3})/$', 'proyecto.app.controllers.cargar_ofertas_sga'),
     url(r'^admin/resumen/evaluaciones/$', 'proyecto.app.controllers.resumen_evaluaciones'),
+    url(r'^admin/resumen/calcular/$', 'proyecto.app.controllers.calcular_resumen'),
 
     # Examples:
 

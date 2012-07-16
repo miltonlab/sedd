@@ -14,7 +14,7 @@ class ResultadosESE2012Form(forms.Form):
         self.fields['opciones'] = forms.ChoiceField(widget=forms.RadioSelect(), choices=choices)
 
     class Media:
-        js = ('jquery-1.6.2.min.js', 'satisfaccion2012.js',)
+        js = ('/static/js/jquery-1.6.2.min.js', '/static/js/ese2012.js',)
 
 class EstudianteAsignaturaDocenteAdminForm(forms.ModelForm):
     carrera = forms.CharField(widget=forms.TextInput(attrs={'size':'80', 'readonly':'readonly'}))
