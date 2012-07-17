@@ -3,23 +3,43 @@
 from django import forms
 from proyecto.app.models import EstudianteAsignaturaDocente
 from proyecto.app.models import AsignaturaDocente
+from proyecto.app.models import Seccion
 from proyecto.app.models import Pregunta
 
-# Para los resultados de la Encuesta de Satisfacción Estudiantil 2012
+
 class ResultadosESE2012Form(forms.Form):
-    #opciones = forms.ChoiceField(widget=forms.RadioSelect(),
-    #choices=(('uno','uno'),('dos','dos'),('tres','tres')))
-    def __init__(self, tabulacion):
+    """
+    Formulario Único para los resultados de la Encuesta de Satisfacción Estudiantil 2012
+    cualquier tipo de Informante
+    """
+
+    def __init__(self, tabulacion, carreras_docente):
         forms.Form.__init__(self)
-        choices = [(o[0], o[1]) for o in tabulacion.calculos]
-        self.fields['opciones'] = forms.ChoiceField(widget=forms.RadioSelect(), choices=choices)
-        campos = (('1', 'campo1'), ('2', 'campo 2'), ('3', 'campo3'))
+        opciones = [(o[0], o[1]) for o in tabulacion.calculos]
+        self.fields['opciones'] = forms.ChoiceField(widget=forms.RadioSelect(), choices=opciones)
+        # TODO: Un docente puede ser coordinador de mas de un carrera ?
+        carrera = carreras_docente[0]['nombre']
+        area = carreras_docente[0]['area']
+        periodoEvaluacion = tabulacion.periodoEvaluacion
+        if area == u'ACE':
+            cuestionario = periodoEvaluacion.cuestionarios.get(informante__tipo=u'InstitutoIdiomas')
+        elif area == u'MED':
+            cuestionario = periodoEvaluacion.cuestionarios.get(informante__tipo=u'EstudianteMED')
+        else:  # Todas las demás areas
+            cuestionario = periodoEvaluacion.cuestionarios.get(informante__tipo=u'Estudiante')
+        secciones = Seccion.objects.filter(cuestionario=cuestionario)
+        campos = [ (s.id, u'{0}. {1}'.format(s.orden, s.titulo)) for s in secciones ]
+        preguntas = []
+        for s in secciones:
+            preguntas.extend(s.preguntas.all())
+        # Por estética en la presentación del SELECT del form de HTML 
+        indicadores = [ (p.id, u'{0}.{1}. {2}'.format(p.seccion.orden, p.orden, p.texto[:150])) for p in preguntas ]
         self.fields['campos'] = forms.ChoiceField(choices=campos)
-        self.fields['preguntas'] = forms.ModelChoiceField(queryset=Pregunta.objects.filter(
-            seccion__cuestionario__periodoEvaluacion=tabulacion.periodoEvaluacion))
+        self.fields['indicadores'] = forms.ChoiceField(choices=indicadores)
         
     class Media:
         js = ('/static/js/jquery-1.6.2.min.js', '/static/js/ese2012.js',)
+
 
 class EstudianteAsignaturaDocenteAdminForm(forms.ModelForm):
     carrera = forms.CharField(widget=forms.TextInput(attrs={'size':'80', 'readonly':'readonly'}))

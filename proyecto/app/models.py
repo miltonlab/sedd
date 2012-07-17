@@ -1,6 +1,7 @@
 # -*- coding: utf-8 -*-
 
 from django.db import models
+from django.db.models import Count
 from proyecto.tools.sgaws.cliente import SGA
 from proyecto import settings
 from django.contrib.auth.models import User
@@ -31,7 +32,7 @@ class InformanteEstudiante(TipoInformante):
 class InformanteEstudianteNovel(TipoInformante):
     def __init__(self):
         TipoInformante.__init__(self)
-        self.tipo = 'Estudiante Novel'
+        self.tipo = 'EstudianteNovel'
 
 class InformanteDirectivos(TipoInformante):
     def __init__(self):
@@ -41,12 +42,12 @@ class InformanteDirectivos(TipoInformante):
 class InformanteInstitutoIdiomas(TipoInformante):
     def __init__(self):
         TipoInformante.__init__(self)
-        self.tipo = 'Instituto Idiomas'
+        self.tipo = 'InstitutoIdiomas'
 
 class InformanteEstudianteMED(TipoInformante):
     def __init__(self):
         TipoInformante.__init__(self)
-        self.tipo = 'Estudiante MED'
+        self.tipo = 'EstudianteMED'
 
 class InformanteIdiomasMED(TipoInformante):
     def __init__(self):
@@ -337,9 +338,14 @@ class TabulacionSatisfaccion2012:
         """
         Satisfacción Estudiantil de un docente en los  módulos, cursos, unidades o talleres
         """
-        from django.db.models import Count
-        # Todas las Secciones de todos los cuestionarios que pertenecen al periodo de evaluación establecido 
-        secciones = Seccion.objects.filter(cuestionario__in=self.periodoEvaluacion.cuestionarios.all())
+        if id_docente == '':
+            return None
+        if nombre_area == u'ACE':
+            secciones = Seccion.objects.filter(cuestionario__in=self.periodoEvaluacion.cuestionarios.all(),
+                                               cuestionario__informante__tipo=u'InstitutoIdiomas')
+        else:
+            secciones = Seccion.objects.filter(cuestionario__in=self.periodoEvaluacion.cuestionarios.all(),
+                                               cuestionario__informante__tipo=u'Estudiante')        
         # Para asegurar que se tomen unicamente preguntas que representen indicadores además
         indicadores=Pregunta.objects.filter(seccion__in=secciones).filter(tipo__tipo=u'SeleccionUnica').values_list('id', flat=True)
         conteo_ms=Contestacion.objects.filter(evaluacion__cuestionario__periodoEvaluacion=self.periodoEvaluacion).filter(
@@ -418,9 +424,14 @@ class TabulacionSatisfaccion2012:
 
     # TODO: Usar carrera_id en vez de nombre_carrera
     def por_carrera(self, nombre_area, nombre_carrera):
-        from django.db.models import Count
-        # Todas las Secciones de todos los cuestionarios que pertenecen al periodo de evaluación establecido 
-        secciones = Seccion.objects.filter(cuestionario__in=self.periodoEvaluacion.cuestionarios.all())
+        # Todas las Secciones de todos los cuestionarios que pertenecen al periodo de evaluación establecido
+        ### Discriminar nombre area
+        if nombre_area == u'ACE':
+            secciones = Seccion.objects.filter(cuestionario__in=self.periodoEvaluacion.cuestionarios.all(),
+                                               cuestionario__informante__tipo=u'InstitutoIdiomas')
+        else:
+            secciones = Seccion.objects.filter(cuestionario__in=self.periodoEvaluacion.cuestionarios.all(),
+                                               cuestionario__informante__tipo=u'Estudiante')
         # Para asegurar que se tomen unicamente preguntas que representen indicadores además
         indicadores=Pregunta.objects.filter(seccion__in=secciones).filter(tipo__tipo=u'SeleccionUnica').values_list('id', flat=True)
         conteo_ms=Contestacion.objects.filter(evaluacion__cuestionario__periodoEvaluacion=self.periodoEvaluacion).filter(
@@ -487,11 +498,82 @@ class TabulacionSatisfaccion2012:
         return dict(conteos=conteos, totales=totales, porcentajes=porcentajes)
     
 
-    def por_campos(self, nombre_area, nombre_carrera, campo):
-        print 'por docente' 
+    def por_campos(self, nombre_area, nombre_carrera, id_seccion):
+        # @param id_seccion representa el campo de la carrera. Seccion = Campo
+        if id_seccion == None:
+            return None
+        # La sección especcífica del cuestionario (por Área) que corresponde
+        # ya se determina en la vista anterior
+        seccion = Seccion.objects.get(id=int(id_seccion))
+        # Para asegurar que se tomen unicamente preguntas que representen indicadores además
+        # de que pertenezcan únicamente al campo (sección) especificado.
+        indicadores=Pregunta.objects.filter(seccion=seccion).filter(tipo__tipo=u'SeleccionUnica').values_list('id', flat=True)
+        conteo_ms=Contestacion.objects.filter(evaluacion__cuestionario__periodoEvaluacion=self.periodoEvaluacion).filter(
+            evaluacion__cuestionario__periodoEvaluacion__tabulacion__tipo='ESE2012').filter(
+            evaluacion__estudianteAsignaturaDocente__asignaturaDocente__asignatura__area=nombre_area).filter(
+            evaluacion__estudianteAsignaturaDocente__asignaturaDocente__asignatura__carrera=nombre_carrera).filter(
+            pregunta__in=indicadores).values('pregunta').annotate(MS=Count('respuesta')).filter(
+            respuesta='4').order_by('pregunta')
+        conteo_s=Contestacion.objects.filter(evaluacion__cuestionario__periodoEvaluacion=self.periodoEvaluacion).filter(
+            evaluacion__cuestionario__periodoEvaluacion__tabulacion__tipo='ESE2012').filter(
+            evaluacion__estudianteAsignaturaDocente__asignaturaDocente__asignatura__area=nombre_area).filter(
+            evaluacion__estudianteAsignaturaDocente__asignaturaDocente__asignatura__carrera=nombre_carrera).filter(
+            pregunta__in=indicadores).values('pregunta').annotate(S=Count('respuesta')).filter(
+            respuesta='3').order_by('pregunta')
+        conteo_ps=Contestacion.objects.filter(evaluacion__cuestionario__periodoEvaluacion=self.periodoEvaluacion).filter(
+            evaluacion__cuestionario__periodoEvaluacion__tabulacion__tipo='ESE2012').filter(
+            evaluacion__estudianteAsignaturaDocente__asignaturaDocente__asignatura__area=nombre_area).filter(
+            evaluacion__estudianteAsignaturaDocente__asignaturaDocente__asignatura__carrera=nombre_carrera).filter(
+            pregunta__in=indicadores).values('pregunta').annotate(PS=Count('respuesta')).filter(
+            respuesta='2').order_by('pregunta')
+        conteo_ins=Contestacion.objects.filter(evaluacion__cuestionario__periodoEvaluacion=self.periodoEvaluacion).filter(
+            evaluacion__cuestionario__periodoEvaluacion__tabulacion__tipo='ESE2012').filter(
+            evaluacion__estudianteAsignaturaDocente__asignaturaDocente__asignatura__area=nombre_area).filter(
+            evaluacion__estudianteAsignaturaDocente__asignaturaDocente__asignatura__carrera=nombre_carrera).filter(
+            pregunta__in=indicadores).values('pregunta').annotate(INS=Count('respuesta')).filter(
+            respuesta='1').order_by('pregunta')
+        conteos = []
+        for i in indicadores:
+            conteo = {}            
+            for c in conteo_ms:
+                if c['pregunta'] == i:
+                    conteo.update(c)
+                    # Se intercambia por el objeto completo por versatilidad
+                    conteo['pregunta'] = Pregunta.objects.get(id=i)
+            for c in conteo_s:
+                if c['pregunta'] == i:
+                    conteo.update(c)
+                    conteo['pregunta'] = Pregunta.objects.get(id=i)
+            for c in conteo_ps:
+                if c['pregunta'] == i:
+                    conteo.update(c)
+                    conteo['pregunta'] = Pregunta.objects.get(id=i)
+            for c in conteo_ins:
+                if c['pregunta'] == i:
+                    conteo.update(c)
+                    conteo['pregunta'] = Pregunta.objects.get(id=i)
+            for grado in ('MS','S','PS','INS'):
+                if grado not in conteo.keys():
+                    conteo[grado] = 0
+            conteos.append(conteo)
+            totales = {}
+            for grado in ('MS','S','PS','INS'):
+                totales[grado] = sum([c[grado] for c in conteos])
+            universo = Contestacion.objects.filter(evaluacion__cuestionario__periodoEvaluacion=self.periodoEvaluacion).filter(
+                evaluacion__cuestionario__periodoEvaluacion__tabulacion__tipo='ESE2012').filter(
+                evaluacion__estudianteAsignaturaDocente__asignaturaDocente__asignatura__area=nombre_area).filter(
+                evaluacion__estudianteAsignaturaDocente__asignaturaDocente__asignatura__carrera=nombre_carrera).filter(
+                pregunta__in=indicadores).count()
+            porcentajes = {}
+            for grado in ('MS','S','PS','INS'):
+                numero  = totales[grado] * 100 / float(universo)
+                porcentajes[grado] = '%.2f'%numero
+                
+        return dict(conteos=conteos, totales=totales, porcentajes=porcentajes)
+    
 
     def por_indicador(self):
-        print 'por docente' 
+        pass
 
     def mayor_satisfaccion(self):
         print 'por docente' 

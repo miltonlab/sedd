@@ -450,7 +450,7 @@ def menu_resultados(request, id_periodo_evaluacion):
         logg.info(tabulacion)
         if tabulacion.tipo == 'ESE2012':
             tabulacion = TabulacionSatisfaccion2012(periodoEvaluacion)
-            return HttpResponse(ResultadosESE2012Form(tabulacion).as_table())
+            return HttpResponse(ResultadosESE2012Form(tabulacion, request.session['carreras_docente']).as_table())
         
     except PeriodoEvaluacion.DoesNotExist:
         logg.error(u"No Existe el Periodo de Evaluacion: {0}".format(id_periodo_evaluacion))
@@ -460,20 +460,21 @@ def menu_resultados(request, id_periodo_evaluacion):
 
 def mostrar_resultados(request):
     id_periodo = request.POST['periodos']
-    id_docente = request.POST['docentes']
     opcion = request.POST['opciones']
-    periodoEvaluacion=PeriodoEvaluacion.objects.get(id=id_periodo)
+    periodoEvaluacion=PeriodoEvaluacion.objects.get(id=int(id_periodo))
     tabulacion = periodoEvaluacion.tabulacion
-    docente = DocentePeriodoAcademico.objects.get(id=id_docente)
     resultados = ""
     if tabulacion.tipo == 'ESE2012':
+        # Tipo específico de Tabulación
         tabulacion = TabulacionSatisfaccion2012(periodoEvaluacion)
         metodo =  [c[2] for c in tabulacion.calculos if c[0] == opcion][0]
         # Por docente
         if opcion == 'a':
+            id_docente = request.POST['docentes']
             resultados = metodo(request.session['area'], request.session['carrera'], id_docente)
         elif opcion == 'c':
-            resultados = metodo(request.session['area'], request.session['carrera'], campo)
+            id_seccion = request.POST['campos']
+            resultados = metodo(request.session['area'], request.session['carrera'], id_seccion)
         # Para el resto de casos
         else:
             resultados = metodo(request.session['area'], request.session['carrera'])
