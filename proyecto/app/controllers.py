@@ -12,6 +12,8 @@ from django.contrib import messages
 
 from proyecto.app.models import Configuracion
 from proyecto.app.models import Cuestionario
+from proyecto.app.models import Seccion
+from proyecto.app.models import Pregunta
 from proyecto.app.models import Evaluacion
 from proyecto.app.models import Contestacion
 from proyecto.app.models import AsignaturaDocente
@@ -398,7 +400,7 @@ def calcular_resumen(request):
         
     
     
-# =============================================================================
+# ==============================================================================
 # Calcular y mostrar resultados de evaluaciones
 # ==============================================================================
 
@@ -407,7 +409,7 @@ def resultados_carrera(request, id_docente):
     Consulta los docnetes que pertenece a la misma carrera del docente coordinador (id_docente)
     """
     try:
-        #field_carrera = forms.ModelChoiceField(queryset = Asignatura.objects.values_list('carrera').distinct())
+        #field_carrera = forms.ModelChoiceField(queryset=Asignatura.objects.values_list('carrera').distinct())
         periodoAcademico = Configuracion.getPeriodoAcademicoActual()
         area_siglas, carrera = AsignaturaDocente.objects.filter(
                 docente__id=id_docente, docente__periodoAcademico=periodoAcademico).distinct(
@@ -435,11 +437,11 @@ def resultados_carrera(request, id_docente):
                     )
     except Exception, ex:
         logg.error("Error :", str(ex))
-    return render_to_response("app/resultados_carrera.html", datos, context_instance=RequestContext(request))
+    return render_to_response("app/menu_resultados_carrera.html", datos, context_instance=RequestContext(request))
 
 
 
-def menu_resultados(request, id_periodo_evaluacion):
+def menu_resultados_carrera(request, id_periodo_evaluacion):
     """
     Genera el menú de opciones para reportes de acuerdo al periodo de evaluacion
     y su tipo de tabulación especificamente. Llamado con Ajax.
@@ -453,7 +455,7 @@ def menu_resultados(request, id_periodo_evaluacion):
             return HttpResponse(ResultadosESE2012Form(tabulacion, request.session['carreras_docente']).as_table())
         
     except PeriodoEvaluacion.DoesNotExist:
-        logg.error(u"No Existe el Periodo de Evaluacion: {0}".format(id_periodo_evaluacion))
+        logg.error(u"No Existe el Periodo de Evaluación: {0}".format(id_periodo_evaluacion))
     except Exception, ex:
         logg.error('Error: '+str(ex))
         
@@ -463,21 +465,31 @@ def mostrar_resultados(request):
     opcion = request.POST['opciones']
     periodoEvaluacion=PeriodoEvaluacion.objects.get(id=int(id_periodo))
     tabulacion = periodoEvaluacion.tabulacion
-    resultados = ""
     if tabulacion.tipo == 'ESE2012':
         # Tipo específico de Tabulación
         tabulacion = TabulacionSatisfaccion2012(periodoEvaluacion)
         metodo =  [c[2] for c in tabulacion.calculos if c[0] == opcion][0]
+        titulo = [c[3] for c in tabulacion.calculos if c[0] == opcion][0]
         # Por docente
+        resultados = {}
         if opcion == 'a':
             id_docente = request.POST['docentes']
-            resultados = metodo(request.session['area'], request.session['carrera'], id_docente)
+            if id_docente != '':
+                titulo += u': {0}'.format(DocentePeriodoAcademico.objects.get(id=int(id_docente)))
+                resultados = metodo(request.session['area'], request.session['carrera'], int(id_docente))
         elif opcion == 'c':
             id_seccion = request.POST['campos']
-            resultados = metodo(request.session['area'], request.session['carrera'], id_seccion)
+            if id_seccion != '':
+                titulo += u': {0}'.format(Seccion.objects.get(id=int(id_seccion)).titulo)
+                resultados = metodo(request.session['area'], request.session['carrera'], int(id_seccion))
+        elif opcion == 'd':
+            id_pregunta = request.POST['indicadores']
+            if id_pregunta != '':
+                titulo += u': {0}'.format(Pregunta.objects.get(id=int(id_pregunta)).texto)
+                resultados = metodo(request.session['area'], request.session['carrera'], int(id_pregunta))                
         # Para el resto de casos
         else:
             resultados = metodo(request.session['area'], request.session['carrera'])
-        ###if opcion=='b':
-        ###    resultados = tabulacion.por_carrera(request.session['carrera'], request.session['area'])
-    return HttpResponse(str(resultados));
+        resultados['titulo'] = titulo
+
+        return render_to_response('app/resultados_carrera_ese2012.html', resultados, context_instance=RequestContext(request));

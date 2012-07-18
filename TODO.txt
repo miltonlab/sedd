@@ -2,3 +2,4 @@
  * Mejorar relacion Cuestionario - Seccion - Pregunta 
  * vista y template para encuestas de docentes
  * Manejar carrera como modelo separado, necesitamos carrera_id
+ * Manejar 'seccion' (matituina, vespertina, nocturna) en las asignaturas

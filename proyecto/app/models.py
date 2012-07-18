@@ -316,19 +316,19 @@ class TabulacionSatisfaccion2012:
         #self.tipo = u'ESE2012'
         #self.descripcion = u'Encuesta de Satisfacción Estudiantil 2012'
         self.calculos = (
-            # codigo, descripcion, metodo 
-            ('a',u'La valoracion global de la Satisfacción Estudiantil por docente',
-            self.por_docente),
-            ('b',u'La valoracion global de la Satisfacción Estudiantil por carrera',
-             self.por_carrera),
-            ('c',u'La valoracion  de la Satisfacción Estudiantil en cada uno de los campos, por carrera',
-             self.por_campos),
-            ('d',u'La valoración Estudiantil en cada uno de los indicadores por carrera',
-             self.por_indicador),
-            ('e',u'Los 10 indicadores de mayor satisfacción en la Carrera',
-             self.mayor_satisfaccion),
-            ('f',u'Los 10 indicadores de mayor satisfacción en la Carrera',
-             self.mayor_satisfaccion),
+            # codigo, descripcion, metodo, titulo 
+            ('a',u'La valoracion global de la Satisfacción Estudiantil por DOCENTE',
+            self.por_docente, u'Satisfacción Estudiantil por Docente'),
+            ('b',u'La valoracion global de la Satisfacción Estudiantil por CARRERA',
+             self.por_carrera, u'Satisfacción Estudiantil en la Carrera'),
+            ('c',u'La valoracion  de la Satisfacción Estudiantil en cada uno de los CAMPOS, por carrera',
+             self.por_campos, u'Satisfacción Estudiantil en Por Campos Específicos'),
+            ('d',u'La valoración estudiantil en cada uno de los INDICADORES por carrera',
+             self.por_indicador, u'Satisfacción Estudiantil por Indicador'),
+            ('e',u'Los 10 indicadores de mayor SATISFACCIÓN en la Carrera',
+             self.mayor_satisfaccion, u'Indicadores de Mayor Satisfacción'),
+            ('f',u'Los 10 indicadores de mayor INSATISFACCIÓN en la Carrera',
+             self.mayor_insatisfaccion, u'Indicadores de mayor Insatisfacción'),
         )
 
   
@@ -338,8 +338,6 @@ class TabulacionSatisfaccion2012:
         """
         Satisfacción Estudiantil de un docente en los  módulos, cursos, unidades o talleres
         """
-        if id_docente == '':
-            return None
         if nombre_area == u'ACE':
             secciones = Seccion.objects.filter(cuestionario__in=self.periodoEvaluacion.cuestionarios.all(),
                                                cuestionario__informante__tipo=u'InstitutoIdiomas')
@@ -347,13 +345,15 @@ class TabulacionSatisfaccion2012:
             secciones = Seccion.objects.filter(cuestionario__in=self.periodoEvaluacion.cuestionarios.all(),
                                                cuestionario__informante__tipo=u'Estudiante')        
         # Para asegurar que se tomen unicamente preguntas que representen indicadores además
+        # Se seleccionan solo ids para poder comparar
         indicadores=Pregunta.objects.filter(seccion__in=secciones).filter(tipo__tipo=u'SeleccionUnica').values_list('id', flat=True)
         conteo_ms=Contestacion.objects.filter(evaluacion__cuestionario__periodoEvaluacion=self.periodoEvaluacion).filter(
             evaluacion__cuestionario__periodoEvaluacion__tabulacion__tipo='ESE2012').filter(
             evaluacion__estudianteAsignaturaDocente__asignaturaDocente__asignatura__area=nombre_area).filter(
             evaluacion__estudianteAsignaturaDocente__asignaturaDocente__asignatura__carrera=nombre_carrera).filter(
             # Unica diferencia con respecto al método 'por_carrera'
-            evaluacion__estudianteAsignaturaDocente__asignaturaDocente__docente__id=id_docente).filter(            
+            evaluacion__estudianteAsignaturaDocente__asignaturaDocente__docente__id=id_docente).filter(
+            # Recordatorio: 'pregunta' en Cuestionario es int no de tipo Pregunta
             pregunta__in=indicadores).values('pregunta').annotate(MS=Count('respuesta')).filter(
             respuesta='4').order_by('pregunta')
         conteo_s=Contestacion.objects.filter(evaluacion__cuestionario__periodoEvaluacion=self.periodoEvaluacion).filter(
@@ -425,7 +425,6 @@ class TabulacionSatisfaccion2012:
     # TODO: Usar carrera_id en vez de nombre_carrera
     def por_carrera(self, nombre_area, nombre_carrera):
         # Todas las Secciones de todos los cuestionarios que pertenecen al periodo de evaluación establecido
-        ### Discriminar nombre area
         if nombre_area == u'ACE':
             secciones = Seccion.objects.filter(cuestionario__in=self.periodoEvaluacion.cuestionarios.all(),
                                                cuestionario__informante__tipo=u'InstitutoIdiomas')
@@ -433,6 +432,7 @@ class TabulacionSatisfaccion2012:
             secciones = Seccion.objects.filter(cuestionario__in=self.periodoEvaluacion.cuestionarios.all(),
                                                cuestionario__informante__tipo=u'Estudiante')
         # Para asegurar que se tomen unicamente preguntas que representen indicadores además
+        # Se seleccionan solo ids para poder comparar
         indicadores=Pregunta.objects.filter(seccion__in=secciones).filter(tipo__tipo=u'SeleccionUnica').values_list('id', flat=True)
         conteo_ms=Contestacion.objects.filter(evaluacion__cuestionario__periodoEvaluacion=self.periodoEvaluacion).filter(
             evaluacion__cuestionario__periodoEvaluacion__tabulacion__tipo='ESE2012').filter(
@@ -494,20 +494,89 @@ class TabulacionSatisfaccion2012:
             for grado in ('MS','S','PS','INS'):
                 numero  = totales[grado] * 100 / float(universo)
                 porcentajes[grado] = '%.2f'%numero
-                
         return dict(conteos=conteos, totales=totales, porcentajes=porcentajes)
     
 
     def por_campos(self, nombre_area, nombre_carrera, id_seccion):
-        # @param id_seccion representa el campo de la carrera. Seccion = Campo
+        # @param id_seccion representa el campo del cuestionario. Seccion = Campo
         if id_seccion == None:
             return None
         # La sección especcífica del cuestionario (por Área) que corresponde
         # ya se determina en la vista anterior
-        seccion = Seccion.objects.get(id=int(id_seccion))
+        seccion = Seccion.objects.get(id=id_seccion)
         # Para asegurar que se tomen unicamente preguntas que representen indicadores además
         # de que pertenezcan únicamente al campo (sección) especificado.
+        # Se seleccionan solo ids para poder comparar luego
         indicadores=Pregunta.objects.filter(seccion=seccion).filter(tipo__tipo=u'SeleccionUnica').values_list('id', flat=True)
+        conteo_ms=Contestacion.objects.filter(evaluacion__cuestionario__periodoEvaluacion=self.periodoEvaluacion).filter(
+            evaluacion__cuestionario__periodoEvaluacion__tabulacion__tipo='ESE2012').filter(
+            evaluacion__estudianteAsignaturaDocente__asignaturaDocente__asignatura__area=nombre_area).filter(
+            evaluacion__estudianteAsignaturaDocente__asignaturaDocente__asignatura__carrera=nombre_carrera).filter(
+            pregunta__in=indicadores).values('pregunta').annotate(MS=Count('respuesta')).filter(
+            respuesta='4').order_by('pregunta')
+        conteo_s=Contestacion.objects.filter(evaluacion__cuestionario__periodoEvaluacion=self.periodoEvaluacion).filter(
+            evaluacion__cuestionario__periodoEvaluacion__tabulacion__tipo='ESE2012').filter(
+            evaluacion__estudianteAsignaturaDocente__asignaturaDocente__asignatura__area=nombre_area).filter(
+            evaluacion__estudianteAsignaturaDocente__asignaturaDocente__asignatura__carrera=nombre_carrera).filter(
+            pregunta__in=indicadores).values('pregunta').annotate(S=Count('respuesta')).filter(
+            respuesta='3').order_by('pregunta')
+        conteo_ps=Contestacion.objects.filter(evaluacion__cuestionario__periodoEvaluacion=self.periodoEvaluacion).filter(
+            evaluacion__cuestionario__periodoEvaluacion__tabulacion__tipo='ESE2012').filter(
+            evaluacion__estudianteAsignaturaDocente__asignaturaDocente__asignatura__area=nombre_area).filter(
+            evaluacion__estudianteAsignaturaDocente__asignaturaDocente__asignatura__carrera=nombre_carrera).filter(
+            pregunta__in=indicadores).values('pregunta').annotate(PS=Count('respuesta')).filter(
+            respuesta='2').order_by('pregunta')
+        conteo_ins=Contestacion.objects.filter(evaluacion__cuestionario__periodoEvaluacion=self.periodoEvaluacion).filter(
+            evaluacion__cuestionario__periodoEvaluacion__tabulacion__tipo='ESE2012').filter(
+            evaluacion__estudianteAsignaturaDocente__asignaturaDocente__asignatura__area=nombre_area).filter(
+            evaluacion__estudianteAsignaturaDocente__asignaturaDocente__asignatura__carrera=nombre_carrera).filter(
+            pregunta__in=indicadores).values('pregunta').annotate(INS=Count('respuesta')).filter(
+            respuesta='1').order_by('pregunta')
+        conteos = []
+        for i in indicadores:
+            conteo = {}            
+            for c in conteo_ms:
+                if c['pregunta'] == i:
+                    conteo.update(c)
+                    # Se intercambia por el objeto completo por versatilidad
+                    conteo['pregunta'] = Pregunta.objects.get(id=i)
+            for c in conteo_s:
+                if c['pregunta'] == i:
+                    conteo.update(c)
+                    conteo['pregunta'] = Pregunta.objects.get(id=i)
+            for c in conteo_ps:
+                if c['pregunta'] == i:
+                    conteo.update(c)
+                    conteo['pregunta'] = Pregunta.objects.get(id=i)
+            for c in conteo_ins:
+                if c['pregunta'] == i:
+                    conteo.update(c)
+                    conteo['pregunta'] = Pregunta.objects.get(id=i)
+            for grado in ('MS','S','PS','INS'):
+                if grado not in conteo.keys():
+                    conteo[grado] = 0
+            conteos.append(conteo)
+            totales = {}
+            for grado in ('MS','S','PS','INS'):
+                totales[grado] = sum([c[grado] for c in conteos])
+            universo = Contestacion.objects.filter(evaluacion__cuestionario__periodoEvaluacion=self.periodoEvaluacion).filter(
+                evaluacion__cuestionario__periodoEvaluacion__tabulacion__tipo='ESE2012').filter(
+                evaluacion__estudianteAsignaturaDocente__asignaturaDocente__asignatura__area=nombre_area).filter(
+                evaluacion__estudianteAsignaturaDocente__asignaturaDocente__asignatura__carrera=nombre_carrera).filter(
+                pregunta__in=indicadores).count()
+            porcentajes = {}
+            for grado in ('MS','S','PS','INS'):
+                numero  = totales[grado] * 100 / float(universo)
+                porcentajes[grado] = '%.2f'%numero
+        return dict(conteos=conteos, totales=totales, porcentajes=porcentajes)
+    
+
+    def por_indicador(self,nombre_area, nombre_carrera, id_pregunta ):
+        # @param id_pregunta representa el indicador campo del cuestionario. Pregunta = Indicador
+        # La pregunta especcífica del cuestionario (por Área) que corresponde
+        # ya se determina en la vista anterior
+        # Se selecciona unicamente el id para la comparación posterior
+        indicadores = (id_pregunta, )
         conteo_ms=Contestacion.objects.filter(evaluacion__cuestionario__periodoEvaluacion=self.periodoEvaluacion).filter(
             evaluacion__cuestionario__periodoEvaluacion__tabulacion__tipo='ESE2012').filter(
             evaluacion__estudianteAsignaturaDocente__asignaturaDocente__asignatura__area=nombre_area).filter(
@@ -570,16 +639,150 @@ class TabulacionSatisfaccion2012:
                 porcentajes[grado] = '%.2f'%numero
                 
         return dict(conteos=conteos, totales=totales, porcentajes=porcentajes)
+        
+
+    def mayor_satisfaccion(self, nombre_area, nombre_carrera):
+        # Todas las Secciones de todos los cuestionarios que pertenecen al periodo de evaluación establecido
+        if nombre_area == u'ACE':
+            secciones = Seccion.objects.filter(cuestionario__in=self.periodoEvaluacion.cuestionarios.all(),
+                                               cuestionario__informante__tipo=u'InstitutoIdiomas')
+        else:
+            secciones = Seccion.objects.filter(cuestionario__in=self.periodoEvaluacion.cuestionarios.all(),
+                                               cuestionario__informante__tipo=u'Estudiante')
+        # Para asegurar que se tomen unicamente preguntas que representen indicadores además
+        # Se seleccionan solo ids para poder comparar
+        indicadores=Pregunta.objects.filter(seccion__in=secciones).filter(tipo__tipo=u'SeleccionUnica').values_list('id', flat=True)
+        conteo_ms=Contestacion.objects.filter(evaluacion__cuestionario__periodoEvaluacion=self.periodoEvaluacion).filter(
+            evaluacion__cuestionario__periodoEvaluacion__tabulacion__tipo='ESE2012').filter(
+            evaluacion__estudianteAsignaturaDocente__asignaturaDocente__asignatura__area=nombre_area).filter(
+            evaluacion__estudianteAsignaturaDocente__asignaturaDocente__asignatura__carrera=nombre_carrera).filter(
+            pregunta__in=indicadores).values('pregunta').annotate(MS=Count('respuesta')).filter(
+            respuesta='4').order_by('pregunta')
+        conteo_s=Contestacion.objects.filter(evaluacion__cuestionario__periodoEvaluacion=self.periodoEvaluacion).filter(
+            evaluacion__cuestionario__periodoEvaluacion__tabulacion__tipo='ESE2012').filter(
+            evaluacion__estudianteAsignaturaDocente__asignaturaDocente__asignatura__area=nombre_area).filter(
+            evaluacion__estudianteAsignaturaDocente__asignaturaDocente__asignatura__carrera=nombre_carrera).filter(
+            pregunta__in=indicadores).values('pregunta').annotate(S=Count('respuesta')).filter(
+            respuesta='3').order_by('pregunta')
+        conteo_ps=Contestacion.objects.filter(evaluacion__cuestionario__periodoEvaluacion=self.periodoEvaluacion).filter(
+            evaluacion__cuestionario__periodoEvaluacion__tabulacion__tipo='ESE2012').filter(
+            evaluacion__estudianteAsignaturaDocente__asignaturaDocente__asignatura__area=nombre_area).filter(
+            evaluacion__estudianteAsignaturaDocente__asignaturaDocente__asignatura__carrera=nombre_carrera).filter(
+            pregunta__in=indicadores).values('pregunta').annotate(PS=Count('respuesta')).filter(
+            respuesta='2').order_by('pregunta')
+        conteo_ins=Contestacion.objects.filter(evaluacion__cuestionario__periodoEvaluacion=self.periodoEvaluacion).filter(
+            evaluacion__cuestionario__periodoEvaluacion__tabulacion__tipo='ESE2012').filter(
+            evaluacion__estudianteAsignaturaDocente__asignaturaDocente__asignatura__area=nombre_area).filter(
+            evaluacion__estudianteAsignaturaDocente__asignaturaDocente__asignatura__carrera=nombre_carrera).filter(
+            pregunta__in=indicadores).values('pregunta').annotate(INS=Count('respuesta')).filter(
+            respuesta='1').order_by('pregunta')
+        conteos = []
+        # Se contabiliza por cada pregunta
+        for i in indicadores:
+            conteo = {}            
+            for c in conteo_ms:
+                if c['pregunta'] == i:
+                    conteo.update(c)
+                    # Se intercambia por el objeto completo por versatilidad
+                    conteo['pregunta'] = Pregunta.objects.get(id=i)
+            for c in conteo_s:
+                if c['pregunta'] == i:
+                    conteo.update(c)
+                    conteo['pregunta'] = Pregunta.objects.get(id=i)
+            for c in conteo_ps:
+                if c['pregunta'] == i:
+                    conteo.update(c)
+                    conteo['pregunta'] = Pregunta.objects.get(id=i)
+            for c in conteo_ins:
+                if c['pregunta'] == i:
+                    conteo.update(c)
+                    conteo['pregunta'] = Pregunta.objects.get(id=i)
+            for grado in ('MS','S','PS','INS'):
+                if grado not in conteo.keys():
+                    conteo[grado] = 0
+            conteos.append(conteo)
+        # Ordenar de mayor a menor por 'MS' luego por 'S'        
+        conteos.sort(lambda c1, c2: -cmp(c1['MS'],c2['MS']) or -cmp(c1['S'],c2['S'] ))
+        return dict(conteos=conteos[:10], totales=None, porcentajes=None)
+
+        
+    def mayor_insatisfaccion(self, nombre_area, nombre_carrera):
+        # Todas las Secciones de todos los cuestionarios que pertenecen al periodo de evaluación establecido
+        if nombre_area == u'ACE':
+            secciones = Seccion.objects.filter(cuestionario__in=self.periodoEvaluacion.cuestionarios.all(),
+                                               cuestionario__informante__tipo=u'InstitutoIdiomas')
+        else:
+            secciones = Seccion.objects.filter(cuestionario__in=self.periodoEvaluacion.cuestionarios.all(),
+                                               cuestionario__informante__tipo=u'Estudiante')
+        # Para asegurar que se tomen unicamente preguntas que representen indicadores además
+        # Se seleccionan solo ids para poder comparar
+        indicadores=Pregunta.objects.filter(seccion__in=secciones).filter(tipo__tipo=u'SeleccionUnica').values_list('id', flat=True)
+        conteos = self._contabilizar(nombre_area, nombre_carrera, indicadores)
+        # Ordenar de mayor a menor por 'INS' luego por 'PS'
+        conteos.sort(lambda c1, c2: -cmp(c1['INS'], c2['INS']) or -cmp(c1['PS'], c2['PS'] ))
+        return dict(conteos=conteos[:10], totales=None, porcentajes=None)
+
     
-
-    def por_indicador(self):
-        pass
-
-    def mayor_satisfaccion(self):
-        print 'por docente' 
-
-    def mayor_insatisfaccion(self):
-        print 'por docente' 
+    def _contabilizar(self, nombre_area, nombre_carrera, indicadores=[], id_docente=None):
+        """
+        @param indicadores: lista de ids de pregunta que se involucran en el conteo
+        @param id_docente: para el caso único en el que no se contabiliza en toda la carrera
+        """
+        conteo_ms=Contestacion.objects.filter(evaluacion__cuestionario__periodoEvaluacion=self.periodoEvaluacion).filter(
+            evaluacion__cuestionario__periodoEvaluacion__tabulacion__tipo='ESE2012').filter(
+            evaluacion__estudianteAsignaturaDocente__asignaturaDocente__asignatura__area=nombre_area).filter(
+            evaluacion__estudianteAsignaturaDocente__asignaturaDocente__asignatura__carrera=nombre_carrera).filter(
+            pregunta__in=indicadores).values('pregunta').annotate(MS=Count('respuesta')).filter(
+            respuesta='4').order_by('pregunta')
+        conteo_s=Contestacion.objects.filter(evaluacion__cuestionario__periodoEvaluacion=self.periodoEvaluacion).filter(
+            evaluacion__cuestionario__periodoEvaluacion__tabulacion__tipo='ESE2012').filter(
+            evaluacion__estudianteAsignaturaDocente__asignaturaDocente__asignatura__area=nombre_area).filter(
+            evaluacion__estudianteAsignaturaDocente__asignaturaDocente__asignatura__carrera=nombre_carrera).filter(
+            pregunta__in=indicadores).values('pregunta').annotate(S=Count('respuesta')).filter(
+            respuesta='3').order_by('pregunta')
+        conteo_ps=Contestacion.objects.filter(evaluacion__cuestionario__periodoEvaluacion=self.periodoEvaluacion).filter(
+            evaluacion__cuestionario__periodoEvaluacion__tabulacion__tipo='ESE2012').filter(
+            evaluacion__estudianteAsignaturaDocente__asignaturaDocente__asignatura__area=nombre_area).filter(
+            evaluacion__estudianteAsignaturaDocente__asignaturaDocente__asignatura__carrera=nombre_carrera).filter(
+            pregunta__in=indicadores).values('pregunta').annotate(PS=Count('respuesta')).filter(
+            respuesta='2').order_by('pregunta')
+        conteo_ins=Contestacion.objects.filter(evaluacion__cuestionario__periodoEvaluacion=self.periodoEvaluacion).filter(
+            evaluacion__cuestionario__periodoEvaluacion__tabulacion__tipo='ESE2012').filter(
+            evaluacion__estudianteAsignaturaDocente__asignaturaDocente__asignatura__area=nombre_area).filter(
+            evaluacion__estudianteAsignaturaDocente__asignaturaDocente__asignatura__carrera=nombre_carrera).filter(
+            pregunta__in=indicadores).values('pregunta').annotate(INS=Count('respuesta')).filter(
+            respuesta='1').order_by('pregunta')
+        if id_docente:
+            conteo_ms = conteo_ms.filter(evaluacion__estudianteAsignaturaDocente__asignaturaDocente__docente__id=id_docente)
+            conteo_s = conteo_s.filter(evaluacion__estudianteAsignaturaDocente__asignaturaDocente__docente__id=id_docente)
+            conteo_ps = conteo_ps.filter(evaluacion__estudianteAsignaturaDocente__asignaturaDocente__docente__id=id_docente)
+            conteo_ins = conteo_ins.filter(evaluacion__estudianteAsignaturaDocente__asignaturaDocente__docente__id=id_docente)
+        conteos = []
+        # Se contabiliza por cada pregunta
+        for i in indicadores:
+            conteo = {}            
+            for c in conteo_ms:
+                if c['pregunta'] == i:
+                    conteo.update(c)
+                    # Se intercambia por el objeto completo por versatilidad
+                    conteo['pregunta'] = Pregunta.objects.get(id=i)
+            for c in conteo_s:
+                if c['pregunta'] == i:
+                    conteo.update(c)
+                    conteo['pregunta'] = Pregunta.objects.get(id=i)
+            for c in conteo_ps:
+                if c['pregunta'] == i:
+                    conteo.update(c)
+                    conteo['pregunta'] = Pregunta.objects.get(id=i)
+            for c in conteo_ins:
+                if c['pregunta'] == i:
+                    conteo.update(c)
+                    conteo['pregunta'] = Pregunta.objects.get(id=i)
+            for grado in ('MS','S','PS','INS'):
+                if grado not in conteo.keys():
+                    conteo[grado] = 0
+            conteos.append(conteo)
+        return conteos
 
     
 #===================================================================================================
@@ -655,7 +858,7 @@ class Asignatura(models.Model):
     duracion = models.FloatField(verbose_name='duración en horas')
     inicio = models.DateField(null=True, verbose_name='inicia')
     fin = models.DateField(null=True, verbose_name='termina')
-    # Campo combinado id_unidad:id_paralelo
+    # Campocombinado id_unidad:id_paralelo
     idSGA = models.CharField(max_length='15', db_column='id_sga')
 
     def esVigente(self):
