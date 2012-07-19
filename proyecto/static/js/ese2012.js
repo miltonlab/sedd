@@ -4,3 +4,7 @@ $(document).ready(function(){
 	alert('soy borrar');
     });
 });
+
+function test(){
+alert('testing');    
+}

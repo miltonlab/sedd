@@ -22,19 +22,11 @@ urlpatterns = patterns('',
     url(r'^encuesta/responder/(\d{1,5})/$', 'proyecto.app.controllers.encuesta_responder'),
     url(r'^encuesta/grabar/$', 'proyecto.app.controllers.encuesta_grabar'),
     url(r'^resultados/carrera/(\w+)/$', 'proyecto.app.controllers.resultados_carrera'),
-    url(r'^resultados/menu/(\d{1,2})/$', 'proyecto.app.controllers.menu_resultados_carrera'),
+    url(r'^resultados/periodo/(\d{1,2})/$', 'proyecto.app.controllers.menu_resultados_carrera'),
     url(r'^resultados/mostrar/$', 'proyecto.app.controllers.mostrar_resultados'),                       
     url(r'^sga/cargar_ofertas_sga/(\d{1,3})/$', 'proyecto.app.controllers.cargar_ofertas_sga'),
     url(r'^admin/resumen/evaluaciones/$', 'proyecto.app.controllers.resumen_evaluaciones'),
     url(r'^admin/resumen/calcular/$', 'proyecto.app.controllers.calcular_resumen'),
-
-    # Examples:
-
-    # url(r'^proyecto/', include('proyecto.foo.urls')),
-
-    # Uncomment the admin/doc line below to enable admin documentation:
-    # url(r'^admin/doc/', include('django.contrib.admindocs.urls')),
-
-    # Uncomment the next line to enable the admin:
+    url(r'^admin/app/resultados/$', 'proyecto.app.controllers.resultados'),
     url(r'^admin/', include(admin.site.urls)),
 )

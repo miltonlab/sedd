@@ -1,0 +1,79 @@
+{% extends "admin/base_site.html" %}
+{% block extrahead %}
+<script type="text/javascript" src="/static/js/jquery-1.6.2.min.js"></script>
+<script type="text/javascript" src="/static/js/sedd.js"></script>
+<script type="text/javascript">
+    $(document).ready(function(){
+	menu_academico_ajax();
+	var link = '<b><a id="ver-opciones" href="javascript:void(0)" style="font-size: 15px;"> Ver Opciones </a> </b>';
+	$('tr td:eq(1)').append(link);
+	$('#ver-opciones').click(function(){
+	    /* NOTA: JavaScript no soporta nombres de variables largos! */
+	    var id_periodo = $("#id_periodo_evaluacion option:selected").val();
+	    var area = $("#id_area option:selected").val();
+	    var carrera = $("#id_carrera option:selected").val();
+	    if (id_periodo !='' && area !='' && carrera !='' ){
+		$.ajax({
+		    url: "/resultados/periodo/" + id_periodo + "/",
+		    method: "GET",
+		    data: {area:area, carrera:carrera},
+		    // El servicio devuelve un formulario HTML formateado
+		    dataType: 'html',
+		    success: function (data){
+			$("#menu-opciones").html(data);
+			$("#procesar").show();
+		    },
+		    error: function(xhr,status,error){
+			alert("error: " + status + "-" + error);
+		    }
+		});
+	    }else{
+		$("#menu-opciones").html("");
+	    }	    
+	});
+    });
+</script>
+<style type="text/css">
+body{
+    font-size: 30px;
+}
+.boton {
+    align: right;
+    width: 150px;
+    height: 30px;
+    font-size: 15px;
+}
+select {
+    width: 600px;
+    font-size: 15px;
+    font-weight: bold;
+    color: #666666;
+}
+td {
+    vertical-align: center;
+}
+</style>
+{% endblock %}
+
+{% block content_title %}
+<h1> Seleccione: </h1>
+<p/>
+{% endblock %}
+
+{% block content %}
+{{ block.super }}
+<form action="/resultados/mostrar/" method="POST" target="_blank">
+
+  {% csrf_token %}
+
+  <table style="margin-bottom: 20px;">
+    {{ form.as_table }} 
+  </table>
+  <div id="menu-opciones">
+  </div>
+  <div id="acciones">
+    <input class="boton" id="borrar" type="reset" value="Borrar"/>
+    <input class="boton" id="procesar" type="submit" value="Aceptar"/>
+  </div>
+</form>
+{% endblock %}

@@ -27,7 +27,7 @@
 	    var id_periodo = $("#id_periodos option:selected").val();
 	    if (id_periodo != ""){
 		$.ajax({
-		    url: "/resultados/menu/" + id_periodo + "/",
+		    url: "/resultados/tipo/" + id_periodo + "/",
 		    method: "GET",
 		    //data: "periodo_academico_id={{ object_id }}",
 		    success: function (data){

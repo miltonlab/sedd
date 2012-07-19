@@ -285,6 +285,8 @@ class EvaluacionAdmin(admin.ModelAdmin):
     def has_add_permission(self, request):
         return False
 
+class ResultadosAdmin(admin.ModelAdmin):
+    pass
     
 class TabulacionAdmin(admin.ModelAdmin):
     pass
@@ -304,3 +306,4 @@ admin.site.register(models.Usuario, UsuarioAdmin)
 admin.site.register(models.Configuracion, ConfiguracionAdmin)
 admin.site.register(models.Evaluacion, EvaluacionAdmin)
 admin.site.register(models.Tabulacion, TabulacionAdmin)
+admin.site.register(models.Resultados, ResultadosAdmin)

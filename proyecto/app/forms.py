@@ -1,6 +1,10 @@
 # -*- coding: utf-8 -*-
 
 from django import forms
+from proyecto.app.models import PeriodoAcademico
+from proyecto.app.models import PeriodoEvaluacion
+from proyecto.app.models import AreaSGA
+from proyecto.app.models import Asignatura
 from proyecto.app.models import EstudianteAsignaturaDocente
 from proyecto.app.models import AsignaturaDocente
 from proyecto.app.models import Seccion
@@ -13,13 +17,13 @@ class ResultadosESE2012Form(forms.Form):
     cualquier tipo de Informante
     """
 
-    def __init__(self, tabulacion, carreras_docente):
+    def __init__(self, tabulacion, area, carrera):
         forms.Form.__init__(self)
         opciones = [(o[0], o[1]) for o in tabulacion.calculos]
         self.fields['opciones'] = forms.ChoiceField(widget=forms.RadioSelect(), choices=opciones)
         # TODO: Un docente puede ser coordinador de mas de un carrera ?
-        carrera = carreras_docente[0]['nombre']
-        area = carreras_docente[0]['area']
+        ###carrera = carreras_docente[0]['nombre']
+        ###area = carreras_docente[0]['area']
         periodoEvaluacion = tabulacion.periodoEvaluacion
         if area == u'ACE':
             cuestionario = periodoEvaluacion.cuestionarios.get(informante__tipo=u'InstitutoIdiomas')
@@ -38,8 +42,22 @@ class ResultadosESE2012Form(forms.Form):
         self.fields['indicadores'] = forms.ChoiceField(choices=indicadores)
         
     class Media:
-        js = ('/static/js/jquery-1.6.2.min.js', '/static/js/ese2012.js',)
+        ###js = ('/static/js/jquery-1.6.2.min.js', '/static/js/ese2012.js',)
+        js = ('js/ese2012.js',)
 
+
+class ResultadosForm(forms.Form):
+    periodo_academico = forms.ModelChoiceField(queryset=PeriodoAcademico.objects.all())
+    periodo_academico.label = u'Periodo Académico'
+    periodo_evaluacion = forms.ModelChoiceField(PeriodoEvaluacion.objects.none())
+    periodo_evaluacion.label = u'Periodo Evaluación'
+    area = forms.ModelChoiceField(AreaSGA.objects.none())
+    carrera = forms.ModelChoiceField(Asignatura.objects.none())
+    # semestre = forms.ModelChoiceField(Asignatura.objects.none())
+    # paralelo = forms.ModelChoiceField(Asignatura.objects.none())
+
+    ###def as_table(self):
+    ###    return "nada"
 
 class EstudianteAsignaturaDocenteAdminForm(forms.ModelForm):
     carrera = forms.CharField(widget=forms.TextInput(attrs={'size':'80', 'readonly':'readonly'}))

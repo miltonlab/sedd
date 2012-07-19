@@ -1,0 +1,81 @@
+<html>
+  <head>  
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8"/>
+    <title> Resultados Encuesta de Satisfacción Estudiantil 2012 </title>
+    <style type="text/css">
+    body {
+	font-family: Arial;
+	font-size: 12px;
+    }
+    table {
+	margin-top: 10px;
+	margin-bottom: 10px;
+	width: 75%;
+	borderspacing: 0;
+    }
+    td, th {
+	text-align: center;
+	border: 1px solid gray;
+        font-size: 13px;
+        width: 20%;
+    }
+    </style>
+  </head>
+  <body>
+    <center>
+      <img width="75px" height="75px" src="/static/images/unl_logo.png"/>
+      <h2> {{ "Unversidad Nacional de Loja"|upper }} </h2>
+      <h2 style="margin-bottom: 3px;"> Encuesta de Satisfacción Estudiantil 2012 </h2>
+      <h3> {{ titulo|safe }} </h3>
+      <table  width="100%" cellspacing="0">
+	<th rowspan="2"> Indicadores </th>
+	<th colspan="4"> Niveles de Satisfacción  </th>
+	<tr>
+	  <th> Muy Satisfecho MS (4) </th>
+	  <th> Satisfecho S (3) </th>
+	  <th> Poco Satisfecho PS (2) </th>
+	  <th> Insatisfecho INS (1) </th>
+	</tr>
+	{% for c in conteos %}
+	<tr>
+	  <td title="{{ c.pregunta.texto }}" width="20%"> 
+	    <b>{{ c.pregunta.seccion.orden }}.{{c.pregunta.orden}} </b>
+	  </td>
+	  <td> {{ c.MS }} </td>
+	  <td> {{ c.S }} </td>
+	  <td> {{ c.PS }} </td>
+	  <td> {{ c.INS }} </td>
+	</tr>
+	{% endfor %}
+      </table>
+
+      {% if totales and porcentajes %}
+      <h3> Resultados </h3>
+      <table cellspacing="0">
+	<tr>
+	  <td> Suman ( {{ totales.total }} ) </td>
+	  <td> {{ totales.MS }} </td>
+	  <td> {{ totales.S }} </td>
+	  <td> {{ totales.PS }} </td>
+	  <td> {{ totales.INS }} </td>
+	</tr>
+	<tr>
+	  <td> %Satisfacción </td>
+	  <td> {{ porcentajes.MS }}% </td>
+	  <td> {{ porcentajes.S }}% </td>
+	  <td> {{ porcentajes.PS }}% </td>
+	  <td> {{ porcentajes.INS }}% </td>
+	</tr>
+      </table>
+      {%endif%}
+      <div id="pie" style="font-size: 9px; ; color: #666666">
+	<hr style="margin-bottom: 6px;"/>
+	Unidad de Telecomunicaciones e Infomacion - Departamento de Desarrollo de Software <br>
+	Correo Sistema de Evaluacion: 
+	<a href="mailto:evaluacion.docente@unl.edu.ec"> <u>evaluacion.docente@unl.edu.ec</u> </a> <br/>
+	Loja - Ecuador
+      </div>
+
+    </center>
+  </body>
+</html>
