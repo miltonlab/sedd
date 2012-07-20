@@ -355,9 +355,12 @@ def menu_academico_ajax(request):
     Funcionalidad reutilizada cuando se necesita información académica jerárquica
     estructurada en (PeriodoAcademico, PeriodoEvaluacion, AreaSGA, carrera, semestre,
     paralelo). Utilizado generalmente en menus de reportes.
+    TODO: Analizar el parámetro 'siguiente' en más casos para crear un componente más independiente.
     """
     try:
-        id_campo, valor_campo = request.GET['id'], request.GET['valor']
+        id_campo = request.GET['id']
+        valor_campo = request.GET['valor']
+        campo_siguiente = request.GET['siguiente']
         if valor_campo == '':
             return HttpResponse('{"id": "", "valores": []}', mimetype="JSON")
         id = ""
@@ -386,15 +389,24 @@ def menu_academico_ajax(request):
                 valores.append(dict(id=carrera, valor=carrera))
         elif id_campo == 'id_carrera':
             request.session['carrera'] = valor_campo
-            id = 'id_semestre'
-            objetos = EstudianteAsignaturaDocente.objects.filter(
-                estudiante__periodoAcademico=request.session['periodoAcademico']).filter(
-                asignaturaDocente__asignatura__area=request.session['area']).filter(
-                asignaturaDocente__asignatura__carrera=valor_campo).values_list(
-                'asignaturaDocente__asignatura__semestre', flat=True).distinct()
-            for o in objetos:
-                semestre = o.encode('utf-8') if isinstance(o, unicode) else o
-                valores.append(dict(id=semestre, valor=semestre))
+            id = campo_siguiente
+            if campo_siguiente == 'id_semestre':
+            ###id = 'id_semestre'
+                objetos = EstudianteAsignaturaDocente.objects.filter(
+                    estudiante__periodoAcademico=request.session['periodoAcademico']).filter(
+                    asignaturaDocente__asignatura__area=request.session['area']).filter(
+                    asignaturaDocente__asignatura__carrera=valor_campo).values_list(
+                    'asignaturaDocente__asignatura__semestre', flat=True).distinct()
+                for o in objetos:
+                    semestre = o.encode('utf-8') if isinstance(o, unicode) else o
+                    valores.append(dict(id=semestre, valor=semestre))
+            elif campo_siguiente == 'id_docente':
+                objetos = AsignaturaDocente.objects.filter(
+                    docente__periodoAcademico=request.session['periodoAcademico']).filter(
+                    asignatura__area=request.session['area']).filter(
+                    asignatura__carrera=valor_campo)
+                docentes = set([o.docente for o in objetos])
+                valores = [dict(id=d.id, valor=d.__unicode__()) for d in docentes]
         elif id_campo == 'id_semestre':
             request.session['semestre'] = valor_campo
             id = 'id_paralelo'
@@ -436,14 +448,14 @@ def resultados_carrera(request, id_docente):
         ids = set([ad.docente.id for ad in AsignaturaDocente.objects.filter(
             asignatura__carrera=carrera, asignatura__area=area)])
         form = forms.Form()
-        form.fields['docente'] = forms.ModelChoiceField(queryset=DocentePeriodoAcademico.objects.filter(id__in=ids))
         # Selecciona solo los peridos de evaluacion en los que se encuentra el area del docente
         # y a su vez que estén dentro del periodo académico actual.  
-        form.fields['periodo_evaluacion'] = forms.ModelChoiceField(queryset=area.periodosEvaluacion.filter(
-            periodoAcademico=periodoAcademico))
-        datos = dict(form=form,
-                     title='>> Comision Academica de la Carrera ' + carrera
-                    )
+        form.fields['periodo_evaluacion'] = forms.ModelChoiceField(
+            queryset=area.periodosEvaluacion.filter(periodoAcademico=periodoAcademico)
+            )
+        form.fields['periodo_evaluacion'].label = 'Periodo de Evaluación'
+        form.fields['docente'] = forms.ModelChoiceField(queryset=DocentePeriodoAcademico.objects.filter(id__in=ids))        
+        datos = dict(form=form, title='>> Coordinador Carrera ' + carrera )
     except Exception, ex:
         logg.error("Error :", str(ex))
     return render_to_response("app/menu_resultados_carrera.html", datos, context_instance=RequestContext(request))
@@ -454,7 +466,6 @@ def menu_resultados_carrera(request, id_periodo_evaluacion):
     Genera el menú de opciones para reportes de acuerdo al periodo de evaluacion
     y su tipo de tabulación especificamente. Llamado con Ajax.
     """
-    logg.info(id_periodo_evaluacion)    
     try:
         periodoEvaluacion=PeriodoEvaluacion.objects.get(id=id_periodo_evaluacion)
         tabulacion = Tabulacion.objects.get(periodoEvaluacion=periodoEvaluacion)
@@ -473,9 +484,9 @@ def menu_resultados_carrera(request, id_periodo_evaluacion):
                 area = request.GET['area']
                 carrera = request.GET['carrera']
             form = ResultadosESE2012Form(tabulacion, area, carrera)
-            formulario_formateado = render_to_string("admin/app/formulario_ese2012.html", dict(form=form))                                
-            return HttpResponse(form.as_table())
-            #return HttpResponse(formulario_formateado)
+            formulario_formateado = render_to_string("admin/app/formulario_ese2012.html", dict(form=form))
+            #return HttpResponse(form.as_table())
+            return HttpResponse(formulario_formateado)
         
     except PeriodoEvaluacion.DoesNotExist:
         logg.error(u"No Existe el Periodo de Evaluación: {0}".format(id_periodo_evaluacion))
@@ -484,9 +495,8 @@ def menu_resultados_carrera(request, id_periodo_evaluacion):
         
 
 def mostrar_resultados(request):
-    """
-    Método llamado con Ajax
-    """
+    if not (request.POST.has_key('periodo_evaluacion') and request.POST.has_key('opciones')):
+        return HttpResponse("<h2> Tiene que eleegir Opciones de Resultados </h2>") 
     id_periodo = request.POST['periodo_evaluacion']
     opcion = request.POST['opciones']
     periodoEvaluacion=PeriodoEvaluacion.objects.get(id=int(id_periodo))
@@ -495,24 +505,24 @@ def mostrar_resultados(request):
         # Tipo específico de Tabulación
         tabulacion = TabulacionSatisfaccion2012(periodoEvaluacion)
         metodo =  [c[2] for c in tabulacion.calculos if c[0] == opcion][0]
-        titulo = request.session['area'] + '<br/>' + request.session['carrera'] + '<br/>'
+        titulo = request.session['area'] + '<br/> <b>' + request.session['carrera'] + '</b><br/>'
         titulo += [c[3] for c in tabulacion.calculos if c[0] == opcion][0]
         # Por docente
         resultados = {}
         if opcion == 'a':
             id_docente = request.POST['docente']
             if id_docente != '':
-                titulo += u': {0}'.format(DocentePeriodoAcademico.objects.get(id=int(id_docente)))
+                titulo += u': <b>{0}</b>'.format(DocentePeriodoAcademico.objects.get(id=int(id_docente)))
                 resultados = metodo(request.session['area'], request.session['carrera'], int(id_docente))
         elif opcion == 'c':
             id_seccion = request.POST['campos']
             if id_seccion != '':
-                titulo += u': {0}'.format(Seccion.objects.get(id=int(id_seccion)).titulo)
+                titulo += u': <b>{0}</b>'.format(Seccion.objects.get(id=int(id_seccion)).titulo)
                 resultados = metodo(request.session['area'], request.session['carrera'], int(id_seccion))
         elif opcion == 'd':
             id_pregunta = request.POST['indicadores']
             if id_pregunta != '':
-                titulo += u': {0}'.format(Pregunta.objects.get(id=int(id_pregunta)).texto)
+                titulo += u': <b>{0}</b>'.format(Pregunta.objects.get(id=int(id_pregunta)).texto)
                 resultados = metodo(request.session['area'], request.session['carrera'], int(id_pregunta))                
         # Para el resto de casos
         else:

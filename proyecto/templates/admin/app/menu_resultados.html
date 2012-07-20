@@ -4,24 +4,23 @@
 <script type="text/javascript" src="/static/js/sedd.js"></script>
 <script type="text/javascript">
     $(document).ready(function(){
+	$('.boton').hide();
 	menu_academico_ajax();
-	var link = '<b><a id="ver-opciones" href="javascript:void(0)" style="font-size: 15px;"> Ver Opciones </a> </b>';
-	$('tr td:eq(1)').append(link);
 	$('#ver-opciones').click(function(){
 	    /* NOTA: JavaScript no soporta nombres de variables largos! */
-	    var id_periodo = $("#id_periodo_evaluacion option:selected").val();
+	    var id_periodoe = $("#id_periodo_evaluacion option:selected").val();
 	    var area = $("#id_area option:selected").val();
 	    var carrera = $("#id_carrera option:selected").val();
-	    if (id_periodo !='' && area !='' && carrera !='' ){
+	    if (id_periodoe !='' && area !='' && carrera !='' ){
 		$.ajax({
-		    url: "/resultados/periodo/" + id_periodo + "/",
+		    url: "/resultados/periodo/" + id_periodoe + "/",
 		    method: "GET",
 		    data: {area:area, carrera:carrera},
 		    // El servicio devuelve un formulario HTML formateado
 		    dataType: 'html',
 		    success: function (data){
 			$("#menu-opciones").html(data);
-			$("#procesar").show();
+			$('.boton').show();
 		    },
 		    error: function(xhr,status,error){
 			alert("error: " + status + "-" + error);
@@ -29,13 +28,14 @@
 		});
 	    }else{
 		$("#menu-opciones").html("");
+		$('.boton').hide();
 	    }	    
 	});
     });
 </script>
 <style type="text/css">
 body{
-    font-size: 30px;
+    font-size: 12px;
 }
 .boton {
     align: right;
@@ -43,21 +43,43 @@ body{
     height: 30px;
     font-size: 15px;
 }
-select {
+/*select nth:eq(1) {
     width: 600px;
     font-size: 15px;
     font-weight: bold;
     color: #666666;
-}
+}*/
 td {
     vertical-align: center;
 }
 </style>
 {% endblock %}
 
+
 {% block content_title %}
-<h1> Seleccione: </h1>
-<p/>
+  <ul class="object-tools">
+    <li>
+      <a href="javascript:void(0)" id="ver-opciones">
+        Ver Opciones de Resultados
+      </a>
+    </li>
+  </ul>
+  <h1 style="margin-bottom: 20px;"> Seleccione Datos Académicos </h1>
+{% endblock %}
+
+
+{% block breadcrumbs %}
+  <div class="breadcrumbs">
+      <a href="../../">
+        Inicio
+      </a>
+       &rsaquo;
+       <a href="../">
+         App
+      </a>
+      &rsaquo;
+      Evaluaciones
+    </div>
 {% endblock %}
 
 {% block content %}

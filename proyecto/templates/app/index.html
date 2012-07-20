@@ -12,7 +12,13 @@
 <h1> Carreras del Estudiante </h1>
 <ul style="margin-top: 20px;">
   {% for carrera in request.session.carreras_estudiante %}
-  <h1> <li> <a href="{% url proyecto.app.controllers.estudiante_asignaturas_docentes carrera.num_carrera %}"> {{ carrera.nombre|upper }} </a> </li> <h1>
+  <h1> 
+    <li> 
+      <a href="{% url proyecto.app.controllers.estudiante_asignaturas_docentes carrera.num_carrera %}"> 
+	{{ carrera.nombre|upper }} 
+      </a> 
+    </li> 
+    <h1>
   {% endfor %}
 </ul>
 <hr/>
@@ -32,10 +38,16 @@
 <hr/>
 
 {% if request.session.docente.esCoordinador %}
-<h1> Comision Academica de la Carrera </h1>
+<h1 style="margin-top: 20px;"> Comisión Académica de Carrera  </h1>
 <ul style="margin-top: 20px;">
   {% for carrera in request.session.carreras_docente %}
-  <h3> <li> <a href="/resultados/carrera/{{ request.session.docente.id }}">  {{ carrera.nombre|upper }} [{{ carrera.area|upper }}]</a> </li> </h3>
+  <h3> 
+    <li>
+      
+      <a href="/resultados/carrera/{{ request.session.docente.id }}">  
+	RESULTADOS EVALUACIÓN CARRERA {{ carrera.nombre|upper }} [{{ carrera.area|upper }}]</a> 
+    </li> 
+  </h3>
   {% endfor %}
 </ul>
 <hr/>

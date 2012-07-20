@@ -15,24 +15,25 @@
 <script type="text/javascript">
     $(document).ready(function(){
 	$("#procesar").hide();
-	$("#id_docentes").change(function(){
-	    var id_docente = $("#id_docentes option:selected").val();
+	$("#id_docente").change(function(){
+	    var id_docente = $("#id_docente option:selected").val();
 	    if (id_docente == ""){
 		$("#procesar").hide();
 	    }else{
 		$("#procesar").show();
 	    }
 	});
-	$("#id_periodos").change(function(){
-	    var id_periodo = $("#id_periodos option:selected").val();
+	$("#id_periodo_evaluacion").change(function(){
+	    var id_periodo = $("#id_periodo_evaluacion option:selected").val();
 	    if (id_periodo != ""){
 		$.ajax({
-		    url: "/resultados/tipo/" + id_periodo + "/",
+		    url: "/resultados/periodo/" + id_periodo + "/",
 		    method: "GET",
 		    //data: "periodo_academico_id={{ object_id }}",
 		    success: function (data){
 			$("#menu-resultados").html(data);
 			$("#procesar").show();
+			$("#borrar").show();
 		    },
 		    error: function(xhr,status,error){
 			alert("error: " + status + "-" + error);
@@ -41,6 +42,7 @@
 	    }else{
 		$("#menu-resultados").html("");
 		$("#procesar").hide();
+		$("#borrar").hide();
 	    }
 	    
 	});
@@ -60,19 +62,14 @@
 
 <form action="/resultados/mostrar/" method="POST" target="_blank">
 
-  {% csrf_token %}
+  {% csrf_token %} 
 
-  <span class="big"> Periodo de Evaluación </span> 
-  {{ form.periodos }} 
+  <table>  
+    {{ form.as_table }}
+  </table>
 
-  <span class="big"> Docente </span>
-
-  {{ form.docentes }}
-
-  <fieldset style="margin-top: 20px; min-height: 30px">
-    <!--legend> Opciones </legend-->
-    <div id="menu-resultados"> </div>
-  </fieldset>
+  <!--legend> Opciones </legend-->
+  <div id="menu-resultados"> </div>
   <p/>    
 
   <input id="procesar" type="submit" value="Aceptar"/>

@@ -40,6 +40,7 @@ class ResultadosESE2012Form(forms.Form):
         indicadores = [ (p.id, u'{0}.{1}. {2}'.format(p.seccion.orden, p.orden, p.texto[:150])) for p in preguntas ]
         self.fields['campos'] = forms.ChoiceField(choices=campos)
         self.fields['indicadores'] = forms.ChoiceField(choices=indicadores)
+
         
     class Media:
         ###js = ('/static/js/jquery-1.6.2.min.js', '/static/js/ese2012.js',)
@@ -53,6 +54,7 @@ class ResultadosForm(forms.Form):
     periodo_evaluacion.label = u'Periodo Evaluación'
     area = forms.ModelChoiceField(AreaSGA.objects.none())
     carrera = forms.ModelChoiceField(Asignatura.objects.none())
+    docente = forms.ModelChoiceField(Asignatura.objects.none())
     # semestre = forms.ModelChoiceField(Asignatura.objects.none())
     # paralelo = forms.ModelChoiceField(Asignatura.objects.none())
 

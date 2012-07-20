@@ -14,13 +14,25 @@ function menu_academico_ajax(){
 	for (var i=0; i<ids.length; i++){
 	    if (ids[i] == id){ indice = i; break; }
 	}
+	// Se obtiene el siguiente campo en la jerarquía de los campos SELECT
+	var siguiente = null;
+	if (indice < ids.length - 1){ // Si no es el último
+	    siguiente = ids[ indice + 1 ];
+	}
 	if (valor == ''){
+	    // Limpiar el resto de campos hacia abajo
+	    for (var i=0; i<ids.length; i++){
+		if ( i > indice ){
+		    $('#' + ids[i]).find('option').remove();
+		    $('#' + ids[i]).append(new Option('---------',''));
+		}
+	    }
 	    return;
 	}
 	$.ajax({
 	    url: "/admin/resumen/evaluaciones/",
 	    method: "GET",
-	    data: {id:id, valor:valor},
+	    data: {id:id, valor:valor, siguiente:siguiente},
 	    dataType: "JSON",
 	    success: function (response){
 		/* Limpiamos los select que deben ser cambiados */

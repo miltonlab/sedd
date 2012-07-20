@@ -126,10 +126,13 @@ class Evaluacion(models.Model):
         verbose_name_plural = 'Evaluaciones'
         
     def __unicode__(self):
-        return u'{0} - {1} - {2}::{3}'.format(self.estudianteAsignaturaDocente.estudiante.cedula(),
-                                           self.estudianteAsignaturaDocente.asignaturaDocente.docente.cedula(),
-                                           self.fechaInicio, self.horaInicio, )
-    
+        return u'{0} - {1} - {2}|{3} - {4}|{5}'.format(
+            self.estudianteAsignaturaDocente.estudiante.cedula(),
+            self.estudianteAsignaturaDocente.asignaturaDocente.docente.cedula(),
+            self.fechaInicio, self.horaInicio,
+            self.fechaFin, self.horaFin
+            )
+
 class Resultados(models.Model):
     """
     Clase para forzar un enlace desde al admin de la app
