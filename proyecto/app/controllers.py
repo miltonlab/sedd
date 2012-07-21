@@ -261,7 +261,7 @@ def encuesta_responder(request, id_cuestionario):
                                         estudianteAsignaturaDocente.asignaturaDocente.asignatura.nombre,
                                         estudianteAsignaturaDocente.asignaturaDocente.docente)
     fecha = datetime.now()
-    # Para una mejor extraccioon de los datos de la asignatura se agrega el ultimo elemento
+    # Para una mejor extraccion de los datos de la asignatura se agrega el ultimo elemento
     datos = dict(cuestionario=cuestionario, title=title, 
                  asignaturaDocente=estudianteAsignaturaDocente.asignaturaDocente,
                  fecha=fecha)
@@ -275,8 +275,11 @@ def encuesta_grabar(request):
     estudianteAsignaturaDocente = request.session['estudianteAsignaturaDocente']
     datos = dict(num_carrera=request.session['num_carrera'])
     # Si se regresa a grabar otra vez la misma encuesta
-    if Evaluacion.objects.filter(estudianteAsignaturaDocente = estudianteAsignaturaDocente).filter(
+    if not evaluacion or Evaluacion.objects.filter(
+        estudianteAsignaturaDocente = estudianteAsignaturaDocente).filter(
         cuestionario = evaluacion.cuestionario).count() > 0:
+        request.session['evaluacion'] = None
+        request.session['estudianteAsignaturaDocente'] = None
         return render_to_response('app/encuesta_finalizada.html',
                                   datos, context_instance=RequestContext(request))     
     evaluacion.fechaFin = datetime.now().date()

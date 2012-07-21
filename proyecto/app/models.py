@@ -138,7 +138,7 @@ class Resultados(models.Model):
     Clase para forzar un enlace desde al admin de la app
     """
     class Meta:
-        managed = False
+        #managed = False
         verbose_name_plural = 'Resultados'
         
 class TipoPregunta(models.Model):
