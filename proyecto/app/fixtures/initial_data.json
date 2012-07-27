@@ -1528,7 +1528,7 @@
     "pk"    : 2
   },
   { "fields" : { "siglas" : "AJSA",
-        "nombre" : "Área de la Educación, Arte y Comunicación"
+        "nombre" : "Área Juridica Social y Administrativa"
       },
     "model" : "app.areasga",
     "pk"    : 4

@@ -1,0 +1,50 @@
+<html>
+  <head>  
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8"/>
+    <title> Resultados Encuesta de Satisfacción Estudiantil 2012 </title>
+    <style type="text/css">
+    body {
+	font-family: Helvetica, Arial, Sans;
+    }
+    table {
+	margin-top: 10px;
+	margin-bottom: 10px;
+	width: 75%;
+	borderspacing: 0;
+    }
+    td, th {
+	border: 1px solid gray;
+        font-size: 13px;
+    }
+    </style>
+  </head>
+  <body>
+    <center>
+      <img width="75px" height="75px" src="/static/images/unl_logo.png"/>
+      <h4> {{ "Unversidad Nacional de Loja"|upper }} </h4>
+      <h3 style="margin-bottom: 3px;"> Encuesta de Satisfacción Estudiantil 2012 </h3>
+      {{ titulo|safe }}
+      <table id="tabla-resultados" width="100%" cellspacing="0">
+	<th width="25%"> Otros Aspectos </th>
+	<th width="70%"> Respuesta  </th>
+	<th width="5%"> Frecuencia </th>
+	{% for r in resultados %}
+	<tr>
+	  <td width="25%">  {{ r.pregunta.texto }} </td>
+	  <td width="70%"> {{ r.respuesta }} </td>
+	  <td width="5%" align="center"> {{ r.frecuencia }} </td>
+	</tr>
+	{% endfor %}
+      </table>
+
+      <div id="pie" style="font-size: 9px; ; color: #666666">
+	<hr style="margin-bottom: 6px;"/>
+	Unidad de Telecomunicaciones e Infomacion - Departamento de Desarrollo de Software <br>
+	Correo Sistema de Evaluacion: 
+	<a href="mailto:evaluacion.docente@unl.edu.ec"> <u>evaluacion.docente@unl.edu.ec</u> </a> <br/>
+	Loja - Ecuador
+      </div>
+
+    </center>
+  </body>
+</html>

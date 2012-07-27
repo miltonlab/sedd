@@ -520,19 +520,25 @@ def mostrar_resultados(request):
         elif opcion == 'c':
             id_seccion = request.POST['campos']
             if id_seccion != '':
-                titulo += u': <b>{0}</b>'.format(Seccion.objects.get(id=int(id_seccion)).titulo)
+                seccion = Seccion.objects.get(id=int(id_seccion))
+                titulo += u': <b>{0}</b>'.format(seccion.titulo)
                 resultados = metodo(request.session['area'], request.session['carrera'], int(id_seccion))
+                if seccion.orden == 4:
+                    datos = dict(resultados=resultados, titulo=titulo)
+                    return render_to_response('app/imprimir_otros_ese2012.html', datos,
+                                              context_instance=RequestContext(request));
         elif opcion == 'd':
             id_pregunta = request.POST['indicadores']
             if id_pregunta != '':
                 titulo += u': <b>{0}</b>'.format(Pregunta.objects.get(id=int(id_pregunta)).texto)
-                resultados = metodo(request.session['area'], request.session['carrera'], int(id_pregunta))                
+                resultados = metodo(request.session['area'], request.session['carrera'], int(id_pregunta))
         # Para el resto de casos
         else:
             resultados = metodo(request.session['area'], request.session['carrera'])
         resultados['titulo'] = titulo
 
-        return render_to_response('app/imprimir_resultados_ese2012.html', resultados, context_instance=RequestContext(request));
+        return render_to_response('app/imprimir_resultados_ese2012.html', resultados,
+                                  context_instance=RequestContext(request));
 
 
 def resultados(request):

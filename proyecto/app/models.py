@@ -7,6 +7,9 @@ from proyecto import settings
 from django.contrib.auth.models import User
 from datetime import datetime
 
+import logging
+logg = logging.getLogger('logapp')
+
 
 class TipoInformante(models.Model): 
     # TODO: Clase Abstracta
@@ -67,6 +70,11 @@ class Cuestionario(models.Model):
         return self.titulo
 
     def clonar(self):
+        """
+        Crea una copia de un cuestionario incluyendo todas sus secciones y todas sus
+        preguntas. Teniendo en cuenta que todos los objetos involucrados seran objetos
+        nuevos.
+        """
         numero = Cuestionario.objects.count()
         nuevo = Cuestionario()
         nuevo.titulo = u'{0} (Clonado {1})'.format(self.titulo, str(numero+1))
@@ -515,6 +523,10 @@ class TabulacionSatisfaccion2012:
         # La sección especcífica del cuestionario (por Área) que corresponde
         # ya se determina en la vista anterior
         seccion = Seccion.objects.get(id=id_seccion)
+        print seccion.id
+        # Se tratan unicamente preguntas abiertas
+        if seccion.orden == 4:
+            return self.por_otros_aspectos(siglas_area, nombre_carrera, seccion)
         # Para asegurar que se tomen unicamente preguntas que representen indicadores además
         # de que pertenezcan únicamente al campo (sección) especificado.
         # Se seleccionan solo ids para poder comparar luego
@@ -581,10 +593,24 @@ class TabulacionSatisfaccion2012:
                 numero  = totales[grado] * 100 / float(universo)
                 porcentajes[grado] = '%.2f'%numero
         return dict(conteos=conteos, totales=totales, porcentajes=porcentajes)
-    
 
+    
+    def por_otros_aspectos(self, siglas_area, nombre_carrera, seccion):
+        indicadores=Pregunta.objects.filter(seccion=seccion).filter(tipo__tipo=u'Ensayo').values_list('id', flat=True)
+
+        conteo=Contestacion.objects.filter(evaluacion__cuestionario__periodoEvaluacion=self.periodoEvaluacion).filter(
+            evaluacion__cuestionario__periodoEvaluacion__tabulacion__tipo='ESE2012').filter(
+            evaluacion__estudianteAsignaturaDocente__asignaturaDocente__asignatura__area=siglas_area).filter(
+            evaluacion__estudianteAsignaturaDocente__asignaturaDocente__asignatura__carrera=nombre_carrera).filter(
+            pregunta__in=indicadores).values('pregunta','respuesta').annotate(
+            frecuencia=Count('respuesta')).order_by('pregunta')
+        # Para acceder a los datos del objeto pregunta en el template
+        for c in conteo:
+            c['pregunta'] = Pregunta.objects.get(id=c['pregunta'])
+        return conteo
+    
     def por_indicador(self,siglas_area, nombre_carrera, id_pregunta ):
-        # @param id_pregunta representa el indicador campo del cuestionario. Pregunta = Indicador
+        # @param id_pregunta representa el indicador del campo del cuestionario. Pregunta = Indicador
         # La pregunta especcífica del cuestionario (por Área) que corresponde
         # ya se determina en la vista anterior
         # Se selecciona unicamente el id para la comparación posterior
