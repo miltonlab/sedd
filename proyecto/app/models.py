@@ -234,8 +234,9 @@ class AreaSGA(models.Model):
 class PeriodoEvaluacion(models.Model):
     nombre = models.CharField(max_length='100')
     descripcion = models.TextField(null=True)
-    inicio = models.DateField()
-    fin = models.DateField()
+    observaciones = models.TextField(null=True)
+    inicio = models.DateTimeField()
+    fin = models.DateTimeField()
     periodoAcademico = models.ForeignKey('PeriodoAcademico', related_name='periodosEvaluacion', verbose_name="Periodo Académico")
     areasSGA = models.ManyToManyField(AreaSGA, related_name='periodosEvaluacion', verbose_name=u'Areas Académicas SGA')
     
