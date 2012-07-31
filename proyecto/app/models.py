@@ -246,16 +246,16 @@ class PeriodoEvaluacion(models.Model):
         verbose_name_plural = 'Periodos de Evaluación'
         
     def noIniciado(self):
-        hoy = datetime.today().date()
-        return hoy < self.inicio
+        ahora = datetime.today()
+        return ahora < self.inicio
     
     def vigente(self):
-        hoy = datetime.today().date()
-        return self.inicio <=  hoy <= self.fin 
+        ahora = datetime.today()
+        return self.inicio <=  ahora <= self.fin 
 
     def finalizado(self):
-        hoy = datetime.today().date()
-        return hoy > self.fin
+        ahora = datetime.today()
+        return ahora > self.fin
 
     def verificar_estudiante(self, cedula):
         """

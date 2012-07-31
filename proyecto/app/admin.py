@@ -100,11 +100,11 @@ class PeriodoAcademicoAdmin(admin.ModelAdmin):
 
 class EstudianteAsignaturaDocenteEnLinea(admin.StackedInline):
     model = models.EstudianteAsignaturaDocente
-    form = EstudianteAsignaturaDocenteAdminForm
+    # form = EstudianteAsignaturaDocenteAdminForm
     extra = 1
     verbose_name = 'Asignaturas de Estudiante'
     raw_id_fields = ('asignaturaDocente',)
-    fields = ('carrera','semestre','paralelo','asignaturaDocente')
+    # fields = ('carrera','semestre','paralelo','asignaturaDocente')
 
 class EstudiantePeriodoAcademicoAdmin(admin.ModelAdmin):
     list_display = ('cedula', '__unicode__')
@@ -115,7 +115,7 @@ class EstudiantePeriodoAcademicoAdmin(admin.ModelAdmin):
 
         
 class EstudianteAsignaturaDocenteAdmin(admin.ModelAdmin):
-    form = EstudianteAsignaturaDocenteAdminForm
+    # form = EstudianteAsignaturaDocenteAdminForm
     raw_id_fields = ('asignaturaDocente','estudiante')
     search_fields = ('estudiante__usuario__cedula', 'estudiante__usuario__first_name',
                      'estudiante__usuario__last_name', 'asignaturaDocente__asignatura__carrera',
@@ -123,7 +123,7 @@ class EstudianteAsignaturaDocenteAdmin(admin.ModelAdmin):
     list_per_page = 30
     list_display = ('estudiante', 'get_asignatura', 'get_area', 'get_carrera', 'get_semestre', 'get_paralelo')
     # Algunos campos se toman del formulario
-    fields = ('estudiante','asignaturaDocente','carrera','semestre', 'paralelo', 'estado')
+    # fields = ('estudiante','asignaturaDocente','carrera','semestre', 'paralelo', 'estado')
 
     # Permitir filtros
     def lookup_allowed(self, key, value):
