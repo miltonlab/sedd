@@ -436,7 +436,7 @@ class TabulacionSatisfaccion2012:
             porcentajes = {}
             for grado in ('MS','S','PS','INS'):
                 numero  = totales[grado] * 100 / float(universo)
-                porcentajes[grado] = '%.2f'%numero
+                porcentajes[grado] = numero
                 
         return dict(conteos=conteos, totales=totales, porcentajes=porcentajes)
     
@@ -513,7 +513,8 @@ class TabulacionSatisfaccion2012:
             porcentajes = {}
             for grado in ('MS','S','PS','INS'):
                 numero  = totales[grado] * 100 / float(universo)
-                porcentajes[grado] = '%.2f'%numero
+                porcentajes[grado] = numero
+
         return dict(conteos=conteos, totales=totales, porcentajes=porcentajes)
     
 
@@ -592,7 +593,8 @@ class TabulacionSatisfaccion2012:
             porcentajes = {}
             for grado in ('MS','S','PS','INS'):
                 numero  = totales[grado] * 100 / float(universo)
-                porcentajes[grado] = '%.2f'%numero
+                porcentajes[grado] = numero
+
         return dict(conteos=conteos, totales=totales, porcentajes=porcentajes)
 
     
@@ -676,7 +678,7 @@ class TabulacionSatisfaccion2012:
             porcentajes = {}
             for grado in ('MS','S','PS','INS'):
                 numero  = totales[grado] * 100 / float(universo)
-                porcentajes[grado] = '%.2f'%numero
+                porcentajes[grado] = numero
                 
         return dict(conteos=conteos, totales=totales, porcentajes=porcentajes)
         

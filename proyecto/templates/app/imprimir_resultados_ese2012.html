@@ -60,10 +60,15 @@
 	</tr>
 	<tr>
 	  <td> % de Estudiantes que declaran su Satisfacción </td>
-	  <td> {{ porcentajes.MS }}% </td>
-	  <td> {{ porcentajes.S }}% </td>
-	  <td> {{ porcentajes.PS }}% </td>
-	  <td> {{ porcentajes.INS }}% </td>
+	  <td> {{ porcentajes.MS|floatformat:"-2" }}% </td>
+	  <td> {{ porcentajes.S|floatformat:"-2" }}% </td>
+	  <td> {{ porcentajes.PS|floatformat:"-2" }}% </td>
+	  <td> {{ porcentajes.INS|floatformat:"-2" }}% </td>
+	</tr>
+	<tr>
+	  <td> % de estudiantes que se declaran Satisfechos o Mas </td>
+	  <td colspan="2"> {{ porcentajes.MS|add:porcentajes.S }}% </td>
+	  <td colspan="2"> </td>
 	</tr>
       </table>
       {%endif%}
