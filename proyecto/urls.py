@@ -8,7 +8,7 @@ admin.autodiscover()
 
 urlpatterns = patterns('',
     # django-chronograph: Aplicacion para comandos de administración
-    ### url(r'^admin/chronograph/job/(?P<pk>\d+)/run/$', 'chronograph.views.job_run', name="admin_chronograph_job_run"),
+    # url(r'^admin/chronograph/job/(?P<pk>\d+)/run/$', 'chronograph.views.job_run', name="admin_chronograph_job_run"),
                        
     url(r'^$', 'proyecto.app.controllers.portada'),                        
     url(r'^login/$', 'proyecto.app.controllers.login'),
