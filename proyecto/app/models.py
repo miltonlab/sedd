@@ -270,8 +270,7 @@ class PeriodoEvaluacion(models.Model):
             estudiante__periodoAcademico=self.periodoAcademico).count()
         restantes = total - evaluaciones
         mensaje = "{0}: total {1}, evaluados {2}, restan {3} ".format(cedula, total, evaluaciones, restantes)
-        ###logg.info(mensaje)
-        ###print mensaje
+        logg.info(mensaje)
         if restantes == 0:
             return True
         else:
