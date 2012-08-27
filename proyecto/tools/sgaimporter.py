@@ -86,6 +86,7 @@ def importar(periodoAcademicoId, periodoEvaluacionId=None):
                             # Tratamiento de los saltos de línea dentro del nombre de la unidad
                             unidad = unidad.replace('\r\n',' ')[0:-1]
                             dict_unidad = dict(
+                                # El idSGA tiene similitud con del id_horario_Semana en el SGA
                                 idSGA="{0}:{1}".format(id_unidad, id_paralelo), area=area, carrera=carrera,
                                 semestre=modulo, paralelo=paralelo, seccion=seccion, nombre=unidad,
                                 creditos=creditos, duracion=horas, inicio=fecha_inicio, fin=fecha_fin

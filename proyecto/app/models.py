@@ -434,9 +434,13 @@ class TabulacionSatisfaccion2012:
             totales['total'] = universo
             porcentajes = {}
             for grado in ('MS','S','PS','INS'):
-                numero  = totales[grado] * 100 / float(universo)
+                if universo != 0:
+                    numero  = totales[grado] * 100 / float(universo)
+                else:
+                    numero = 0
                 porcentajes[grado] = numero
-                
+            porcentajes['MSS'] = porcentajes['MS'] + porcentajes['S']
+            
         return dict(conteos=conteos, totales=totales, porcentajes=porcentajes)
     
 
@@ -511,9 +515,13 @@ class TabulacionSatisfaccion2012:
             totales['total'] = universo
             porcentajes = {}
             for grado in ('MS','S','PS','INS'):
-                numero  = totales[grado] * 100 / float(universo)
+                if universo is not 0:
+                    numero  = totales[grado] * 100 / float(universo)
+                else:
+                    numero = 0
                 porcentajes[grado] = numero
-
+            porcentajes['MSS'] = porcentajes['MS'] + porcentajes['S']
+            
         return dict(conteos=conteos, totales=totales, porcentajes=porcentajes)
     
 
@@ -591,9 +599,13 @@ class TabulacionSatisfaccion2012:
             totales['total'] = universo            
             porcentajes = {}
             for grado in ('MS','S','PS','INS'):
-                numero  = totales[grado] * 100 / float(universo)
+                if numero is not 0:
+                    numero  = totales[grado] * 100 / float(universo)
+                else:
+                    numero = 0
                 porcentajes[grado] = numero
-
+            porcentajes['MSS'] = porcentajes['MS'] + porcentajes['S']
+            
         return dict(conteos=conteos, totales=totales, porcentajes=porcentajes)
 
     
@@ -676,9 +688,13 @@ class TabulacionSatisfaccion2012:
             totales['total'] = universo
             porcentajes = {}
             for grado in ('MS','S','PS','INS'):
-                numero  = totales[grado] * 100 / float(universo)
+                if universo is not 0:
+                    numero = totales[grado] * 100 / float(universo)
+                else:
+                    numero = 0
                 porcentajes[grado] = numero
-                
+            porcentajes['MSS'] = porcentajes['MS'] + porcentajes['S']
+            
         return dict(conteos=conteos, totales=totales, porcentajes=porcentajes)
         
 
