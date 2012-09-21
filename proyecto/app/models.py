@@ -532,7 +532,7 @@ class TabulacionSatisfaccion2012:
         # La sección especcífica del cuestionario (por Área) que corresponde
         # ya se determina en la vista anterior
         seccion = Seccion.objects.get(id=id_seccion)
-        print seccion.id
+        logg.info("Campo Seccion: " + str(seccion.id) + str(seccion))
         # Se tratan unicamente preguntas abiertas
         if seccion.orden == 4:
             return self.por_otros_aspectos(siglas_area, nombre_carrera, seccion)
@@ -599,7 +599,7 @@ class TabulacionSatisfaccion2012:
             totales['total'] = universo            
             porcentajes = {}
             for grado in ('MS','S','PS','INS'):
-                if numero is not 0:
+                if universo is not 0:
                     numero  = totales[grado] * 100 / float(universo)
                 else:
                     numero = 0
