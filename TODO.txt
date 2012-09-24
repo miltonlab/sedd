@@ -3,23 +3,3 @@
  * vista y template para encuestas de docentes
  * Manejar carrera como modelo separado, necesitamos carrera_id
  * Manejar 'seccion' (matituina, vespertina, nocturna) en las asignaturas
-
-* Snippet para Reporte de Docentes con sus asignaturas y estudiantes que lo evaluaron
-
-from proyecto.app.models import AsignaturaDocente, DocentePeriodoAcademico
-from tools.util import UnicodeWriter
-
-rs=AsignaturaDocente.objects.values_list( 
-'asignatura__area', 'asignatura__carrera', 'docente', 'asignatura__semestre', 'asignatura__paralelo', 'asignatura__seccion', 'asignatura__nombre', 'id').order_by('asignatura__area', 'asignatura__carrera', 'docente', 'asignatura__semestre', 'asignatura__paralelo', 'asignatura__seccion', 'asignatura__nombre') 
-rs2 = list()
-for t in rs:
-    l = list(t)
-    # Se cambia el id del docente por su representacion en unicode
-    l[2] = DocentePeriodoAcademico.objects.get(id=l[2]).__unicode__()
-    # Se cambia el id de la AsignaturaDocente por la cantidad de estudiantes que la toman
-    l[7] = AsignaturaDocente.objects.get(id=l[7]).estudiantesAsignaturaDocente.count()
-    rs2.append(tuple(l))
-f = open('/tmp/reporte.csv')
-w = UnicodeWriter(f, delimiter=';')
-w.writerows(rs2)
-f.close()

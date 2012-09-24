@@ -39,5 +39,6 @@ class Job(BaseJob):
         root = os.path.abspath(os.path.dirname(__file__) + '../../../')            
         f = open('{0}/tmp/docentes.csv'.format(root), 'wb')
         w = UnicodeWriter(f, delimiter=';')
+        w.writerow((u'Área', u'Carrera', u'Docente', u'Módulo', u'Paralelo', u'Sección', u'Asignatura/Unidad/Momento/Modulo/Taller', u'No Estudiantes'))
         w.writerows(rs2)
         f.close()
