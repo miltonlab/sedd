@@ -3,7 +3,7 @@
 {% block extrahead %}
 
 <style>
-  #id_docentes, #id_periodos {
+  #id_periodos {
       width: 100%;
       font-size: 15px;
       font-weight: bold;
@@ -15,14 +15,6 @@
 <script type="text/javascript">
     $(document).ready(function(){
 	$("#procesar").hide();
-	$("#id_docente").change(function(){
-	    var id_docente = $("#id_docente option:selected").val();
-	    if (id_docente == ""){
-		$("#procesar").hide();
-	    }else{
-		$("#procesar").show();
-	    }
-	});
 	$("#id_periodo_evaluacion").change(function(){
 	    var id_periodo = $("#id_periodo_evaluacion option:selected").val();
 	    if (id_periodo != ""){

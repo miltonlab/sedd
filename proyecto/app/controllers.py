@@ -448,8 +448,6 @@ def resultados_carrera(request, id_docente):
         request.session['area'] = area_siglas
         periodosEvaluacion = area.periodosEvaluacion.filter(periodoAcademico=periodoAcademico)
         # Ids de los docentes de la carrera
-        ids = set([ad.docente.id for ad in AsignaturaDocente.objects.filter(
-            asignatura__carrera=carrera, asignatura__area=area)])
         form = forms.Form()
         # Selecciona solo los peridos de evaluacion en los que se encuentra el area del docente
         # y a su vez que estén dentro del periodo académico actual.  
@@ -457,7 +455,9 @@ def resultados_carrera(request, id_docente):
             queryset=area.periodosEvaluacion.filter(periodoAcademico=periodoAcademico)
             )
         form.fields['periodo_evaluacion'].label = 'Periodo de Evaluación'
-        form.fields['docente'] = forms.ModelChoiceField(queryset=DocentePeriodoAcademico.objects.filter(id__in=ids))        
+        ### ids_docentes = set([ad.docente.id for ad in AsignaturaDocente.objects.filter(
+        #    asignatura__carrera=carrera, asignatura__area=area)])
+        ### form.fields['docente'] = forms.ModelChoiceField(queryset=DocentePeriodoAcademico.objects.filter(id__in=ids_docentes))        
         datos = dict(form=form, title='>> Coordinador Carrera ' + carrera )
     except Exception, ex:
         logg.error("Error :", str(ex))
@@ -499,8 +499,10 @@ def menu_resultados_carrera(request, id_periodo_evaluacion):
 
 def mostrar_resultados(request):
     if not (request.POST.has_key('periodo_evaluacion') and request.POST.has_key('opciones')):
-        return HttpResponse("<h2> Tiene que eleegir Opciones de Resultados </h2>") 
+        return HttpResponse("<h2> Tiene que elegir las Opciones de Resultados </h2>")
     id_periodo = request.POST['periodo_evaluacion']
+    if id_periodo == '':
+        return HttpResponse("<h2> Tiene que elegir el Periodo de Evaluación </h2>")
     opcion = request.POST['opciones']
     periodoEvaluacion=PeriodoEvaluacion.objects.get(id=int(id_periodo))
     tabulacion = periodoEvaluacion.tabulacion
@@ -513,7 +515,7 @@ def mostrar_resultados(request):
         # Por docente
         resultados = {}
         if opcion == 'a':
-            id_docente = request.POST['docente']
+            id_docente = request.POST['docentes']
             if id_docente != '':
                 titulo += u': <b>{0}</b>'.format(DocentePeriodoAcademico.objects.get(id=int(id_docente)))
                 resultados = metodo(request.session['area'], request.session['carrera'], int(id_docente))

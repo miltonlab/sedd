@@ -3,6 +3,7 @@
 from django import forms
 from proyecto.app.models import PeriodoAcademico
 from proyecto.app.models import PeriodoEvaluacion
+from proyecto.app.models import DocentePeriodoAcademico
 from proyecto.app.models import AreaSGA
 from proyecto.app.models import Asignatura
 from proyecto.app.models import EstudianteAsignaturaDocente
@@ -24,6 +25,11 @@ class ResultadosESE2012Form(forms.Form):
         # TODO: Un docente puede ser coordinador de mas de un carrera ?
         ###carrera = carreras_docente[0]['nombre']
         ###area = carreras_docente[0]['area']
+        # Docentes de la carrera a la que pertenece el coordinador
+        ids_docentes = set([ad.docente.id for ad in AsignaturaDocente.objects.filter(
+            asignatura__carrera=carrera, asignatura__area=area
+            )])
+        self.fields['docentes'] = forms.ModelChoiceField(queryset=DocentePeriodoAcademico.objects.filter(id__in=ids_docentes))                
         periodoEvaluacion = tabulacion.periodoEvaluacion
         if area == u'ACE':
             cuestionario = periodoEvaluacion.cuestionarios.get(informante__tipo=u'InstitutoIdiomas')
@@ -38,6 +44,7 @@ class ResultadosESE2012Form(forms.Form):
             preguntas.extend(s.preguntas.all())
         # Por estética en la presentación del SELECT del form de HTML 
         indicadores = [ (p.id, u'{0}.{1}. {2}'.format(p.seccion.orden, p.orden, p.texto[:150])) for p in preguntas ]
+        
         self.fields['campos'] = forms.ChoiceField(choices=campos)
         self.fields['indicadores'] = forms.ChoiceField(choices=indicadores)
 
