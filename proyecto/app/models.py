@@ -60,7 +60,6 @@ class InformanteIdiomasMED(TipoInformante):
 class Cuestionario(models.Model):
     titulo = models.CharField(max_length='100')
     encabezado = models.TextField()
-    ### TODO: revisar cambio incio por inicio
     inicio = models.DateTimeField('Inicio de la Encuesta')
     fin=models.DateTimeField('Finalización de la Encuesta')
     informante = models.ForeignKey(TipoInformante, blank=True, null=True)
@@ -903,8 +902,6 @@ class PeriodoAcademico(models.Model):
 
 class Asignatura(models.Model):
     area = models.CharField(max_length='20')
-    #TODO: experimento
-    #area = models.CharField(max_length='20', choices=[(a,a) for a in Asignatura.objects.values('area').distinct()] )
     carrera = models.CharField(max_length='100')
     semestre = models.CharField(max_length='10', verbose_name='módulo')
     paralelo = models.CharField(max_length='50')
