@@ -89,7 +89,7 @@ class OfertaAcademicaSGAEnLinea(admin.TabularInline):
 
 class PeriodoEvaluacionAdmin(admin.ModelAdmin):
     filter_horizontal = ('areasSGA',)
-    ###model = models.PeriodoEvaluacion
+    #model = models.PeriodoEvaluacion
     ###extra = 1
     
 
