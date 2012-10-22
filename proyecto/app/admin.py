@@ -226,7 +226,10 @@ class DocentePeriodoAcademicoAdmin(admin.ModelAdmin):
     inlines = (AsignaturaDocenteEnLinea,)
     raw_id_fields = ('usuario',)
 
-    
+
+class DireccionCarreraAdmin(admin.ModelAdmin):
+    raw_id_fields = ('director',)
+
 class AsignaturaAdmin(admin.ModelAdmin):
     list_display = ('carrera','semestre','paralelo', '__unicode__')
     list_display_links = ('__unicode__',)
@@ -299,6 +302,7 @@ admin.site.register(models.PeriodoAcademico,PeriodoAcademicoAdmin)
 admin.site.register(models.PeriodoEvaluacion,PeriodoEvaluacionAdmin)
 admin.site.register(models.EstudiantePeriodoAcademico, EstudiantePeriodoAcademicoAdmin)
 admin.site.register(models.DocentePeriodoAcademico, DocentePeriodoAcademicoAdmin)
+admin.site.register(models.DireccionCarrera, DireccionCarreraAdmin)
 admin.site.register(models.EstudianteAsignaturaDocente, EstudianteAsignaturaDocenteAdmin)
 admin.site.register(models.AsignaturaDocente, AsignaturaDocenteAdmin)
 admin.site.register(models.Asignatura, AsignaturaAdmin)

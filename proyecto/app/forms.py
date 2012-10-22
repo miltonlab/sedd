@@ -1,9 +1,11 @@
 # -*- coding: utf-8 -*-
 
 from django import forms
+from proyecto.app.models import Configuracion
 from proyecto.app.models import PeriodoAcademico
 from proyecto.app.models import PeriodoEvaluacion
 from proyecto.app.models import DocentePeriodoAcademico
+from proyecto.app.models import DireccionCarrera
 from proyecto.app.models import AreaSGA
 from proyecto.app.models import Asignatura
 from proyecto.app.models import EstudianteAsignaturaDocente
@@ -65,8 +67,6 @@ class ResultadosForm(forms.Form):
     # semestre = forms.ModelChoiceField(Asignatura.objects.none())
     # paralelo = forms.ModelChoiceField(Asignatura.objects.none())
 
-    ###def as_table(self):
-    ###    return "nada"
 
 class EstudianteAsignaturaDocenteAdminForm(forms.ModelForm):
     carrera = forms.CharField(widget=forms.TextInput(attrs={'size':'80', 'readonly':'readonly'}))

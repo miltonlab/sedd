@@ -6,6 +6,18 @@
     $(document).ready(function(){
 	$('.boton').hide();
 	menu_academico_ajax();
+	// Para actualización de los dos campos Docente
+	$('#id_carrera').change(function(){
+	    var id_periodoe = $("#id_periodo_evaluacion option:selected").val();
+	    /* Si se trata de la Encuesta de Satisfacción Estudiantil */
+	    if (id_periodoe == 1){
+		// Se oculta el primer campo Docente del menú general
+		$("label[for=id_docente]").hide();
+		$("#id_docente").hide();
+	    }
+
+	    $("#ver-opciones").click();
+	});
 	$('#ver-opciones').click(function(){
 	    /* NOTA: JavaScript no soporta nombres de variables largos! */
 	    var id_periodoe = $("#id_periodo_evaluacion option:selected").val();

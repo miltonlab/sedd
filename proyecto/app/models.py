@@ -297,6 +297,7 @@ class PeriodoEvaluacion(models.Model):
     def __unicode__(self):
         return self.nombre
 
+
 # TODO: Modelar de mejor manera la funcionalidad
 tipos_tabulacion = (
     (u'ESE2012', u'Tabulación  Satisfacción Estudiantil 2012'),
@@ -900,6 +901,27 @@ class PeriodoAcademico(models.Model):
         return self.nombre
 
 
+class Configuracion(models.Model):
+    """ Configuraciones Globales de la Aplicación """
+    periodoAcademicoActual = models.OneToOneField(PeriodoAcademico, null=True, blank=True, verbose_name='Periodo Académico Actual')
+    periodoEvaluacionActual = models.OneToOneField(PeriodoEvaluacion, null=True, blank=True, verbose_name='Periodo Evaluación Actual')
+
+    @classmethod
+    def getPeriodoAcademicoActual(self):
+        return Configuracion.objects.get(id=1).periodoAcademicoActual
+    
+    @classmethod
+    def getPeriodoEvaluacionActual(self):
+        return Configuracion.objects.get(id=1).periodoEvaluacionActual
+    
+    class Meta:
+        verbose_name = u'Configuraciones'
+        verbose_name_plural = u'Configuraciones'
+
+    def __unicode__(self):
+        return u"Configuraciones de la Aplicación"
+
+
 class Asignatura(models.Model):
     area = models.CharField(max_length='20')
     carrera = models.CharField(max_length='100')
@@ -1047,9 +1069,9 @@ class AsignaturaDocente(models.Model):
 
 class DocentePeriodoAcademico(models.Model):
     usuario = models.ForeignKey('Usuario', related_name='docentePeriodosAcademicos')
-    periodoAcademico = models.ForeignKey('PeriodoAcademico', related_name='docentes', verbose_name='Periodo Académico', db_column='periodo_academico_id')
+    periodoAcademico = models.ForeignKey('PeriodoAcademico', related_name='docentes',
+                                         verbose_name='Periodo Académico', db_column='periodo_academico_id')
     esCoordinador = models.BooleanField()
-    
     
     class Meta:
         verbose_name = 'Docente'
@@ -1069,7 +1091,25 @@ class DocentePeriodoAcademico(models.Model):
     def __unicode__(self):
         return u'{0} {1}'.format(self.usuario.abreviatura, self.usuario.get_full_name())
 
+# Todas las carrera que vigentes en el Periodo Académico Actual
+carreras = AsignaturaDocente.objects.filter(
+    docente__periodoAcademico=Configuracion.getPeriodoAcademicoActual()).values_list(
+    'asignatura__carrera', 'asignatura__area').order_by(
+    'asignatura__carrera').distinct()
+carreras_areas = [('|'.join(c),'|'.join(c)) for c in  carreras]
 
+class DireccionCarrera(models.Model):
+    # Nombre de la Carrera más el Área
+    carrera = models.CharField(max_length=255, choices=carreras_areas, unique=True)
+    # Director o Coordinador de Carrera
+    director = models.ForeignKey('DocentePeriodoAcademico', verbose_name=u"Coordinador",
+                                 related_name="direcciones")
+    def __unicode__(self):
+        return u"Coordinación {0}".format(self.carrera)
+
+    class Meta:
+        verbose_name = u'Coordinación de Carrera'
+        verbose_name_plural = 'Coordinaciones de Carreras'
 #===================================================================================================
 #   Autenticación y Usuarios
 #===================================================================================================
@@ -1117,25 +1157,3 @@ class Usuario(User):
 
     def __unicode__(self):
         return self.get_full_name()
-
-
-
-class Configuracion(models.Model):
-    """ Configuraciones Globales de la Aplicación """
-    periodoAcademicoActual = models.OneToOneField(PeriodoAcademico, null=True, blank=True, verbose_name='Periodo Académico Actual')
-    periodoEvaluacionActual = models.OneToOneField(PeriodoEvaluacion, null=True, blank=True, verbose_name='Periodo Evaluación Actual')
-
-    @classmethod
-    def getPeriodoAcademicoActual(self):
-        return Configuracion.objects.get(id=1).periodoAcademicoActual
-    
-    @classmethod
-    def getPeriodoEvaluacionActual(self):
-        return Configuracion.objects.get(id=1).periodoEvaluacionActual
-    
-    class Meta:
-        verbose_name = u'Configuraciones'
-        verbose_name_plural = u'Configuraciones'
-
-    def __unicode__(self):
-        return u"Configuraciones de la Aplicación"

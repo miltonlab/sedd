@@ -37,8 +37,8 @@
 </ul>  
 <hr/>
 
-{% if request.session.docente.esCoordinador %}
-<h1 style="margin-top: 20px;"> Comisión Académica de Carrera  </h1>
+{% if request.session.docente.direcciones|length > 0 %}
+<h1 style="margin-top: 20px;"> Comisiones Académicas de Carrera  </h1>
 <ul style="margin-top: 20px;">
   {% for carrera in request.session.carreras_docente %}
   <h3> 

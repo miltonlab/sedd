@@ -1,6 +1,6 @@
 
 function menu_academico_ajax(){
-    $('#cargando').hide();
+     $('#cargando').hide();
     var ids = new Array();
     var cont = 0;
     $('select').each(function(){

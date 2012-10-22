@@ -111,10 +111,13 @@ def index(request):
                                  if c.informante.tipo == 'Docente']
         request.session['cuestionarios_docente'] = cuestionarios_docente
         # Si es coordinador se colocan las carreras del docente en la session
-        if docente.esCoordinador:
-            carreras_docente = docente.asignaturasDocente.values('asignatura__carrera','asignatura__area').distinct()
-            carreras_docente = [ dict(num_carrera=i, nombre=c['asignatura__carrera'],area=c['asignatura__area'])
-                                 for i,c in enumerate(carreras_docente) ]
+        if docente.direcciones.count() > 0:
+        # OLD: if docente.esCoordinador:
+            # El nombre de la carrera continene también 
+            carreras_docente = [ dict(num_carrera=i,
+                                      nombre=dc.carrera.split('|')[0],
+                                      area=dc.carrera.split('|')[1] )
+                                 for i,dc in enumerate(docente.direcciones.all()) ]
             request.session['carreras_docente'] = carreras_docente
     except DocentePeriodoAcademico.DoesNotExist:
         noDocente = True
@@ -391,10 +394,10 @@ def menu_academico_ajax(request):
                 carrera = o.encode('utf-8') if isinstance(o, unicode) else o
                 valores.append(dict(id=carrera, valor=carrera))
         elif id_campo == 'id_carrera':
+            # Dos bifuraciones dependiendo del menú
             request.session['carrera'] = valor_campo
             id = campo_siguiente
             if campo_siguiente == 'id_semestre':
-            ###id = 'id_semestre'
                 objetos = EstudianteAsignaturaDocente.objects.filter(
                     estudiante__periodoAcademico=request.session['periodoAcademico']).filter(
                     asignaturaDocente__asignatura__area=request.session['area']).filter(
@@ -455,9 +458,6 @@ def resultados_carrera(request, id_docente):
             queryset=area.periodosEvaluacion.filter(periodoAcademico=periodoAcademico)
             )
         form.fields['periodo_evaluacion'].label = 'Periodo de Evaluación'
-        ### ids_docentes = set([ad.docente.id for ad in AsignaturaDocente.objects.filter(
-        #    asignatura__carrera=carrera, asignatura__area=area)])
-        ### form.fields['docente'] = forms.ModelChoiceField(queryset=DocentePeriodoAcademico.objects.filter(id__in=ids_docentes))        
         datos = dict(form=form, title='>> Coordinador Carrera ' + carrera )
     except Exception, ex:
         logg.error("Error :", str(ex))
