@@ -44,7 +44,8 @@
   <h3> 
     <li>
       
-      <a href="/resultados/carrera/{{ request.session.docente.id }}">  
+      <!--OLD a href="/resultados/carrera/{{ request.session.docente.id }}"-->  
+      <a href="/resultados/carrera/{{ carrera.num_carrera }}/">
 	RESULTADOS EVALUACIÓN CARRERA {{ carrera.nombre|upper }} [{{ carrera.area|upper }}]</a> 
     </li> 
   </h3>

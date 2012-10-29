@@ -113,7 +113,7 @@ def index(request):
         # Si es coordinador se colocan las carreras del docente en la session
         if docente.direcciones.count() > 0:
         # OLD: if docente.esCoordinador:
-            # El nombre de la carrera continene también 
+            # El nombre de la carrera continene también el nombre del área
             carreras_docente = [ dict(num_carrera=i,
                                       nombre=dc.carrera.split('|')[0],
                                       area=dc.carrera.split('|')[1] )
@@ -437,30 +437,34 @@ def menu_academico_ajax(request):
 # Calcular y mostrar resultados de evaluaciones
 # ==============================================================================
 
-def resultados_carrera(request, id_docente):
-    """
-    Consulta los docnetes que pertenece a la misma carrera del docente coordinador (id_docente)
-    """
+def resultados_carrera(request, num_carrera):
     try:
-        periodoAcademico = Configuracion.getPeriodoAcademicoActual()
-        area_siglas, carrera = AsignaturaDocente.objects.filter(
-                docente__id=id_docente, docente__periodoAcademico=periodoAcademico).distinct(
-                ).values_list('asignatura__area','asignatura__carrera')[0]
-        area = AreaSGA.objects.get(siglas=area_siglas)
+        # Carreras cuya dirección está a cargo del docente
+        # Almacenadas en la vista previa index
+        carreras_docente = request.session['carreras_docente']
+        for cd in carreras_docente:
+            if cd['num_carrera'] == int(num_carrera):
+                carrera = cd['nombre']
+                area_siglas = cd['area']
+                break
+        else:
+            logg.error('No hay carreras para este docente')
         request.session['carrera'] = carrera
         request.session['area'] = area_siglas
+        # Objeto AreaSGA 
+        area = AreaSGA.objects.get(siglas=area_siglas)
+        periodoAcademico = Configuracion.getPeriodoAcademicoActual()
+        # Periodos de Evaluación del Periodo Académico Actual 
         periodosEvaluacion = area.periodosEvaluacion.filter(periodoAcademico=periodoAcademico)
-        # Ids de los docentes de la carrera
         form = forms.Form()
-        # Selecciona solo los peridos de evaluacion en los que se encuentra el area del docente
-        # y a su vez que estén dentro del periodo académico actual.  
+        # Selecciona solo los peridos de evaluacion en los que se encuentra el area del docente director
         form.fields['periodo_evaluacion'] = forms.ModelChoiceField(
             queryset=area.periodosEvaluacion.filter(periodoAcademico=periodoAcademico)
             )
         form.fields['periodo_evaluacion'].label = 'Periodo de Evaluación'
         datos = dict(form=form, title='>> Coordinador Carrera ' + carrera )
     except Exception, ex:
-        logg.error("Error :", str(ex))
+        logg.error("Error :" + str(ex))
     return render_to_response("app/menu_resultados_carrera.html", datos, context_instance=RequestContext(request))
 
 
