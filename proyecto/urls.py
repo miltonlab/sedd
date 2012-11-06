@@ -21,7 +21,7 @@ urlpatterns = patterns('',
     url(r'^encuestas/(\d{1,5})/(\d{1,5})/$', 'proyecto.app.controllers.encuestas'),
     url(r'^encuesta/responder/(\d{1,5})/$', 'proyecto.app.controllers.encuesta_responder'),
     url(r'^encuesta/grabar/$', 'proyecto.app.controllers.encuesta_grabar'),
-    # Recibe carrera y area
+    # Recibe número de carrera
     url(r'^resultados/carrera/(\d{1})/$', 'proyecto.app.controllers.resultados_carrera'),
     url(r'^resultados/periodo/(\d{1,2})/$', 'proyecto.app.controllers.menu_resultados_carrera'),
     url(r'^resultados/mostrar/$', 'proyecto.app.controllers.mostrar_resultados'),                       

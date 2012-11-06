@@ -15,13 +15,14 @@ Requerimientos:
  * ptyhon-django-extensions 0.4.2
  * python-soappy 0.12.0
  * python-psycopg2 2.4.2
-
+ * libapache2-mod-wsgi 3.3  (modulo para desplegar en apache)
 
 Opcionales 
 -------------------------------------------------------------------
-
+ * django-south 0.7.3       (Migraciones)
  * django-chronograph 0.3.1 (Admin de Tareas)
  * python-dateutil 1.4.1    (Admin de Tareas)
- * graphviz 2.26   	    (Generación de graficos del modelo)
+ * graphviz 2.26   	    
+ * libgraphviz-dev
  * python-pygraphviz 1.0    (Generación de graficos del modelo)
- * libapache2-mod-wsgi 3.3  (modulo para desplegar en apache)
+

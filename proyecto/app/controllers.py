@@ -483,16 +483,14 @@ def menu_resultados_carrera(request, id_periodo_evaluacion):
             carrera = ''
             # Para los Docentes Coordinadores de Carrera 
             if request.session.has_key('carreras_docente'):
-                carreras_docente = request.session['carreras_docente']
-                carrera = carreras_docente[0]['nombre']
-                area = carreras_docente[0]['area']
-            # Para la Comisión de Evaluación
+                carrera = request.session['carrera']
+                area = request.session['area']
+            # Para la Comisión de Evaluación Administración
             else:
                 area = request.GET['area']
                 carrera = request.GET['carrera']
             form = ResultadosESE2012Form(tabulacion, area, carrera)
             formulario_formateado = render_to_string("admin/app/formulario_ese2012.html", dict(form=form))
-            #return HttpResponse(form.as_table())
             return HttpResponse(formulario_formateado)
         
     except PeriodoEvaluacion.DoesNotExist:

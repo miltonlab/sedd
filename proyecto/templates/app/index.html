@@ -43,8 +43,6 @@
   {% for carrera in request.session.carreras_docente %}
   <h3> 
     <li>
-      
-      <!--OLD a href="/resultados/carrera/{{ request.session.docente.id }}"-->  
       <a href="/resultados/carrera/{{ carrera.num_carrera }}/">
 	RESULTADOS EVALUACIÓN CARRERA {{ carrera.nombre|upper }} [{{ carrera.area|upper }}]</a> 
     </li> 
