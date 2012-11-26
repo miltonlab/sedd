@@ -30,4 +30,6 @@ urlpatterns = patterns('',
     url(r'^admin/resumen/calcular/$', 'proyecto.app.controllers.calcular_resumen'),
     url(r'^admin/app/resultados/$', 'proyecto.app.controllers.resultados'),
     url(r'^admin/', include(admin.site.urls)),
+    # API Webservices
+    url(r'^api/', include('app.api.urls'))
 )

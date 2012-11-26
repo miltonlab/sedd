@@ -261,6 +261,12 @@ class PeriodoEvaluacion(models.Model):
         Analiza si el Estudiante a realizado todas las evaluaciones
         que le corresponden en este Periodo de Evaluación.
         """
+        try:
+            EstudiantePeriodoAcademico.objects.get(usuario__cedula=cedula)
+        except EstudiantePeriodoAcademico.DoesNotExist:
+            logg.error('Verificar estudiante: dni {} no existe'.format(cedula))
+            return False
+
         evaluaciones = Evaluacion.objects.filter(
             estudianteAsignaturaDocente__estudiante__usuario__cedula=cedula).filter(
             cuestionario__periodoEvaluacion=self).count()
