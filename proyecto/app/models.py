@@ -195,7 +195,9 @@ class Seccion(models.Model):
 
         
 class Pregunta(models.Model):
-    texto = models.TextField(max_length='100')
+    codigo = models.CharField(max_length='5', null=True, blank=True)
+    texto = models.TextField()
+    descripcion = models.TextField(null=True, blank=True)
     orden = models.IntegerField()
     tipo = models.ForeignKey(TipoPregunta)
     seccion = models.ForeignKey(Seccion, related_name='preguntas')
@@ -208,7 +210,10 @@ class Pregunta(models.Model):
 
 
 class ItemPregunta(models.Model):
+    # Valor para la contestación de la pregunta
     texto = models.CharField(max_length='50')
+    # Observaciones adicionales para la contestación
+    descripcion = models.CharField(max_length='70', null=True, blank=True)
     pregunta = models.ForeignKey(Pregunta, related_name='items')
     orden = models.IntegerField()
 
@@ -231,9 +236,9 @@ class AreaSGA(models.Model):
 
 
 class PeriodoEvaluacion(models.Model):
-    nombre = models.CharField(max_length='100')
+    nombre = models.CharField(max_length='300')
     descripcion = models.TextField(null=True)
-    observaciones = models.TextField(null=True)
+    observaciones = models.TextField(null=True, blank=True)
     inicio = models.DateTimeField()
     fin = models.DateTimeField()
     periodoAcademico = models.ForeignKey('PeriodoAcademico', related_name='periodosEvaluacion', verbose_name="Periodo Académico")

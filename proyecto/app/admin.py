@@ -17,7 +17,7 @@ class ItemPreguntaEnLinea(admin.StackedInline):
 
 class PreguntaAdmin(admin.ModelAdmin):
     inlines = (ItemPreguntaEnLinea,)
-    fields = ('seccion','texto','orden','tipo')
+    fields = ('seccion','orden','codigo', 'texto', 'descripcion', 'tipo')
     list_per_page = 30
     # Sobreescrito
     def save_model(self, request, obj, form, change):

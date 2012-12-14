@@ -27,7 +27,7 @@
 
 {% if request.session.docente %}
 
-<h1> Encuestas para el Docente </h1>
+<h1> Encuestas para Autoevalación del Docente </h1>
 <ul style="margin-top: 20px;">
   {% for cuestionario in request.session.cuestionarios_docente %}
   <h1> <li> <a href="pendiente"> {{ cuestionario.titulo }} </a> </li> <h1>
@@ -36,23 +36,25 @@
   {% endfor %}
 </ul>  
 <hr/>
-
+<!-- Si es docente director/coordinador de carrera --> 
 {% if request.session.docente.direcciones|length > 0 %}
-<h1 style="margin-top: 20px;"> Comisiones Académicas de Carrera  </h1>
+
+<h1 style="margin-top: 20px;"> Comisión Académica de la Carrera </h1>
 <ul style="margin-top: 20px;">
   {% for carrera in request.session.carreras_docente %}
   <h3> 
     <li>
       <a href="/resultados/carrera/{{ carrera.num_carrera }}/">
-	RESULTADOS EVALUACIÓN CARRERA {{ carrera.nombre|upper }} [{{ carrera.area|upper }}]</a> 
+	RESULTADOS DE EVALUACIÓN CARRERA {{ carrera.nombre|upper }} [{{ carrera.area|upper }}]</a> 
     </li> 
   </h3>
   {% endfor %}
 </ul>
 <hr/>
-{% endif %}
 
 {% endif %}
+
+
 
 
 {% endblock %}

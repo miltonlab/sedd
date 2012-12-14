@@ -47,7 +47,6 @@ def portada(request):
     return render_to_response("app/portada.html",datos)
 
 def login(request):
-
     form = forms.Form()
     form.fields['username'] = forms.CharField(label="Cedula", max_length=30, 
                                               widget=forms.TextInput(attrs={'title': 'Cedula',}),
@@ -88,7 +87,9 @@ def index(request):
     try:
         # Se obtiene solo las siglas de las areas del periodo de evaluación
         areas_periodo = periodoEvaluacion.areasSGA.values_list('siglas', flat=True)
+        #
         # Se trata de un Estudiante
+        #
         estudiante = EstudiantePeriodoAcademico.objects.get(periodoAcademico=periodoAcademico, usuario=usuario)
         # solo las carreras que están dentro de las areas asignadas al periodo de evaluación
         carreras_estudiante = estudiante.asignaturasDocentesEstudiante.filter(
@@ -103,16 +104,26 @@ def index(request):
     except EstudiantePeriodoAcademico.DoesNotExist:
         noEstudiante = True
     try:
+        # 
         # Se trata de un Docente 
+        #
         docente = DocentePeriodoAcademico.objects.get(periodoAcademico=periodoAcademico, usuario=usuario)
         request.session['docente'] = docente
         periodoEvaluacion = Configuracion.getPeriodoEvaluacionActual()
         cuestionarios_docente = [c for c in periodoEvaluacion.cuestionarios.all() 
                                  if c.informante.tipo == 'Docente']
         request.session['cuestionarios_docente'] = cuestionarios_docente
-        # Si es coordinador se colocan las carreras del docente en la session
+        #
+        # Se trata de un docente director/coordinador de carrera
+        #
         if docente.direcciones.count() > 0:
-        # OLD: if docente.esCoordinador:
+            #
+            # Encuestas para las Comisiones Académicas de Carrera
+            #
+            cuestionarios_directivos = [c for c in periodoEvaluacion.cuestionarios.all() 
+                                 if c.informante.tipo == 'Directivos']
+            request.session['cuestionarios_directivos'] = cuestionarios_directivos
+            # Se colocan las carreras en las que el docente es coordinador/director
             # El nombre de la carrera continene también el nombre del área
             carreras_docente = [ dict(num_carrera=i,
                                       nombre=dc.carrera.split('|')[0],
