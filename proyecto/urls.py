@@ -14,11 +14,14 @@ urlpatterns = patterns('',
     url(r'^login/$', 'proyecto.app.controllers.login'),
     url(r'^index/$', 'proyecto.app.controllers.index'),                       
     url(r'^logout/$', 'proyecto.app.controllers.logout'),
-
     # Recibe como parametro el numero de carrera
     url(r'^estudiante/asignaturas/docentes/(\d{1})/$', 
         'proyecto.app.controllers.estudiante_asignaturas_docentes'),
-    url(r'^encuestas/(\d{1,5})/(\d{1,5})/$', 'proyecto.app.controllers.encuestas'),
+    # Recibe un número de carrera de la sesion                       
+    url(r'^director/docentes/(\d{1})/$', 
+        'proyecto.app.controllers.director_docentes'),
+    # url(r'^encuestas/(\d{1,5})/(\d{1,5})/(\d{1,5})/$', 'proyecto.app.controllers.encuestas'),
+    url(r'^encuestas/(?P<id_docente>\d{1,5})/(?P<id_asignatura>\d{1,5})/(?P<id_direccion>\d{1,5})/', 'proyecto.app.controllers.encuestas', name='encuestas'),
     url(r'^encuesta/responder/(\d{1,5})/$', 'proyecto.app.controllers.encuesta_responder'),
     url(r'^encuesta/grabar/$', 'proyecto.app.controllers.encuesta_grabar'),
     # Recibe número de carrera

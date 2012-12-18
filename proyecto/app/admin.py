@@ -17,10 +17,14 @@ class ItemPreguntaEnLinea(admin.StackedInline):
 
 class PreguntaAdmin(admin.ModelAdmin):
     inlines = (ItemPreguntaEnLinea,)
-    fields = ('seccion','orden','codigo', 'texto', 'descripcion', 'tipo')
+    fields = ('seccion','orden', 'codigo', 'texto', 'descripcion', 'tipo')
+    search_fields = ('texto', 'descripcion')
+    list_filter = ('seccion__cuestionario__periodoEvaluacion', 'seccion__cuestionario', 'seccion')
     list_per_page = 30
     # Sobreescrito
     def save_model(self, request, obj, form, change):
+        # Se crean y se agregan los items por defecto solo cuando 
+        # se trata de la creación de una nueva pregunta.
         if change:
             obj.save()
             return
@@ -57,9 +61,9 @@ class SeccionEnLinea(admin.TabularInline):
     extra = 1
 
 class SeccionAdmin(admin.ModelAdmin):
-    inlines = (PreguntaEnLinea,)
+    #inlines = (PreguntaEnLinea,)
     fields = ('cuestionario', 'titulo', 'descripcion', 'orden')
-    
+    list_filter = ('cuestionario__periodoEvaluacion', 'cuestionario')
 
 class CuestionarioAdmin(admin.ModelAdmin):
     actions = ['clonar_cuestionario']

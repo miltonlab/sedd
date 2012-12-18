@@ -25,7 +25,7 @@
 	  {% else %}
 	  <b>
 	    {# Se envia ids de asignatura y de docente #}
-	    <a href="{% url proyecto.app.controllers.encuestas ad.asignatura.id d.docente.id %}"> {{ d.docente }} </a> </br>
+	    <a href="{% url proyecto.app.controllers.encuestas d.docente.id ad.asignatura.id %}"> {{ d.docente }} </a> </br>
 	  </b>
 	  {% endif %}
 	</li>

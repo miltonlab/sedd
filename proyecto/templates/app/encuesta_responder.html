@@ -20,6 +20,20 @@
         background-color: #B4CBE5;
         
     }
+
+    .td-item-seleccion{
+	border: 2px white solid;
+	background-color: #B4CBE5;
+	text-align: center;
+	width: 25%;
+	/* Para cortar las palabras al ancho de la celda */
+        word-break: break-all;
+        
+    }
+
+    #tabla-items{
+	width: 100%;
+    }
     </style>
 
     <script type="text/javascript" src="/static/js/jquery-1.6.2.min.js"> </script>
@@ -103,7 +117,7 @@ $(document).ready(function(){
 
   {% csrf_token %}
 
-    <table border="1" width="75%" id="tabla-contenedor">
+    <table border="1" width="100%" id="tabla-contenedor">
 
       <!--thead style="margin-bottom: 40px;"-->
 	<td colspan="2">
@@ -111,6 +125,8 @@ $(document).ready(function(){
 	    {{ cuestionario.encabezado|safe }} 
 	  </div>
 
+	  <!-- Encuesta dirigida a los ESTUDIANTES -->
+	  {% if asignaturaDocente %}
 	  <div id="datos_academicos" style="line-height: 18px;">
 	    Area: <b> {{ asignaturaDocente.asignatura.area }} </b> <br/>
 	    Carrera: <b> {{ asignaturaDocente.asignatura.carrera }} </b> <br/>
@@ -123,6 +139,8 @@ $(document).ready(function(){
 	    Nombre de el/la Docente Evaluado(a): <b> {{ asignaturaDocente.docente }} </b> <br/>
 	    Fecha de Evaluacion: <b> {{ fecha }} </b> <br/>
 	  </div>
+	  {% endif %}
+
 	</td>
       <!--/thead-->
 
@@ -138,33 +156,40 @@ $(document).ready(function(){
 
 	  {% for pregunta in seccion.preguntas.all %}
 	  <tr>
-	    <td width="100%" colspan="{% ifequal pregunta.tipo.tipo 'Ensayo' %} 2 {% endifequal %} ">
+	    <td width="60%" colspan="{% ifequal pregunta.tipo.tipo 'Ensayo' %} 2 {% endifequal %} ">
 	      {% if cuestionario.secciones.all|length > 1 %} 
-	      <b> {{ seccion.orden }}.{{ pregunta.orden }}. </b> {{ pregunta.texto}}  
+	      <b>
+		{% if pregunta.codigo %} {{ pregunta.codigo }}. {% else %} 
+		{{ seccion.orden }}.{{ pregunta.orden }}. {% endif %}
+	      </b> 
+	      {{ pregunta.texto}}
 	      {% else %}
-	      <b> {{ pregunta.orden }}. </b> {{ pregunta.texto}}  
+	      <b> 
+		{% if pregunta.codigo %} {{ pregunta.codigo }}. {% else %} {{ pregunta.orden }}. {% endif %} 
+	      </b> 
+	      {{ pregunta.texto}}  
 	      {% endif %}
-	      
+
+	      <br/>
+	      {{ pregunta.descripcion|safe }} <!-- Puede contener HTML --> 
 	      {% ifequal pregunta.tipo.tipo 'Ensayo' %}
 	      <br/>
 	      <textarea name="pregunta-{{ pregunta.id }}" cols="100" rows="10" ></textarea>
 	      {% endifequal %}
 
-
 	      {% ifequal pregunta.tipo.tipo 'SeleccionUnica' %}
-	      <!--td width="70%">
-	        <b> {#{ pregunta.orden }}. </b> {{ pregunta.texto}#}  
-	      </td-->
 	    
-	      <td width="30%">
+	      <td width="40%">
 		<table id="tabla-items">
 		  <tbody>
 		    <tr>
 		      {% for item in pregunta.items.all %}
-		      <td>
-			<input type="radio" name="pregunta-{{ pregunta.id }}" value="{{ item.texto }}"> 
-			{{ item.texto }}
-			</input>
+		      <td class="td-item-seleccion">
+			  <input type="radio" name="pregunta-{{ pregunta.id }}" 
+				 value="{{ item.texto }}"> </input> 
+			  {{ item.texto }} 
+			  <br/>
+			  {% if item.descripcion %} {{ item.descripcion }} {% endif %}
 		      </td>
 		      {% endfor%}
 		    </tr>

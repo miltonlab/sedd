@@ -12,13 +12,17 @@
 	      var seleccion=$('#id_tipo option:selected').val();
 	      // Tipo de pregunta: SeleccionUnica
 	      if (seleccion == '2'){
-		  $('#id_tipo').parent().append('<span id="activador"><input type="checkbox" id="tipo_predefinido" name="tipo_predefinido" value="Valor">' + 
-						'Predeterminado </input></span>');
+		  $('#id_tipo').parent().append(
+		      '<span id="activador"><input type="checkbox" id="tipo_predefinido"' + 
+			  'name="tipo_predefinido" value="Valor">' + 
+			  'Predeterminado </input></span>'
+		  );
 		  $('#tipo_predefinido').change(function(){
 		      if ($('#tipo_predefinido').is(':checked')) {
 			  $('#items-group').hide();
 			  var contenido = '<span id="opciones_grupo">';
-			  contenido += '<b> Tamaño: </b> <select name="longitud"> <option value="" selected > ----- </option> ';
+			  contenido += '<b> Tamaño: </b> <select name="longitud">' + 
+			      '<option value="" selected > ----- </option> ';
 			  for (var i=2; i<10; i++){
 			      var selected = '';
 			      if ( i==4 ){

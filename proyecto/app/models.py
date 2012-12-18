@@ -122,22 +122,54 @@ class Contestacion(models.Model):
     
     
 class Evaluacion(models.Model):
+    """ """
     fechaInicio = models.DateField()
     fechaFin = models.DateField()
     horaInicio = models.TimeField()
     horaFin = models.TimeField()
     cuestionario = models.ForeignKey('Cuestionario', related_name='evaluaciones')
-    estudianteAsignaturaDocente = models.ForeignKey('EstudianteAsignaturaDocente', related_name='evaluaciones')
+    #
+    # Se delega la lógica que determina el tipo de evaluación a los controladores
+    # Para los estudiantes
+    estudianteAsignaturaDocente = models.ForeignKey('EstudianteAsignaturaDocente', related_name='evaluaciones', null=True, default=None)
+    # Para los docentes. Sus evaluaciones pueden ser evaluaciones y autoevaluaciones 
+    docentePeriodoAcademico = models.ForeignKey('DocentePeriodoAcademico', related_name='evaluaciones', null=True)
+    # Para las direcciones de carrera. Comisión de Evaluación
+    direccionCarrera = models.ForeignKey('DireccionCarrera', related_name='evaluaciones', null=True)
+
+    def evaluador(self):
+        # Evaluacion del Estudiante a sus docentes
+        if self.estudianteAsignaturaDocente:
+            evaluador = self.estudianteAsignaturaDocente.estudiante
+        # Evaluación de la Comisión Académica de la Carrera al docente
+        elif self.direccionCarrera and self.docentePeriodoAcademico:
+            evaluador = self.direccionCarrera
+        # Autoevaluacion del docente
+        elif self.docentePeriodoAcademico:
+            evaluador = self.docentePeriodoAcademico
+        return evaluador
+
+    def evaluado(self):
+        # Evaluacion del Estudiante a sus docentes
+        if self.estudianteAsignaturaDocente:
+            evaluado = self.estudianteAsignaturaDocente.asignaturaDocente.docente
+        # Evaluación de la Comisión Académica de la Carrera al docente
+        elif self.direccionCarrera and self.docentePeriodoAcademico:
+            evaluado = self.docentePeriodoAcademico
+        # Autoevaluacion del docente
+        elif self.docentePeriodoAcademico:
+            evaluado = self.docentePeriodoAcademico
+        return evaluado
 
     class Meta:
         verbose_name_plural = 'Evaluaciones'
         
     def __unicode__(self):
-        return u'{0} - {1} - {2}|{3} - {4}|{5}'.format(
-            self.estudianteAsignaturaDocente.estudiante.cedula(),
-            self.estudianteAsignaturaDocente.asignaturaDocente.docente.cedula(),
-            self.fechaInicio, self.horaInicio,
-            self.fechaFin, self.horaFin
+        return u'{0} - {1} - {2}|{3} - {4}|{5} - {6}'.format(
+            self.evaluador().director.cedula if isinstance(self.evaluador(), DireccionCarrera) else self.evaluador().cedula, 
+            self.evaluado().cedula, 
+            self.fechaInicio, self.horaInicio, self.fechaFin, self.horaFin,
+            self.cuestionario.informante
             )
 
 class Resultados(models.Model):
@@ -186,7 +218,10 @@ class Seccion(models.Model):
         return self.pregunta_set.order_by('orden')
 
     def __unicode__(self):
-        return u'{0} > Cuestionario: {1}'.format(self.titulo, self.cuestionario)
+        return u'{0}'.format(self.titulo)
+
+    def __repr__(self):
+         return u'{0} > Cuestionario: {1}'.format(self.titulo, self.cuestionario)
 
     class Meta:
         ordering = ['orden']
@@ -203,6 +238,9 @@ class Pregunta(models.Model):
     seccion = models.ForeignKey(Seccion, related_name='preguntas')
     
     def __unicode__(self):
+        return u'{0}'.format(self.texto)
+
+    def __repr__(self):
         return u'{0} > {1}'.format(self.texto, self.seccion.titulo)
 
     class Meta:
@@ -358,10 +396,9 @@ class TabulacionSatisfaccion2012:
             ('f',u'Los 10 indicadores de mayor INSATISFACCIÓN en la Carrera',
              self.mayor_insatisfaccion, u'Indicadores de mayor Insatisfacción'),
         )
+ 
 
-  
-
-    ###Pendiente terminar        
+    # TODO Pendiente refactorizar 
     def por_docente(self, siglas_area, nombre_carrera, id_docente):
         """
         Satisfacción Estudiantil de un docente en los  módulos, cursos, unidades o talleres
@@ -455,7 +492,7 @@ class TabulacionSatisfaccion2012:
         return dict(conteos=conteos, totales=totales, porcentajes=porcentajes)
     
 
-    # TODO: Usar carrera_id en vez de nombre_carrera
+    # TODO: Usar carrera_id en vez de nombre_carrera?
     def por_carrera(self, siglas_area, nombre_carrera):
         # Todas las Secciones de todos los cuestionarios que pertenecen al periodo de evaluación establecido
         if siglas_area == u'ACE':
@@ -1088,6 +1125,13 @@ class DocentePeriodoAcademico(models.Model):
         verbose_name = 'Docente'
         unique_together = ('usuario','periodoAcademico')
 
+    def get_carreras(self):
+        """ Devuelve una lista de String: Carreras junto con el Área a la que pertenecen """
+        carreras  = AsignaturaDocente.objects.filter(docente__id=self.id).values_list(
+            'asignatura__carrera', 'asignatura__area').distinct()
+        return ['|'.join(c) for c in carreras]
+
+
     def paralelos(self):
         result = self.asignaturasDocente.values_list('asignatura__area', 'asignatura__carrera',
                                             'asignatura__semestre','asignatura__paralelo',
@@ -1117,6 +1161,16 @@ class DireccionCarrera(models.Model):
                                  related_name="direcciones")
     def __unicode__(self):
         return u"Coordinación {0}".format(self.carrera)
+
+    def get_docentes(self):
+        # separa carrera y area
+        ids_docentes = AsignaturaDocente.objects.filter(
+            asignatura__carrera=self.carrera.split('|')[0], asignatura__area=self.carrera.split('|')[1]
+            ).values_list('docente__id', flat=True).distinct()        
+        docentes = DocentePeriodoAcademico.objects.filter(
+            periodoAcademico=self.director.periodoAcademico, id__in=ids_docentes).order_by(
+            'usuario__last_name', 'usuario__first_name')
+        return docentes
 
     class Meta:
         verbose_name = u'Coordinación de Carrera'

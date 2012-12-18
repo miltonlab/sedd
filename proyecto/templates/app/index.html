@@ -39,23 +39,37 @@
 <!-- Si es docente director/coordinador de carrera --> 
 {% if request.session.docente.direcciones|length > 0 %}
 
-<h1 style="margin-top: 20px;"> Comisión Académica de la Carrera </h1>
+<h1 style="margin-top: 20px;"> Encuenstas para Comisión Académica de Carrera </h1>
 <ul style="margin-top: 20px;">
-  {% for carrera in request.session.carreras_docente %}
+  {% for carrera in request.session.carreras_director %}
   <h3> 
     <li>
-      <a href="/resultados/carrera/{{ carrera.num_carrera }}/">
-	RESULTADOS DE EVALUACIÓN CARRERA {{ carrera.nombre|upper }} [{{ carrera.area|upper }}]</a> 
+      <a href="{% url proyecto.app.controllers.director_docentes carrera.num_carrera %} ">
+	SELECCIONAR DOCENTES DE LA CARRERA {{ carrera.nombre|upper }} [{{ carrera.area|upper }}]</a> 
     </li> 
   </h3>
+  {% empty %}
+  <h3> No existen encuestas para la comisión en el presente Periodo.</h3>
   {% endfor %}
 </ul>
 <hr/>
 
+<h1 style="margin-top: 20px;"> Resultados de Evaluaciones de la Carrera </h1>
+<ul style="margin-top: 20px;">
+  {% for carrera in request.session.carreras_director %}
+  <h3> 
+    <li>
+      <a href="/resultados/carrera/{{ carrera.num_carrera }}/">
+	RESULTADOS DE EVALUACIONES CARRERA {{ carrera.nombre|upper }} [{{ carrera.area|upper }}]</a> 
+    </li> 
+  </h3>
+  {% endfor %}
+</ul>
+
+<hr/>
+
 {% endif %}
-
-
-
+{% endif %}
 
 {% endblock %}
 
