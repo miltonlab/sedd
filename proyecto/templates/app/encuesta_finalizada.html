@@ -9,6 +9,29 @@
 
 <p> Gracias por participar de la Encuesta. </p>
 
-<p><a href="{% url proyecto.app.controllers.estudiante_asignaturas_docentes num_carrera %}"> <<< Continuar >>> </a></p>
+{% if request.session.estudianteAsignaturaDocente %}
+<p>
+  <a href="{% url proyecto.app.controllers.estudiante_asignaturas_docentes num_carrera %}"> 
+    <<< Continuar >>> 
+  </a>
+</p>
+{% else %}
+{% if request.session.director_carrera %}
+<p>
+  <!--a href="{#% url proyecto.app.controllers.director_carreras num_carrera %#}"--> 
+  <a href="{% url encuestas id_docente=request.session.docente_evaluar.id id_asignatura=0 id_direccion=0 %}"> 
+    <<< Continuar >>> 
+  </a>
+</p>
+{% else %}
+{% if request.session.docente %}
+<p>
+  <a href="{% url proyecto.app.controllers.index %}"> 
+    <<< Continuar >>> 
+  </a>
+</p>
+{% endif %}
+{% endif %}
+{% endif %}
 
 {% endblock %}

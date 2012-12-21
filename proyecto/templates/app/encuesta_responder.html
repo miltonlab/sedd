@@ -18,7 +18,6 @@
     .seccion{
 	/*background-color: #EDF3FE;*/
         background-color: #B4CBE5;
-        
     }
 
     .td-item-seleccion{
@@ -26,9 +25,14 @@
 	background-color: #B4CBE5;
 	text-align: center;
 	width: 25%;
+        display: table-cell;
 	/* Para cortar las palabras al ancho de la celda */
         word-break: break-all;
         
+    }
+
+    .td-tabla-contenedor {
+        border-bottom: 1px dashed  #B4CBE5;
     }
 
     #tabla-items{
@@ -117,7 +121,7 @@ $(document).ready(function(){
 
   {% csrf_token %}
 
-    <table border="1" width="100%" id="tabla-contenedor">
+    <table id="tabla-contenedor">
 
       <!--thead style="margin-bottom: 40px;"-->
 	<td colspan="2">
@@ -141,11 +145,30 @@ $(document).ready(function(){
 	  </div>
 	  {% endif %}
 
+	  <!-- Encuesta dirigida a los DIRECCIONES DE CARRERA -->
+	  {% if request.session.director_carrera and request.session.docente_evaluar %}
+	  <div id="datos_academicos" style="line-height: 18px;">
+	    AREA: <b> {{ request.session.area }} </b> <br/>
+	    CARRERA: <b> {{ request.session.carrera }} </b> <br/>
+	    MÓDULO: (<b>X</b>) <br/>
+	    NOMBRE DEL PROFESOR (A) EVALUADO (A): <b> {{ request.session.docente_evaluar }} </b>
+	  </div>
+	  {% endif %}
+
+	  <!-- Encuesta de autoevaluación para los DOCENTES -->
+	  {% if not request.session.director_carrera and request.session.docente %}
+	  <div id="datos_academicos" style="line-height: 18px;">
+	    AREA: <b> {{ request.session.areas_docente }} </b> <br/>
+	    CARRERA: <b> {{ request.session.carreras_docente }} </b> <br/>
+	    MÓDULO: (<b>X</b>) <br/>
+	    NOMBRE DEL PROFESOR (A) EVALUADO (A): <b> {{ request.session.docente_evaluar }} </b>
+	  </div>
+	  {% endif %}
+
 	</td>
       <!--/thead-->
 
       <tbody>
-	<!--div id="preguntas"-->
 	  {% for seccion in cuestionario.secciones.all %}
 	  <tr>
 	    <td class="seccion" colspan="2" > 
@@ -156,7 +179,7 @@ $(document).ready(function(){
 
 	  {% for pregunta in seccion.preguntas.all %}
 	  <tr>
-	    <td width="60%" colspan="{% ifequal pregunta.tipo.tipo 'Ensayo' %} 2 {% endifequal %} ">
+	    <td class="td-tabla-contenedor" width="65%" colspan="{% ifequal pregunta.tipo.tipo 'Ensayo' %} 2 {% endifequal %} ">
 	      {% if cuestionario.secciones.all|length > 1 %} 
 	      <b>
 		{% if pregunta.codigo %} {{ pregunta.codigo }}. {% else %} 
@@ -174,20 +197,20 @@ $(document).ready(function(){
 	      {{ pregunta.descripcion|safe }} <!-- Puede contener HTML --> 
 	      {% ifequal pregunta.tipo.tipo 'Ensayo' %}
 	      <br/>
-	      <textarea name="pregunta-{{ pregunta.id }}" cols="100" rows="10" ></textarea>
+	      <textarea name="pregunta-{{ pregunta.id }}" cols="100" rows="10" style="width: 100%;" ></textarea>
 	      {% endifequal %}
 
 	      {% ifequal pregunta.tipo.tipo 'SeleccionUnica' %}
 	    
-	      <td width="40%">
+	      <td width="35%" class="td-tabla-contenedor">
 		<table id="tabla-items">
 		  <tbody>
 		    <tr>
 		      {% for item in pregunta.items.all %}
-		      <td class="td-item-seleccion">
+		      <td class="td-item-seleccion" {% if not item.descripcion %} style="vertical-align: middle;" {% endif %}>
 			  <input type="radio" name="pregunta-{{ pregunta.id }}" 
 				 value="{{ item.texto }}"> </input> 
-			  {{ item.texto }} 
+			  <b> {{ item.texto }} </b>
 			  <br/>
 			  {% if item.descripcion %} {{ item.descripcion }} {% endif %}
 		      </td>

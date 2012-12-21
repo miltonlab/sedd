@@ -23,9 +23,11 @@
 
 <ul>
   {% for cuestionario in cuestionarios %}
-  <li>
-    <a href="/encuesta/responder/{{ cuestionario.id }} " > {{ cuestionario.titulo }} </a> 
-  </li>
+  <h3>
+    <li>
+      <a href="/encuesta/responder/{{ cuestionario.id }} " > {{ cuestionario.titulo }} </a> 
+    </li>
+  </h3>
   {% empty %}
   <h3> No existen Encuestas Disponibles </h3>
   {% endfor %}

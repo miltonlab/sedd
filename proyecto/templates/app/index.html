@@ -23,34 +23,43 @@
 </ul>
 <hr/>
 {% endif %}
-{% endif %}
+{% endif %} <!-- Estudiante -->
+
 
 {% if request.session.docente %}
 
-<h1> Encuestas para Autoevalación del Docente </h1>
+<h1> Encuestas para Autoevaluación del Docente </h1>
 <ul style="margin-top: 20px;">
-  {% for cuestionario in request.session.cuestionarios_docente %}
-  <h1> <li> <a href="pendiente"> {{ cuestionario.titulo }} </a> </li> <h1>
-  {% empty %}
-  <h3> No existen encuestas para docentes en el presente Periodo.</h3>
-  {% endfor %}
+  <h3> 
+    <li>
+      <a href="{% url docente_autoevaluaciones %}"> 
+	Seleccione la Autoevaluación 
+      </a> 
+      <!--a href="{#% url encuestas id_docente=request.session.docente.id id_asignatura=0 id_direccion=0 %}"> 
+	{{ cuestionario.titulo|upper }#} 
+      </a--> 
+    </li> 
+  </h3>
 </ul>  
 <hr/>
 <!-- Si es docente director/coordinador de carrera --> 
 {% if request.session.docente.direcciones|length > 0 %}
 
-<h1 style="margin-top: 20px;"> Encuenstas para Comisión Académica de Carrera </h1>
+<h1 style="margin-top: 20px;"> Encuestas para Comisión Académica de Carrera </h1>
 <ul style="margin-top: 20px;">
+  {% if not request.session.cuestionarios_directivos %} 
+  <h3> No existen encuestas para la Comisión Académica en el presente Periodo.</h3>
+  {% else %}
   {% for carrera in request.session.carreras_director %}
   <h3> 
     <li>
       <a href="{% url proyecto.app.controllers.director_docentes carrera.num_carrera %} ">
-	SELECCIONAR DOCENTES DE LA CARRERA {{ carrera.nombre|upper }} [{{ carrera.area|upper }}]</a> 
+	SELECCIONAR DOCENTES DE LA CARRERA {{ carrera.nombre|upper }} [{{ carrera.area|upper }}]
+      </a> 
     </li> 
   </h3>
-  {% empty %}
-  <h3> No existen encuestas para la comisión en el presente Periodo.</h3>
   {% endfor %}
+  {% endif %}
 </ul>
 <hr/>
 
@@ -65,11 +74,10 @@
   </h3>
   {% endfor %}
 </ul>
-
 <hr/>
+{% endif %} <!-- Coordinación de carrera-->
 
-{% endif %}
-{% endif %}
+{% endif %} <!-- Docente -->
 
 {% endblock %}
 

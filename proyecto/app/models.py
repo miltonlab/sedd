@@ -10,6 +10,303 @@ from datetime import datetime
 import logging
 logg = logging.getLogger('logapp')
 
+#===================================================================================================
+#   Configuraciones
+#===================================================================================================
+
+class Configuracion(models.Model):
+    """ Configuraciones Globales de la Aplicación """
+    periodoAcademicoActual = models.OneToOneField('PeriodoAcademico', null=True, blank=True, verbose_name='Periodo Académico Actual')
+    periodoEvaluacionActual = models.OneToOneField('PeriodoEvaluacion', null=True, blank=True, verbose_name='Periodo Evaluación Actual')
+
+    @classmethod
+    def getPeriodoAcademicoActual(self):
+        return Configuracion.objects.get(id=1).periodoAcademicoActual
+    
+    @classmethod
+    def getPeriodoEvaluacionActual(self):
+        return Configuracion.objects.get(id=1).periodoEvaluacionActual
+    
+    class Meta:
+        verbose_name = u'Configuraciones'
+        verbose_name_plural = u'Configuraciones'
+
+    def __unicode__(self):
+        return u"Configuraciones de la Aplicación"
+
+
+#===================================================================================================
+#   Información Académica
+#===================================================================================================
+
+
+class OfertaAcademicaSGA(models.Model):
+    idSGA = models.IntegerField(verbose_name='Id_SGA', unique=True, db_column='id_sga', null=True, blank=True)
+    descripcion = models.CharField(max_length='100', verbose_name='Descripción')
+
+    class Meta:
+        verbose_name = 'Oferta Académica'
+        verbose_name_plural = 'Ofertas Académicas'
+    
+    def __unicode__(self):
+        return self.descripcion
+
+
+class PeriodoAcademico(models.Model):
+    nombre = models.CharField(max_length='50')
+    inicio = models.DateField()
+    fin = models.DateField()
+    periodoLectivo = models.CharField(max_length=100,db_column='periodo_lectivo')
+    ofertasAcademicasSGA = models.ManyToManyField('OfertaAcademicaSGA', related_name='peridosAcademicos', blank=True, null=True, verbose_name='Ofertas SGA')
+
+    def cargarOfertasSGA(self):
+        proxy = SGA(settings.SGAWS_USER, settings.SGAWS_PASS)
+        ofertas_dict = proxy.ofertas_academicas(self.inicio, self.fin)
+        ofertas = [OfertaAcademicaSGA(idSGA=oa['id'], descripcion=oa['descripcion'])  for oa in ofertas_dict]
+        for oa in ofertas:
+            try:
+                OfertaAcademicaSGA.objects.get(idSGA=oa.idSGA)
+            except OfertaAcademicaSGA.DoesNotExist:
+                # Se agregan solo en el caso que no existan aún la oferta académica
+                oa.periodoAcademico = self
+                oa.save()
+
+    def save(self, *args, **kwargs):
+        """
+           Cada vez que se crea un nuevo Periodo Académico se consultan las ofertas academicas del SGA para adherirlas.
+           Luego se pueden eliminar desde la aplicación de administración.
+           @author: Milton Labanda
+           @date: 04-05-2012
+        """
+        nuevo = False
+        if not self.pk:
+            nuevo = True
+        super(PeriodoAcademico, self).save(*args, **kwargs)
+        if nuevo:
+            self.cargarOfertasSGA()
+            
+    class Meta:
+        ordering = ['inicio']
+        verbose_name = 'Periodo Académico'
+        verbose_name_plural = 'Periodos Académicos'
+        
+    def __unicode__(self):
+        return self.nombre
+
+
+class Asignatura(models.Model):
+    area = models.CharField(max_length='20')
+    carrera = models.CharField(max_length='100')
+    semestre = models.CharField(max_length='10', verbose_name='módulo')
+    paralelo = models.CharField(max_length='50')
+    seccion = models.CharField(max_length='10')
+    nombre = models.TextField()
+    tipo = models.CharField(max_length='15')
+    creditos = models.IntegerField(verbose_name='número de créditos')
+    duracion = models.FloatField(verbose_name='duración en horas')
+    inicio = models.DateField(null=True, verbose_name='inicia')
+    fin = models.DateField(null=True, verbose_name='termina')
+    # Campocombinado id_unidad:id_paralelo
+    idSGA = models.CharField(max_length='15', db_column='id_sga')
+
+    def esVigente(self):
+        """ Determina si la asignatura se dicta dentro del Periodo de Evaluación Actual """
+        periodoEvaluacion = Configuracion.getPeriodoEvaluacionActual()
+        if self.inicio <= periodoEvaluacion.fin and self.fin >= periodoEvaluacion.inicio:
+            return True
+        else:
+            return False
+                
+    def getTipo(self):
+        tipos = [u'taller',u'curso',u'módulo',u'modulo',u'unidad']
+        l = [t for t in tipos if t in self.nombre.lower()]
+        return l[0]  if l else u'otro'    
+
+    def save(self, *args, **kwargs):
+        self.tipo = self.getTipo()
+        super(Asignatura, self).save(*args, **kwargs)
+    
+    def __unicode__(self):
+        return u"{0} - {1}".format(self.idSGA, self.nombre)
+
+    
+class EstudiantePeriodoAcademico(models.Model):
+    usuario = models.ForeignKey('Usuario', related_name='estudiantePeriodosAcademicos')
+    periodoAcademico = models.ForeignKey('PeriodoAcademico', related_name='estudiantes',
+                                         verbose_name='Periodo Académico', db_column='periodo_academico_id')
+
+    class Meta:
+        verbose_name = 'Estudiante'
+        unique_together = ('usuario', 'periodoAcademico')
+
+    def cedula(self):
+        return self.usuario.cedula
+    
+    def paralelos(self):
+        consulta = self.asignaturasDocentesEstudiante.values_list('asignaturaDocente__asignatura__area',
+                                                                  'asignaturaDocente__asignatura__carrera',
+                                                                  'asignaturaDocente__asignatura__semestre',
+                                                                  'asignaturaDocente__asignatura__paralelo',
+                                                                  'asignaturaDocente__asignatura__seccion',).distinct()
+        # Se construye una lista de diccionarios
+        datos = [dict(zip(('area','carrera','modulo','paralelo','seccion'),r)) for r in consulta]
+        return datos
+
+    def __unicode__(self):
+        return self.usuario.get_full_name()
+    
+
+class EstudianteAsignaturaDocente(models.Model):
+    estudiante = models.ForeignKey('EstudiantePeriodoAcademico', related_name='asignaturasDocentesEstudiante')
+    asignaturaDocente = models.ForeignKey('AsignaturaDocente', related_name='estudiantesAsignaturaDocente',
+                                          verbose_name='Asignatura - Docente')
+    matricula = models.IntegerField(blank=True, null=True)    
+    estado = models.CharField(max_length='60', blank=True, null=True)
+
+    def get_area(self):
+        return self.asignaturaDocente.asignatura.area
+    get_area.short_description = 'Area'
+        
+    def get_carrera(self):
+        return self.asignaturaDocente.asignatura.carrera[:60]
+    get_carrera.short_description = 'Carrera'
+    
+    def get_semestre(self):
+        return self.asignaturaDocente.asignatura.semestre
+    get_semestre.short_description = 'Semestre'
+
+    def get_paralelo(self):
+        return self.asignaturaDocente.asignatura.paralelo
+    get_paralelo.short_description = 'Paralelo'
+    
+    def get_nombre_corto(self):
+        return self.__unicode__()[:60]
+    get_nombre_corto.short_description = 'Nombre'
+
+    def get_asignatura(self):
+        return self.asignaturaDocente.asignatura
+        
+    # Campos para adicionar en el Admin a través del formulario  EstudianteAsignaturaDocenteAdminForm
+    carrera = property(get_carrera,)
+    semestre = property(get_semestre,)
+    paralelo = property(get_paralelo,)
+    
+    class Meta:
+        verbose_name = 'Estudiante Asignaturas'
+        verbose_name_plural = 'Estudiantes y Asignaturas'
+        unique_together = ('estudiante','asignaturaDocente')
+
+    def __unicode__(self):
+        return u"{0} >> {1}".format(self.estudiante, self.asignaturaDocente)
+
+
+class AsignaturaDocente(models.Model):
+    asignatura = models.ForeignKey('Asignatura', related_name='docentesAsignatura')
+    docente = models.ForeignKey('DocentePeriodoAcademico', related_name='asignaturasDocente')
+
+    def get_idSGA(self):
+        return self.asignatura.idSGA
+
+    def get_carrera(self):
+        return self.asignatura.carrera[:60]
+    get_carrera.short_description = 'Carrera'
+    
+    def get_semestre(self):
+        return self.asignatura.semestre
+    get_semestre.short_description = 'Semestre'
+    
+    def get_paralelo(self):
+        return self.asignatura.paralelo
+    get_paralelo.short_description = 'Paralelo'
+    
+    def get_nombre_corto(self):
+        ancho = 60
+        s = self.__unicode__()
+        return s[:ancho]
+    get_nombre_corto.short_description = 'Nombre'
+
+    # Campos para adicionar en el Admin a través del formulario  EstudianteAsignaturaDocenteAdminForm
+    carrera = property(get_carrera,)
+    semestre = property(get_semestre,)
+    paralelo = property(get_paralelo,)
+    
+    class Meta:
+        verbose_name = 'Asignatura Docente'
+        verbose_name_plural = 'Asignaturas y Docentes'
+        unique_together = ('docente','asignatura')
+
+    def __unicode__(self):
+        return u"{0} >> {1}".format(self.docente, self.asignatura.nombre)
+
+
+class DocentePeriodoAcademico(models.Model):
+    usuario = models.ForeignKey('Usuario', related_name='docentePeriodosAcademicos')
+    periodoAcademico = models.ForeignKey('PeriodoAcademico', related_name='docentes',
+                                         verbose_name='Periodo Académico', db_column='periodo_academico_id')
+    esCoordinador = models.BooleanField()
+    
+    class Meta:
+        verbose_name = 'Docente'
+        unique_together = ('usuario','periodoAcademico')
+
+    def get_carreras(self):
+        """ Devuelve una lista de String: Carreras junto con el Área a la que pertenecen """
+        carreras  = AsignaturaDocente.objects.filter(docente__id=self.id).values_list(
+            'asignatura__carrera', 'asignatura__area').distinct()
+        return ['|'.join(c) for c in carreras]
+
+
+    def paralelos(self):
+        result = self.asignaturasDocente.values_list('asignatura__area', 'asignatura__carrera',
+                                            'asignatura__semestre','asignatura__paralelo',
+                                            'asignatura__seccion').distinct()
+        datos = [dict(zip(('area','carrera','modulo','paralelo','seccion'),r)) for r in result]
+        return datos
+
+    
+    def cedula(self):
+        return self.usuario.cedula
+        
+    def __unicode__(self):
+        return u'{0} {1}'.format(self.usuario.abreviatura, self.usuario.get_full_name())
+
+
+# Todas las carrera que riguen en el Periodo Académico Actual
+carreras = AsignaturaDocente.objects.filter(
+    docente__periodoAcademico=Configuracion.getPeriodoAcademicoActual()).values_list(
+    'asignatura__carrera', 'asignatura__area').order_by(
+    'asignatura__carrera').distinct()
+carreras_areas = [('|'.join(c),'|'.join(c)) for c in  carreras]
+
+class DireccionCarrera(models.Model):
+    # Nombre de la Carrera más el Área
+    carrera = models.CharField(max_length=255, choices=carreras_areas, unique=True, 
+                               verbose_name=u'Carrera-Area')
+    # Director o Coordinador de Carrera
+    director = models.ForeignKey('DocentePeriodoAcademico', verbose_name=u"Coordinador",
+                                 related_name="direcciones")
+    def __unicode__(self):
+        return u"Coordinación {0}".format(self.carrera)
+
+    def get_docentes(self):
+        # separa carrera y area
+        ids_docentes = AsignaturaDocente.objects.filter(
+            asignatura__carrera=self.carrera.split('|')[0], asignatura__area=self.carrera.split('|')[1]
+            ).values_list('docente__id', flat=True).distinct()        
+        docentes = DocentePeriodoAcademico.objects.filter(
+            periodoAcademico=self.director.periodoAcademico, id__in=ids_docentes).order_by(
+            'usuario__last_name', 'usuario__first_name')
+        return docentes
+
+    class Meta:
+        verbose_name = u'Coordinación de Carrera'
+        verbose_name_plural = 'Coordinaciones de Carreras'
+
+
+#===================================================================================================
+#   Información de Encuestas y Evaluación 
+#===================================================================================================
+
 
 class TipoInformante(models.Model): 
     # TODO: Clase Abstracta
@@ -63,7 +360,9 @@ class Cuestionario(models.Model):
     inicio = models.DateTimeField('Inicio de la Encuesta')
     fin=models.DateTimeField('Finalización de la Encuesta')
     informante = models.ForeignKey(TipoInformante, blank=True, null=True)
-    periodoEvaluacion = models.ForeignKey('PeriodoEvaluacion', blank=True, null=True, related_name='cuestionarios')
+    periodoEvaluacion = models.ForeignKey('PeriodoEvaluacion', blank=True, null=True, 
+                                          related_name='cuestionarios', verbose_name=u'Periodo de Evaluación'
+                                          )
     
     def __unicode__(self):
         return self.titulo
@@ -122,28 +421,33 @@ class Contestacion(models.Model):
     
     
 class Evaluacion(models.Model):
-    """ """
+    """ 
+    Delega la lógica que determina el tipo de evaluación a los controladores
+    Se puede acceder a las evaluaciones y autoevaluaciones directamente
+    Para acceder a las evaluaciones de los estudiantes utilizar 'estudianteAsignaturaDocente'
+    """
     fechaInicio = models.DateField()
     fechaFin = models.DateField()
     horaInicio = models.TimeField()
     horaFin = models.TimeField()
     cuestionario = models.ForeignKey('Cuestionario', related_name='evaluaciones')
-    #
-    # Se delega la lógica que determina el tipo de evaluación a los controladores
-    # Para los estudiantes
+    # Evaluaciones de ESTUDIANTES
     estudianteAsignaturaDocente = models.ForeignKey('EstudianteAsignaturaDocente', related_name='evaluaciones', null=True, default=None)
-    # Para los docentes. Sus evaluaciones pueden ser evaluaciones y autoevaluaciones 
+    # Evaluaciones de DOCENTES. Pueden ser evaluaciones y autoevaluaciones 
     docentePeriodoAcademico = models.ForeignKey('DocentePeriodoAcademico', related_name='evaluaciones', null=True)
-    # Para las direcciones de carrera. Comisión de Evaluación
-    direccionCarrera = models.ForeignKey('DireccionCarrera', related_name='evaluaciones', null=True)
+    # Evaluaciones de DIRECCIONES DE CARRERA # Docente Director
+    directorCarrera = models.ForeignKey('DocentePeriodoAcademico', related_name='evaluaciones', null=True)
+    # Evaluaciones de DIRECCIONES DE CARRERA # Nombre de la Carrera más el Área
+    carreraDirector =  models.CharField(max_length=255, choices=carreras_areas, 
+                                        verbose_name=u'Carrera-Area', blank=True, null=True)
 
     def evaluador(self):
         # Evaluacion del Estudiante a sus docentes
         if self.estudianteAsignaturaDocente:
             evaluador = self.estudianteAsignaturaDocente.estudiante
         # Evaluación de la Comisión Académica de la Carrera al docente
-        elif self.direccionCarrera and self.docentePeriodoAcademico:
-            evaluador = self.direccionCarrera
+        elif self.directorCarrera and self.docentePeriodoAcademico:
+            evaluador = self.directorCarrera
         # Autoevaluacion del docente
         elif self.docentePeriodoAcademico:
             evaluador = self.docentePeriodoAcademico
@@ -154,7 +458,7 @@ class Evaluacion(models.Model):
         if self.estudianteAsignaturaDocente:
             evaluado = self.estudianteAsignaturaDocente.asignaturaDocente.docente
         # Evaluación de la Comisión Académica de la Carrera al docente
-        elif self.direccionCarrera and self.docentePeriodoAcademico:
+        elif self.directorCarrera and self.docentePeriodoAcademico:
             evaluado = self.docentePeriodoAcademico
         # Autoevaluacion del docente
         elif self.docentePeriodoAcademico:
@@ -166,8 +470,8 @@ class Evaluacion(models.Model):
         
     def __unicode__(self):
         return u'{0} - {1} - {2}|{3} - {4}|{5} - {6}'.format(
-            self.evaluador().director.cedula if isinstance(self.evaluador(), DireccionCarrera) else self.evaluador().cedula, 
-            self.evaluado().cedula, 
+            self.evaluador().director.cedula() if isinstance(self.evaluador(), DireccionCarrera) else self.evaluador().cedula(), 
+            self.evaluado().cedula(), 
             self.fechaInicio, self.horaInicio, self.fechaFin, self.horaFin,
             self.cuestionario.informante
             )
@@ -211,21 +515,21 @@ class Seccion(models.Model):
     descripcion  = models.CharField(max_length='100')
     orden = models.IntegerField()
     seccionPadre = models.ForeignKey('self', null=True, blank=True, db_column='seccion_padre_id',
-                                     related_name='subsecciones', verbose_name='Sección Padre')
+                                     related_name='subsecciones', verbose_name=u'Sección Padre')
     cuestionario = models.ForeignKey(Cuestionario, related_name='secciones')
 
     def preguntas_ordenadas(self):
         return self.pregunta_set.order_by('orden')
 
     def __unicode__(self):
-        return u'{0}'.format(self.titulo)
+        return u'{0} > Cuestionario: {1}'.format(self.titulo, self.cuestionario.titulo)
 
     def __repr__(self):
          return u'{0} > Cuestionario: {1}'.format(self.titulo, self.cuestionario)
 
     class Meta:
         ordering = ['orden']
-        verbose_name = 'sección'
+        verbose_name = u'sección'
         verbose_name_plural = 'secciones'
 
         
@@ -317,7 +621,7 @@ class PeriodoEvaluacion(models.Model):
             estudiante__usuario__cedula=cedula).filter(
             estudiante__periodoAcademico=self.periodoAcademico).count()
         restantes = total - evaluaciones
-        mensaje = "{0}: total {1}, evaluados {2}, restan {3} ".format(cedula, total, evaluaciones, restantes)
+        mensaje = u"{0}: total {1}, evaluados {2}, restan {3} ".format(cedula, total, evaluaciones, restantes)
         logg.info(mensaje)
         if restantes == 0:
             return True
@@ -889,297 +1193,11 @@ class TabulacionSatisfaccion2012:
             conteos.append(conteo)
         return conteos
 
-    
-#===================================================================================================
-#   Información Académica
-#===================================================================================================
 
 
-class OfertaAcademicaSGA(models.Model):
-    idSGA = models.IntegerField(verbose_name='Id_SGA', unique=True, db_column='id_sga', null=True, blank=True)
-    descripcion = models.CharField(max_length='100', verbose_name='Descripción')
-
-    class Meta:
-        verbose_name = 'Oferta Académica'
-        verbose_name_plural = 'Ofertas Académicas'
-    
-    def __unicode__(self):
-        return self.descripcion
-
-
-class PeriodoAcademico(models.Model):
-    nombre = models.CharField(max_length='50')
-    inicio = models.DateField()
-    fin = models.DateField()
-    periodoLectivo = models.CharField(max_length=100,db_column='periodo_lectivo')
-    ofertasAcademicasSGA = models.ManyToManyField('OfertaAcademicaSGA', related_name='peridosAcademicos', blank=True, null=True, verbose_name='Ofertas SGA')
-
-    def cargarOfertasSGA(self):
-        proxy = SGA(settings.SGAWS_USER, settings.SGAWS_PASS)
-        ofertas_dict = proxy.ofertas_academicas(self.inicio, self.fin)
-        ofertas = [OfertaAcademicaSGA(idSGA=oa['id'], descripcion=oa['descripcion'])  for oa in ofertas_dict]
-        for oa in ofertas:
-            try:
-                OfertaAcademicaSGA.objects.get(idSGA=oa.idSGA)
-            except OfertaAcademicaSGA.DoesNotExist:
-                # Se agregan solo en el caso que no existan aún la oferta académica
-                oa.periodoAcademico = self
-                oa.save()
-
-    def save(self, *args, **kwargs):
-        """
-           Cada vez que se crea un nuevo Periodo Académico se consultan las ofertas academicas del SGA para adherirlas.
-           Luego se pueden eliminar desde la aplicación de administración.
-           @author: Milton Labanda
-           @date: 04-05-2012
-        """
-        nuevo = False
-        if not self.pk:
-            nuevo = True
-        super(PeriodoAcademico, self).save(*args, **kwargs)
-        if nuevo:
-            self.cargarOfertasSGA()
-            
-    class Meta:
-        ordering = ['inicio']
-        verbose_name = 'Periodo Académico'
-        verbose_name_plural = 'Periodos Académicos'
-        
-    def __unicode__(self):
-        return self.nombre
-
-
-class Configuracion(models.Model):
-    """ Configuraciones Globales de la Aplicación """
-    periodoAcademicoActual = models.OneToOneField(PeriodoAcademico, null=True, blank=True, verbose_name='Periodo Académico Actual')
-    periodoEvaluacionActual = models.OneToOneField(PeriodoEvaluacion, null=True, blank=True, verbose_name='Periodo Evaluación Actual')
-
-    @classmethod
-    def getPeriodoAcademicoActual(self):
-        return Configuracion.objects.get(id=1).periodoAcademicoActual
-    
-    @classmethod
-    def getPeriodoEvaluacionActual(self):
-        return Configuracion.objects.get(id=1).periodoEvaluacionActual
-    
-    class Meta:
-        verbose_name = u'Configuraciones'
-        verbose_name_plural = u'Configuraciones'
-
-    def __unicode__(self):
-        return u"Configuraciones de la Aplicación"
-
-
-class Asignatura(models.Model):
-    area = models.CharField(max_length='20')
-    carrera = models.CharField(max_length='100')
-    semestre = models.CharField(max_length='10', verbose_name='módulo')
-    paralelo = models.CharField(max_length='50')
-    seccion = models.CharField(max_length='10')
-    nombre = models.TextField()
-    tipo = models.CharField(max_length='15')
-    creditos = models.IntegerField(verbose_name='número de créditos')
-    duracion = models.FloatField(verbose_name='duración en horas')
-    inicio = models.DateField(null=True, verbose_name='inicia')
-    fin = models.DateField(null=True, verbose_name='termina')
-    # Campocombinado id_unidad:id_paralelo
-    idSGA = models.CharField(max_length='15', db_column='id_sga')
-
-    def esVigente(self):
-        """ Determina si la asignatura se dicta dentro del Periodo de Evaluación Actual """
-        periodoEvaluacion = Configuracion.getPeriodoEvaluacionActual()
-        if self.inicio <= periodoEvaluacion.fin and self.fin >= periodoEvaluacion.inicio:
-            return True
-        else:
-            return False
-                
-    def getTipo(self):
-        tipos = [u'taller',u'curso',u'módulo',u'modulo',u'unidad']
-        l = [t for t in tipos if t in self.nombre.lower()]
-        return l[0]  if l else u'otro'    
-
-    def save(self, *args, **kwargs):
-        self.tipo = self.getTipo()
-        super(Asignatura, self).save(*args, **kwargs)
-    
-    def __unicode__(self):
-        return u"{0} - {1}".format(self.idSGA, self.nombre)
-
-    
-class EstudiantePeriodoAcademico(models.Model):
-    usuario = models.ForeignKey('Usuario', related_name='estudiantePeriodosAcademicos')
-    periodoAcademico = models.ForeignKey('PeriodoAcademico', related_name='estudiantes',
-                                         verbose_name='Periodo Académico', db_column='periodo_academico_id')
-
-    class Meta:
-        verbose_name = 'Estudiante'
-        unique_together = ('usuario', 'periodoAcademico')
-
-    def cedula(self):
-        return self.usuario.cedula
-    
-    def paralelos(self):
-        consulta = self.asignaturasDocentesEstudiante.values_list('asignaturaDocente__asignatura__area',
-                                                                  'asignaturaDocente__asignatura__carrera',
-                                                                  'asignaturaDocente__asignatura__semestre',
-                                                                  'asignaturaDocente__asignatura__paralelo',
-                                                                  'asignaturaDocente__asignatura__seccion',).distinct()
-        # Se construye una lista de diccionarios
-        datos = [dict(zip(('area','carrera','modulo','paralelo','seccion'),r)) for r in consulta]
-        return datos
-
-    def __unicode__(self):
-        return self.usuario.get_full_name()
-    
-
-class EstudianteAsignaturaDocente(models.Model):
-    estudiante = models.ForeignKey('EstudiantePeriodoAcademico', related_name='asignaturasDocentesEstudiante')
-    asignaturaDocente = models.ForeignKey('AsignaturaDocente', related_name='estudiantesAsignaturaDocente',
-                                          verbose_name='Asignatura - Docente')
-    matricula = models.IntegerField(blank=True, null=True)    
-    estado = models.CharField(max_length='60', blank=True, null=True)
-
-    def get_area(self):
-        return self.asignaturaDocente.asignatura.area
-    get_area.short_description = 'Area'
-        
-    def get_carrera(self):
-        return self.asignaturaDocente.asignatura.carrera[:60]
-    get_carrera.short_description = 'Carrera'
-    
-    def get_semestre(self):
-        return self.asignaturaDocente.asignatura.semestre
-    get_semestre.short_description = 'Semestre'
-
-    def get_paralelo(self):
-        return self.asignaturaDocente.asignatura.paralelo
-    get_paralelo.short_description = 'Paralelo'
-    
-    def get_nombre_corto(self):
-        return self.__unicode__()[:60]
-    get_nombre_corto.short_description = 'Nombre'
-
-    def get_asignatura(self):
-        return self.asignaturaDocente.asignatura
-        
-    # Campos para adicionar en el Admin a través del formulario  EstudianteAsignaturaDocenteAdminForm
-    carrera = property(get_carrera,)
-    semestre = property(get_semestre,)
-    paralelo = property(get_paralelo,)
-    
-    class Meta:
-        verbose_name = 'Estudiante Asignaturas'
-        verbose_name_plural = 'Estudiantes y Asignaturas'
-        unique_together = ('estudiante','asignaturaDocente')
-
-    def __unicode__(self):
-        return u"{0} >> {1}".format(self.estudiante, self.asignaturaDocente)
-
-
-class AsignaturaDocente(models.Model):
-    asignatura = models.ForeignKey('Asignatura', related_name='docentesAsignatura')
-    docente = models.ForeignKey('DocentePeriodoAcademico', related_name='asignaturasDocente')
-
-    def get_idSGA(self):
-        return self.asignatura.idSGA
-
-    def get_carrera(self):
-        return self.asignatura.carrera[:60]
-    get_carrera.short_description = 'Carrera'
-    
-    def get_semestre(self):
-        return self.asignatura.semestre
-    get_semestre.short_description = 'Semestre'
-    
-    def get_paralelo(self):
-        return self.asignatura.paralelo
-    get_paralelo.short_description = 'Paralelo'
-    
-    def get_nombre_corto(self):
-        ancho = 60
-        s = self.__unicode__()
-        return s[:ancho]
-    get_nombre_corto.short_description = 'Nombre'
-
-    # Campos para adicionar en el Admin a través del formulario  EstudianteAsignaturaDocenteAdminForm
-    carrera = property(get_carrera,)
-    semestre = property(get_semestre,)
-    paralelo = property(get_paralelo,)
-    
-    class Meta:
-        verbose_name = 'Asignatura Docente'
-        verbose_name_plural = 'Asignaturas y Docentes'
-        unique_together = ('docente','asignatura')
-
-    def __unicode__(self):
-        return u"{0} >> {1}".format(self.docente, self.asignatura.nombre)
-
-
-class DocentePeriodoAcademico(models.Model):
-    usuario = models.ForeignKey('Usuario', related_name='docentePeriodosAcademicos')
-    periodoAcademico = models.ForeignKey('PeriodoAcademico', related_name='docentes',
-                                         verbose_name='Periodo Académico', db_column='periodo_academico_id')
-    esCoordinador = models.BooleanField()
-    
-    class Meta:
-        verbose_name = 'Docente'
-        unique_together = ('usuario','periodoAcademico')
-
-    def get_carreras(self):
-        """ Devuelve una lista de String: Carreras junto con el Área a la que pertenecen """
-        carreras  = AsignaturaDocente.objects.filter(docente__id=self.id).values_list(
-            'asignatura__carrera', 'asignatura__area').distinct()
-        return ['|'.join(c) for c in carreras]
-
-
-    def paralelos(self):
-        result = self.asignaturasDocente.values_list('asignatura__area', 'asignatura__carrera',
-                                            'asignatura__semestre','asignatura__paralelo',
-                                            'asignatura__seccion').distinct()
-        datos = [dict(zip(('area','carrera','modulo','paralelo','seccion'),r)) for r in result]
-        return datos
-
-    
-    def cedula(self):
-        return self.usuario.cedula
-        
-    def __unicode__(self):
-        return u'{0} {1}'.format(self.usuario.abreviatura, self.usuario.get_full_name())
-
-# Todas las carrera que vigentes en el Periodo Académico Actual
-carreras = AsignaturaDocente.objects.filter(
-    docente__periodoAcademico=Configuracion.getPeriodoAcademicoActual()).values_list(
-    'asignatura__carrera', 'asignatura__area').order_by(
-    'asignatura__carrera').distinct()
-carreras_areas = [('|'.join(c),'|'.join(c)) for c in  carreras]
-
-class DireccionCarrera(models.Model):
-    # Nombre de la Carrera más el Área
-    carrera = models.CharField(max_length=255, choices=carreras_areas, unique=True)
-    # Director o Coordinador de Carrera
-    director = models.ForeignKey('DocentePeriodoAcademico', verbose_name=u"Coordinador",
-                                 related_name="direcciones")
-    def __unicode__(self):
-        return u"Coordinación {0}".format(self.carrera)
-
-    def get_docentes(self):
-        # separa carrera y area
-        ids_docentes = AsignaturaDocente.objects.filter(
-            asignatura__carrera=self.carrera.split('|')[0], asignatura__area=self.carrera.split('|')[1]
-            ).values_list('docente__id', flat=True).distinct()        
-        docentes = DocentePeriodoAcademico.objects.filter(
-            periodoAcademico=self.director.periodoAcademico, id__in=ids_docentes).order_by(
-            'usuario__last_name', 'usuario__first_name')
-        return docentes
-
-    class Meta:
-        verbose_name = u'Coordinación de Carrera'
-        verbose_name_plural = 'Coordinaciones de Carreras'
 #===================================================================================================
 #   Autenticación y Usuarios
 #===================================================================================================
-
-# from django.contrib.auth.models
 
 class Usuario(User):
     """
@@ -1222,3 +1240,4 @@ class Usuario(User):
 
     def __unicode__(self):
         return self.get_full_name()
+
