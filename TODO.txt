@@ -1,5 +1,27 @@
+1103659833 Luis Chamba
+1103770903 Edison Leonardo Coronel Romero
+
 
  * Mejorar relacion Cuestionario - Seccion - Pregunta 
  * vista y template para encuestas de docentes
- * Manejar carrera como modelo separado, necesitamos carrera_id
+ * Manejar carrera como modelo separado, necesitamos carrera_id?
  * Manejar 'seccion' (matituina, vespertina, nocturna) en las asignaturas
+
+Notas temporales de Desarrollo
+
+ * Antes de aplicar migraciones (desarrollo a produccion): 12-2012
+   - alter table app_itempregunta add column descripcion varchar(70);
+   - 0002 0003 0004 0005
+   - CREATE TABLE "app_direccioncarrera" (
+    "id" serial NOT NULL PRIMARY KEY,
+    "carrera" varchar(255) NOT NULL UNIQUE,
+    "director_id" integer NOT NULL REFERENCES "app_docenteperiodoacademico" ("id") DEFERRABLE INITIALLY DEFERRED
+   );
+   - 0006
+   - eliminar 0007
+   - python manage.py shchemamigration proyecto.app --auto
+   - alter table app_pregunta add column descripcion text;
+   - python manage.py migrate
+   - 0008
+
+

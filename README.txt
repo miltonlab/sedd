@@ -17,13 +17,16 @@ Requerimientos:
  * django-piston 0.2.3
  * python-psycopg2 2.4.2
  * libapache2-mod-wsgi 3.3  (modulo para desplegar en apache)
+ * south 0.7.3       (Migraciones)
 
 Opcionales 
 -------------------------------------------------------------------
- * django-south 0.7.3       (Migraciones)
+
  * django-chronograph 0.3.1 (Admin de Tareas)
  * python-dateutil 1.4.1    (Admin de Tareas)
  * graphviz 2.26   	    
  * libgraphviz-dev
  * python-pygraphviz 1.0    (Generación de graficos del modelo)
+ * ptyhon-mysqldb 1.2.2	    (Importacion desde anterior sedd)
+   
 

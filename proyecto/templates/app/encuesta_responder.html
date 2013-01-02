@@ -156,12 +156,12 @@ $(document).ready(function(){
 	  {% endif %}
 
 	  <!-- Encuesta de autoevaluación para los DOCENTES -->
-	  {% if not request.session.director_carrera and request.session.docente %}
+	  {% if request.session.docente %}
 	  <div id="datos_academicos" style="line-height: 18px;">
 	    AREA: <b> {{ request.session.areas_docente }} </b> <br/>
 	    CARRERA: <b> {{ request.session.carreras_docente }} </b> <br/>
 	    MÓDULO: (<b>X</b>) <br/>
-	    NOMBRE DEL PROFESOR (A) EVALUADO (A): <b> {{ request.session.docente_evaluar }} </b>
+	    NOMBRE DEL PROFESOR (A) EVALUADO (A): <b> {{ request.session.docente }} </b>
 	  </div>
 	  {% endif %}
 

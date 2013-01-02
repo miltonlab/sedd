@@ -8,31 +8,15 @@ from django.db import models
 class Migration(SchemaMigration):
 
     def forwards(self, orm):
-        # Deleting field 'Evaluacion.direccionCarrera'
-        db.delete_column('app_evaluacion', 'direccionCarrera_id')
-
-        # Adding field 'Evaluacion.directorCarrera'
-        db.add_column('app_evaluacion', 'directorCarrera',
-                      self.gf('django.db.models.fields.related.ForeignKey')(related_name='evaluaciones', null=True, to=orm['app.DocentePeriodoAcademico']),
-                      keep_default=False)
-
-        # Adding field 'Evaluacion.carreraDirector'
-        db.add_column('app_evaluacion', 'carreraDirector',
-                      self.gf('django.db.models.fields.CharField')(max_length=255, null=True, blank=True),
+        # Adding field 'DocentePeriodoAcademico.carrera'
+        db.add_column('app_docenteperiodoacademico', 'carrera',
+                      self.gf('django.db.models.fields.CharField')(max_length='500', null=True, blank=True),
                       keep_default=False)
 
 
     def backwards(self, orm):
-        # Adding field 'Evaluacion.direccionCarrera'
-        db.add_column('app_evaluacion', 'direccionCarrera',
-                      self.gf('django.db.models.fields.related.ForeignKey')(related_name='evaluaciones', null=True, to=orm['app.DireccionCarrera']),
-                      keep_default=False)
-
-        # Deleting field 'Evaluacion.directorCarrera'
-        db.delete_column('app_evaluacion', 'directorCarrera_id')
-
-        # Deleting field 'Evaluacion.carreraDirector'
-        db.delete_column('app_evaluacion', 'carreraDirector')
+        # Deleting field 'DocentePeriodoAcademico.carrera'
+        db.delete_column('app_docenteperiodoacademico', 'carrera')
 
 
     models = {
@@ -95,6 +79,7 @@ class Migration(SchemaMigration):
         },
         'app.docenteperiodoacademico': {
             'Meta': {'unique_together': "(('usuario', 'periodoAcademico'),)", 'object_name': 'DocentePeriodoAcademico'},
+            'carrera': ('django.db.models.fields.CharField', [], {'max_length': "'500'", 'null': 'True', 'blank': 'True'}),
             'esCoordinador': ('django.db.models.fields.BooleanField', [], {'default': 'False'}),
             'id': ('django.db.models.fields.AutoField', [], {'primary_key': 'True'}),
             'periodoAcademico': ('django.db.models.fields.related.ForeignKey', [], {'related_name': "'docentes'", 'db_column': "'periodo_academico_id'", 'to': "orm['app.PeriodoAcademico']"}),

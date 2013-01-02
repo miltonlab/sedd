@@ -243,6 +243,8 @@ class DocentePeriodoAcademico(models.Model):
     usuario = models.ForeignKey('Usuario', related_name='docentePeriodosAcademicos')
     periodoAcademico = models.ForeignKey('PeriodoAcademico', related_name='docentes',
                                          verbose_name='Periodo Académico', db_column='periodo_academico_id')
+    # Atributo agregado por efectos de migracion de docentes sin informacion de asignaturas
+    carrera = models.CharField(max_length='500', blank=True, null=True)
     esCoordinador = models.BooleanField()
     
     class Meta:

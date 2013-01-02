@@ -237,18 +237,24 @@ def director_docentes(request, num_carrera):
 
 def docente_autoevaluaciones(request):
     """ Autoevaluaciones para los DOCENTES """
-    docente = request.session['docente']
+    # En caso de que el docente sea a la vez director de carrera
+    if request.session.get('docente', None):
+        docente = request.session['docente']
+    elif request.session.get('director_carrera', None):
+        docente = request.session['director_carrera']
     # Areas en las que dicta clases el docente
-    areas_docente = AsignaturaDocente.objects.filter(docente=docente).values_list('asignatura__area', flat=True).distinct()
+    areas_docente = AsignaturaDocente.objects.filter(docente=docente).values_list(
+        'asignatura__area', flat=True).distinct()
     # Carreras en las que dicta clases el docente
-    carreras_docente = AsignaturaDocente.objects.filter(docente=docente).values_list('asignatura__carrera', flat=True).distinct()
+    carreras_docente = AsignaturaDocente.objects.filter(docente=docente).values_list(
+        'asignatura__carrera', flat=True).distinct()
     request.session['areas_docente'] = areas_docente
     request.session['carreras_docente'] = carreras_docente
-    title = u">>Docente {0}".format(docente) 
+    title = u">> Docente {0}".format(docente) 
     cuestionarios = request.session['cuestionarios_docente']
-    datos = dict(cuestionarios=cuestionarios,title=title)
-    print 'docente: ',  request.session['docente']
-    return render_to_response('app/encuestas.html', datos)#, context_instance=RequestContext(request))
+    datos = dict(cuestionarios=cuestionarios, title=title)
+    print 'session en docente_autovaluaciones', request.session.items()
+    return render_to_response('app/encuestas.html', datos, context_instance=RequestContext(request))
 
 
 def encuestas(request, id_docente, id_asignatura=0, id_direccion=0):
@@ -363,7 +369,8 @@ def encuesta_responder(request, id_cuestionario):
     #
     # Encuesta dirigida a ESTUDIANTES
     #
-    if request.session.get('estudianteAsignaturaDocente', None):
+    ###if request.session.get('estudianteAsignaturaDocente', None):
+    if cuestionario.informante.tipo == 'Estudiante':
         area = request.session['area']
         carrera = request.session['carrera']
         estudianteAsignaturaDocente = request.session['estudianteAsignaturaDocente']
@@ -391,15 +398,18 @@ def encuesta_responder(request, id_cuestionario):
     #
     # Encuesta para Autoevaluación de DOCENTES
     #
-    elif cuestionario.informante.tipo == 'Docente':#request.session.get('docente', None):
-        
-        """
-        evaluacion.docentePeriodoAcademico = request.session['docente']
-        areas_docente = request.session['areas_docente']
-        carreras_docente = request.session['carreras_docente']
-        title = u"{0}>>{1}>>{2}".format(areas_docente, carreras_docente, docente)
-        """
-        print 'entro en docente autoevaluacion, docente_director', request.session['director_carrera']
+    elif cuestionario.informante.tipo == 'Docente': #request.session.get('docente', None):
+        # En caso de que el docente sea a la vez director de carrera
+        docente = None
+        if request.session.get('docente', None):
+            docente = request.session['docente']
+        elif request.session.get('director_carrera', None):
+            docente = request.session['director_carrera']
+        print 'session en encuesta_responder es: ', request.session.items()
+        evaluacion.docentePeriodoAcademico = docente
+        areas_docente = "request.session['areas_docente']"
+        carreras_docente = "request.session['carreras_docente']"
+        title = u'{0}>>{1}>>{2}'.format(areas_docente, carreras_docente, docente)
 
     evaluacion.fechaInicio = datetime.now().date()
     evaluacion.horaInicio = datetime.now().time()
@@ -592,6 +602,7 @@ def menu_academico_ajax(request):
 # ==============================================================================
 
 def resultados_carrera(request, num_carrera):
+    datos = dict()
     try:
         # Carreras cuya dirección está a cargo del docente
         # Almacenadas en la vista previa 'index'

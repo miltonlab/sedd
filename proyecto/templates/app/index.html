@@ -7,6 +7,7 @@
 {% block content %}
 
 <p/>
+<!-- Si es Estudiante -->
 {% if request.session.estudiante %}
 {% if request.session.carreras_estudiante|length > 0 %}
 <h1> Carreras del Estudiante </h1>
@@ -23,7 +24,7 @@
 </ul>
 <hr/>
 {% endif %}
-{% endif %} <!-- Estudiante -->
+{% endif %} <!-- End Estudiante -->
 
 
 {% if request.session.docente %}
@@ -42,8 +43,11 @@
   </h3>
 </ul>  
 <hr/>
-<!-- Si es docente director/coordinador de carrera --> 
-{% if request.session.docente.direcciones|length > 0 %}
+{% endif %} <!-- End Docente -->
+
+
+<!-- Si es docente director/coordinador de carrera  --> 
+{% if request.session.docente.direcciones.count > 0 %}
 
 <h1 style="margin-top: 20px;"> Encuestas para Comisión Académica de Carrera </h1>
 <ul style="margin-top: 20px;">
@@ -75,9 +79,9 @@
   {% endfor %}
 </ul>
 <hr/>
-{% endif %} <!-- Coordinación de carrera-->
 
-{% endif %} <!-- Docente -->
+{% endif %} <!-- End Coordinación de carrera-->
+
 
 {% endblock %}
 
