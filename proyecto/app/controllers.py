@@ -10,6 +10,7 @@ from django.contrib import auth
 from django.contrib.auth.decorators import login_required
 from django.forms.forms import NON_FIELD_ERRORS
 from django.contrib import messages
+from django.db.models import Q
 
 from proyecto.app.models import Configuracion
 from proyecto.app.models import Cuestionario
@@ -21,6 +22,7 @@ from proyecto.app.models import AsignaturaDocente
 from proyecto.app.models import EstudianteAsignaturaDocente
 from proyecto.app.models import EstudiantePeriodoAcademico
 from proyecto.app.models import DocentePeriodoAcademico
+from proyecto.app.models import DireccionCarrera
 from proyecto.app.models import Asignatura
 from proyecto.app.models import PeriodoAcademico
 from proyecto.app.models import PeriodoEvaluacion
@@ -191,7 +193,7 @@ def estudiante_asignaturas_docentes(request, num_carrera):
             if num_evaluaciones > 0 and num_evaluaciones == len(cuestionarios):
                 diccionario['docentes'].append(dict(docente=d, evaluado=True))
             else:
-            # Si no ha contestado aun todos los cuestionario disponibles para el docente 'd'
+                # Si no ha contestado aun todos los cuestionario disponibles para el docente 'd'
                 diccionario['docentes'].append(dict(docente=d, evaluado=False))
         asignaturas_docentes.append(diccionario)
     # Para regresar posteriormente a esta vista
@@ -212,14 +214,17 @@ def director_docentes(request, num_carrera):
     request.session['carrera'] = carrera
     request.session['area'] = area
     request.session['num_carrera'] = num_carrera
-    # Obtenemos los id de los Docentes que pertenecen a la carrera seleccionada
+    # Obtenemos los id de los Docentes que dictan Asignaturas en la carrera seleccionada
     ids_docentes = AsignaturaDocente.objects.filter(
         asignatura__carrera=carrera,
         asignatura__area=area).values_list(
         'docente__id', flat=True).distinct()
+    # Se agregan también los docentes que no tengan Asignaturas pero que pertenezcan a la Carrera
     docentes = DocentePeriodoAcademico.objects.filter(
-        periodoAcademico=Configuracion.getPeriodoAcademicoActual(),
-        id__in=ids_docentes).order_by('usuario__last_name', 'usuario__first_name')
+        Q(periodoAcademico=Configuracion.getPeriodoAcademicoActual()) &
+        Q(id__in=ids_docentes) | Q(carrera=carrera)).order_by(
+        'usuario__last_name', 'usuario__first_name')
+    direccion = DireccionCarrera.objects.get(carrera=u'{0}|{1}'.format(carrera, area))
     docentes_evaluaciones = list()
     cuestionarios = request.session['cuestionarios_directivos']
     for d in docentes:
@@ -230,8 +235,12 @@ def director_docentes(request, num_carrera):
             docentes_evaluaciones.append(dict(docente=d, evaluado=True))
         else:
             docentes_evaluaciones.append(dict(docente=d, evaluado=False))
+    docentes_evaluaciones.sort(
+        lambda x,y: cmp(x['docente'].usuario.first_name, y['docente'].usuario.first_name) or
+        cmp(x['docente'].usuario.last_name, y['docente'].usuario.last_name)
+        )
     title = u"{0}>>{1}".format(area, carrera)
-    datos = dict(docentes_evaluaciones=docentes_evaluaciones, title=title)
+    datos = dict(docentes_evaluaciones=docentes_evaluaciones, direccion=direccion,title=title)
     return render_to_response('app/director_docentes.html', datos, context_instance=RequestContext(request))
 
 
@@ -257,9 +266,16 @@ def docente_autoevaluaciones(request):
     return render_to_response('app/encuestas.html', datos, context_instance=RequestContext(request))
 
 
-def encuestas(request, id_docente, id_asignatura=0, id_direccion=0):
-    """ Lista las encuestas para los informantes en el presente periodo de evaluación """
+def encuestas(request, id_docente, id_asignatura=0, id_tinformante=0):
+    """ 
+    Lista las encuestas para los informantes en el presente periodo de evaluación
+    @param id_docente: Docente a ser evaluado
+    @param id_asignatura: Asignatura que dicta el docente a evaluar 
+    @param id_informante: Id Tipo Informante 1 Estudiante, 5 Docente, 6 Directivos 
+    """
     datos = dict()
+    title=''
+    print id_tinformante
     periodoEvaluacionActual = Configuracion.getPeriodoEvaluacionActual()
     cuestionarios = []
     periodo_finalizado = False
@@ -269,22 +285,24 @@ def encuestas(request, id_docente, id_asignatura=0, id_direccion=0):
         periodo_no_iniciado = True
     # Periodo Vigente
     elif periodoEvaluacionActual.vigente():
+        print 'estudiante: ', request.session.get('estudiante', None)
+        print 'docente: ', request.session.get('docente', None)
+        print 'director_carrera: ', request.session.get('director_carrera', None)
         #
         # Ha ingresado como ESTUDIANTE
         #
-        if request.session.get('estudiante', None):
+        ###if request.session.get('estudiante', None):
+        if id_tinformante == '1':
             estudiante = request.session['estudiante']
-            # Se maneja las siglas del Area en la sesion
+            # Se maneja las siglas del Area en la session
             area = request.session['area']
             carrera = request.session['carrera']
             asignaturaDocente = AsignaturaDocente.objects.get(docente__id=id_docente, asignatura__id=id_asignatura)
             estudianteAsignaturaDocente = EstudianteAsignaturaDocente.objects.get(
-                estudiante=estudiante, asignaturaDocente=asignaturaDocente
-                )
+                estudiante=estudiante, asignaturaDocente=asignaturaDocente)
             request.session['estudianteAsignaturaDocente'] = estudianteAsignaturaDocente
             title = u"{0}>>{1}>>{2}>>{3}".format(area, carrera, asignaturaDocente.asignatura.nombre,
-                                                 asignaturaDocente.docente
-                                                 ) 
+                                                 asignaturaDocente.docente) 
             if asignaturaDocente.asignatura.area == 'MED':
                 cuestionarios = [c for c in periodoEvaluacionActual.cuestionarios.all()
                                  if c.informante.tipo == 'EstudianteMED']                                 
@@ -314,11 +332,12 @@ def encuestas(request, id_docente, id_asignatura=0, id_direccion=0):
         #
         # Ha ingresado como docente y es DIRECTOR DE CARRERA
         #
-        elif request.session.get('director_carrera', None):
+        ###elif request.session.get('director_carrera', None):
+        elif id_tinformante == '6':
             # Se maneja las siglas del Area en la sesion
-            area = request.session['area']
-            carrera = request.session['carrera']
             director_carrera = request.session['director_carrera']
+            area = request.session.get('area', None)
+            carrera = request.session.get('carrera', None)
             docente_evaluar = DocentePeriodoAcademico.objects.get(id=id_docente)
             request.session['docente_evaluar'] = docente_evaluar
             title = u"{0}>>{1}>>Coordinador: {2}".format(area, carrera, director_carrera) 
@@ -332,12 +351,15 @@ def encuestas(request, id_docente, id_asignatura=0, id_direccion=0):
         #
         # Ha ingresado como DOCENTE
         #
-        elif request.session.get('docente', None):
+        ###elif request.session.get('docente', None):
+        elif id_tinformante == '5':
+            print 'en == 5'
             docente = request.session['docente']
             # Areas en las que dicta clases el docente
             areas_docente = AsignaturaDocente.objects.filter(docente=docente).values_list('asignatura__area', flat=True).distinct()
             # Carreras en las que dicta clases el docente
-            carreras_docente = AsignaturaDocente.objects.filter(docente=docente).values_list('asignatura__carrera', flat=True).distinct()
+            carreras_docente = AsignaturaDocente.objects.filter(docente=docente).values_list(
+                'asignatura__carrera', flat=True).distinct()
             request.session['areas_docente'] = areas_docente
             request.session['carreras_docente'] = carreras_docente
             title = u"{0}>>{1}>>Docente {2}".format(areas_docente, carreras_docente, docente) 
@@ -386,7 +408,8 @@ def encuesta_responder(request, id_cuestionario):
     #
     # Encuesta para DIRECCIONES DE CARRERA
     #
-    elif cuestionario.informante.tipo == 'Directivos': #request.session.get('director_carrera', None) and request.session.get('docente_evaluar', None):
+    elif cuestionario.informante.tipo == 'Directivos': 
+    #request.session.get('director_carrera', None) and request.session.get('docente_evaluar', None):
         area = request.session['area']
         carrera = request.session['carrera']
         director_carrera = request.session['director_carrera']
@@ -401,10 +424,11 @@ def encuesta_responder(request, id_cuestionario):
     elif cuestionario.informante.tipo == 'Docente': #request.session.get('docente', None):
         # En caso de que el docente sea a la vez director de carrera
         docente = None
-        if request.session.get('docente', None):
+        if request.session.get('director_carrera', None):
             docente = request.session['docente']
-        elif request.session.get('director_carrera', None):
-            docente = request.session['director_carrera']
+        elif request.session.get('docente', None):
+            docente = request.session['docente']
+        print 'docente en encuesta_responder: ', docente
         print 'session en encuesta_responder es: ', request.session.items()
         evaluacion.docentePeriodoAcademico = docente
         areas_docente = "request.session['areas_docente']"

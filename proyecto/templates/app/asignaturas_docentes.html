@@ -21,11 +21,15 @@
       <ul class="{% if d.evaluado %} messagelist {% endif %}">
 	<li>
 	  {% if d.evaluado %}
-	     {{ d.docente }} </br>
+	     {{ d.docente }} <br/>
 	  {% else %}
 	  <b>
 	    {# Se envia ids de asignatura y de docente #}
-	    <a href="{% url proyecto.app.controllers.encuestas d.docente.id ad.asignatura.id %}"> {{ d.docente }} </a> </br>
+	    {# Modificado en encuestas de actividades adicionales 2012, revisar???#}
+	    <a href="{% url encuestas id_docente=d.docente.id id_asignatura=ad.asignatura.id id_tinformante=1 %}"> 
+	      {{ d.docente }} 
+	    </a> 
+	    <br/>
 	  </b>
 	  {% endif %}
 	</li>

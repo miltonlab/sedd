@@ -7,9 +7,11 @@ os.environ['DJANGO_SETTINGS_MODULE']='proyecto.settings'
 sys.path.append(os.path.abspath(os.path.dirname(__file__) + '../../../'))
 from proyecto.app.models import PeriodoAcademico, DocentePeriodoAcademico, Usuario
 import proyecto.settings as confs
+import logging
 
 import MySQLdb as mysql
 
+logg = logging.getLogger('logapp')
 # carreras : {(id_area, id_carrera): nombre_carrera}
 carreras = {(1, 1): u'Cultura F\xedsica', 
             (1, 2): u'Inform\xe1tica Educativa',
@@ -79,26 +81,26 @@ class Job(BaseJob):
         nuevos = []
         for row in rows:
             cedula = row[0]
+            carrera = carreras.get((row[4], row[5]), None)
             try:
-                DocentePeriodoAcademico.objects.get(periodoAcademico__id=id_periodo, usuario__cedula=cedula)
+                DocentePeriodoAcademico.objects.get(periodoAcademico__id=id_periodo, 
+                                                    usuario__cedula=cedula, carrera=carrera)
             except DocentePeriodoAcademico.DoesNotExist:
-                usuario = Usuario(username=cedula, password='', first_name=row[1].decode('latin1').title(),
-                                  last_name=row[2].decode('latin1').title(), cedula=cedula, titulo=row[3],
-                                  email='')
-                ###carrera = carrera=carreras.get((row[4], row[5]), row[6]+' No encontrada') DEBUG
-                carrera = carreras.get((row[4], row[5]), None)
-                if carrera:
-                    docente = DocentePeriodoAcademico(usuario=usuario, periodoAcademico=periodoAcademico,
-                                                      carrera=carrera)
-                    usuario.save()
-                    docente.save()
-                    nuevos.append(docente)
-        for n in nuevos:
-            try:
-                print n.usuario, ' : ', n.carrera
-            except Exception, ex:
-                print 'error unicode: ', n.cedula(), ex 
+                dict_usuario = dict(username=cedula, password='', first_name=row[1].decode('latin1').title(),
+                                    last_name=row[2].decode('latin1').title(), cedula=cedula, 
+                                    titulo=row[3].decode('latin1'), email='')
+                logg.info('Usuario a migrar: {0}'.format(dict_usuario))
+                (usuario, nuevo) = Usuario.objects.get_or_create(cedula=cedula, defaults=dict_usuario)
+                if not carrera:
+                    logg.info('Carrera del sistema anterior no encontrada: {0}, {1}, {2}'.
+                             format(row[4], row[5], row[6]))
+                    continue
+                docente = DocentePeriodoAcademico(usuario=usuario, periodoAcademico=periodoAcademico, carrera=carrera, migrado=True)
+                docente.save()
+                logg.info('Migrado el docente {0}'.format(docente))
+                nuevos.append(docente)
         cursor.close()
         conexion.close()
+
 j=Job()
 j.execute()

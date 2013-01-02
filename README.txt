@@ -16,17 +16,18 @@ Requerimientos:
  * python-soappy 0.12.0
  * django-piston 0.2.3
  * python-psycopg2 2.4.2
- * libapache2-mod-wsgi 3.3  (modulo para desplegar en apache)
- * south 0.7.3       (Migraciones)
+ * libapache2-mod-wsgi 3.3	(modulo para desplegar en apache)
+ * south 0.7.3          	(Migraciones)
 
 Opcionales 
 -------------------------------------------------------------------
 
  * django-chronograph 0.3.1 (Admin de Tareas)
- * python-dateutil 1.4.1    (Admin de Tareas)
- * graphviz 2.26   	    
- * libgraphviz-dev
+   - python-dateutil 1.4.1    
  * python-pygraphviz 1.0    (Generación de graficos del modelo)
- * ptyhon-mysqldb 1.2.2	    (Importacion desde anterior sedd)
+   - graphviz 2.26   	    
+   - libgraphviz-dev
+ * ptyhon-mysqldb 1.2.2	    (Importacion desde el anterior Sistema de Evaluacion)
+   - libmysqlclient-dev 5.5.27
    
 

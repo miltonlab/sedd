@@ -130,6 +130,7 @@ $(document).ready(function(){
 	  </div>
 
 	  <!-- Encuesta dirigida a los ESTUDIANTES -->
+	  {#% if cuestionario.informante.tipo in ('Estudiante', 'EstudianteNovel', 'EstudianteMED', 'InstitutoIdiomas' %#}
 	  {% if asignaturaDocente %}
 	  <div id="datos_academicos" style="line-height: 18px;">
 	    Area: <b> {{ asignaturaDocente.asignatura.area }} </b> <br/>
@@ -146,7 +147,7 @@ $(document).ready(function(){
 	  {% endif %}
 
 	  <!-- Encuesta dirigida a los DIRECCIONES DE CARRERA -->
-	  {% if request.session.director_carrera and request.session.docente_evaluar %}
+	  {% if cuestionario.informante.tipo == 'Directivos' %}
 	  <div id="datos_academicos" style="line-height: 18px;">
 	    AREA: <b> {{ request.session.area }} </b> <br/>
 	    CARRERA: <b> {{ request.session.carrera }} </b> <br/>
@@ -156,7 +157,7 @@ $(document).ready(function(){
 	  {% endif %}
 
 	  <!-- Encuesta de autoevaluación para los DOCENTES -->
-	  {% if request.session.docente %}
+	  {% if cuestionario.informante.tipo == 'Docente' %}
 	  <div id="datos_academicos" style="line-height: 18px;">
 	    AREA: <b> {{ request.session.areas_docente }} </b> <br/>
 	    CARRERA: <b> {{ request.session.carreras_docente }} </b> <br/>

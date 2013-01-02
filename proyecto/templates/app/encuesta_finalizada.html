@@ -18,8 +18,8 @@
 {% else %}
 {% if request.session.director_carrera %}
 <p>
-  <!--a href="{#% url proyecto.app.controllers.director_carreras num_carrera %#}"--> 
-  <a href="{% url encuestas id_docente=request.session.docente_evaluar.id id_asignatura=0 id_direccion=0 %}"> 
+  <a href="{% url proyecto.app.controllers.director_docentes num_carrera %}"> 
+  <!--a href="{#% url encuestas id_docente=request.session.docente_evaluar.id id_asignatura=0 id_tinformante=6 %#}"--> 
     <<< Continuar >>> 
   </a>
 </p>

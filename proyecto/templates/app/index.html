@@ -32,14 +32,16 @@
 <h1> Encuestas para Autoevaluación del Docente </h1>
 <ul style="margin-top: 20px;">
   <h3> 
-    <li>
-      <a href="{% url docente_autoevaluaciones %}"> 
+      <!--a href="{#% url docente_autoevaluaciones %#}"> 
 	Seleccione la Autoevaluación 
-      </a> 
-      <!--a href="{#% url encuestas id_docente=request.session.docente.id id_asignatura=0 id_direccion=0 %}"> 
-	{{ cuestionario.titulo|upper }#} 
       </a--> 
-    </li> 
+      {% for cuestionario in request.session.cuestionarios_docente %}
+      <li>
+	<a href="{% url encuestas id_docente=request.session.docente.id id_asignatura=0 id_tinformante=5 %}"> 
+	  {{ cuestionario.titulo|upper }} 
+	</a>
+      </li>
+      {% endfor %}
   </h3>
 </ul>  
 <hr/>
