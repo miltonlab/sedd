@@ -21,6 +21,7 @@ class PreguntaAdmin(admin.ModelAdmin):
     search_fields = ('texto', 'descripcion')
     list_filter = ('seccion__cuestionario__periodoEvaluacion', 'seccion__cuestionario', 'seccion')
     list_per_page = 30
+
     # Sobreescrito
     def save_model(self, request, obj, form, change):
         # Se crean y se agregan los items por defecto solo cuando 
@@ -51,6 +52,8 @@ class PreguntaAdmin(admin.ModelAdmin):
         else:
             obj.save()
           
+    class Media:
+        js = ['js/tiny_mce/tiny_mce.js', 'js/tmce_config.js',]
 
 class PreguntaEnLinea(admin.TabularInline):
     model = models.Pregunta
