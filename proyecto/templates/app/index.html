@@ -30,20 +30,30 @@
 {% if request.session.docente %}
 
 <h1> Encuestas para Autoevaluación del Docente </h1>
-<ul style="margin-top: 20px;">
-  <h3> 
-      <!--a href="{#% url docente_autoevaluaciones %#}"> 
-	Seleccione la Autoevaluación 
-      </a--> 
-      {% for cuestionario in request.session.cuestionarios_docente %}
-      <li>
-	<a href="{% url encuestas id_docente=request.session.docente.id id_asignatura=0 id_tinformante=5 %}"> 
-	  {{ cuestionario.titulo|upper }} 
-	</a>
-      </li>
+<!--ul style="margin-top: 20px;"-->
+  <!--h3--> 
+      {#% for cuestionario in request.session.cuestionarios_docente %#}
+      <!-- Se recorren los cuestionarios para autoevaluacion con su estado --> 
+      {% for da in request.session.docente_autoevaluaciones %}
+      <ul class="{% if da.evaluado %} messagelist {% endif %}" 
+	  {% if forloop.first %} style="margin-top: 20px;" {% endif %}>
+	<h3>
+	<li>
+	  {% if da.evaluado %}
+	  {{ da.cuestionario.titulo|upper }}
+	  {% else %}
+	  <a href="{% url encuesta_responder da.cuestionario.id %}">
+	  {{ da.cuestionario.titulo|upper }}
+	  </a>
+	  {% endif %}
+	</li>
+	</h3>
+      </ul>
+      {% empty %}
+      <h3> No existen encuestas para el Docente el presente Periodo.</h3>
       {% endfor %}
-  </h3>
-</ul>  
+  <!--/h3-->
+<!--/ul-->  
 <hr/>
 {% endif %} <!-- End Docente -->
 
