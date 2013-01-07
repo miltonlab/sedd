@@ -254,28 +254,6 @@ def director_docentes(request, num_carrera):
     return render_to_response('app/director_docentes.html', datos, context_instance=RequestContext(request))
 
 
-def docente_autoevaluaciones(request):
-    """ Autoevaluaciones para los DOCENTES """
-    # En caso de que el docente sea a la vez director de carrera
-    if request.session.get('docente', None):
-        docente = request.session['docente']
-    elif request.session.get('director_carrera', None):
-        docente = request.session['director_carrera']
-    # Areas en las que dicta clases el docente
-    areas_docente = AsignaturaDocente.objects.filter(docente=docente).values_list(
-        'asignatura__area', flat=True).distinct()
-    # Carreras en las que dicta clases el docente
-    carreras_docente = AsignaturaDocente.objects.filter(docente=docente).values_list(
-        'asignatura__carrera', flat=True).distinct()
-    request.session['areas_docente'] = areas_docente
-    request.session['carreras_docente'] = carreras_docente
-    title = u">> Docente {0}".format(docente) 
-    cuestionarios = request.session['cuestionarios_docente']
-    datos = dict(cuestionarios=cuestionarios, title=title)
-    print 'session en docente_autovaluaciones', request.session.items()
-    return render_to_response('app/encuestas.html', datos, context_instance=RequestContext(request))
-
-
 def encuestas(request, id_docente, id_asignatura=0, id_tinformante=0):
     """ 
     Lista las encuestas para los informantes en el presente periodo de evaluación
@@ -301,7 +279,6 @@ def encuestas(request, id_docente, id_asignatura=0, id_tinformante=0):
         #
         # Ha ingresado como ESTUDIANTE
         #
-        ###if request.session.get('estudiante', None):
         if id_tinformante == '1':
             estudiante = request.session['estudiante']
             # Se maneja las siglas del Area en la session
@@ -333,7 +310,6 @@ def encuestas(request, id_docente, id_asignatura=0, id_tinformante=0):
                 cuestionarios = [c for c in periodoEvaluacionActual.cuestionarios.all() 
                              if c.informante.tipo == 'Estudiante']
             # Si ya ha contestado todos los cuestionario disponibles
-            ###if len(cuestionarios) > 0 and estudianteAsignaturaDocente.evaluaciones.count() == len(cuestionarios):
             # Cuestionarios disponibles ya tienen su evaluación? Forma pythonica de comparar, contar y sumar
             evaluados = sum([e.cuestionario in cuestionarios for e in estudianteAsignaturaDocente.evaluaciones.all()])
             # Compara cuestionarios evaluados con cuestionarios establecidos
@@ -390,7 +366,6 @@ def encuesta_responder(request, id_cuestionario):
     #
     # Encuesta dirigida a ESTUDIANTES
     #
-    ###if request.session.get('estudianteAsignaturaDocente', None):
     if cuestionario.informante.tipo == 'Estudiante':
         area = request.session['area']
         carrera = request.session['carrera']
