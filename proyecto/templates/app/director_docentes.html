@@ -1,0 +1,46 @@
+{% extends "admin/base_site.html" %}
+{#% extends "base.html" %#}
+
+{% block content_title %}
+<h1>Seleccione el Docente a Evaluar </h1>
+{% endblock %}
+
+{% block content %}
+<table style="margin-top: 20px; width: 100%;">
+  <tbody>
+    <tr style="border-bottom: 1px dotted #B4CBE5;">
+      <td>
+	{% for de in docentes_evaluaciones %}
+	<b>
+	  <ul class="{% if de.evaluado %} messagelist {% endif %}">
+	    <li>
+	      {% if de.evaluado %}
+	      {{ de.docente }}
+	      {% else %}
+	      <a href="{% url encuestas id_docente=de.docente.id id_asignatura=0 id_tinformante=6 %}">
+		{{ de.docente }}
+	      </a>
+	      {% endif %}
+	    </li>
+	  </ul>
+	</b>
+	<!-- Paginador de docentes -->
+	{% if forloop.counter|divisibleby:"10" %}
+        </td>
+        <td>
+	{% endif %}
+	{% endfor %}
+    </td>
+  </tr>
+
+  <tr> 
+    <td> 
+    </td> 
+    <td align="right">
+      <a href="{% url proyecto.app.controllers.index %}"> <u><<< Carreras >>> </u></a>  
+    </td> 
+  </tr>
+  </tbody>
+</table>
+
+{% endblock %}
