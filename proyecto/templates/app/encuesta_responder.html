@@ -97,9 +97,13 @@ function grabarEncuesta(){
 
 $(document).ready(function(){
     $('#grabar').click(function(){
+	{% if cuestionario.preguntas_obligatorias %}
 	if (validarSeleccionUnica() == true && validarEnsayos() == true){
 	    grabarEncuesta();
 	}
+	{% else %}
+	    grabarEncuesta();	
+	{% endif %}
     });
 });
     </script>

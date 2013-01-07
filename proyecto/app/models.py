@@ -359,8 +359,10 @@ class InformanteIdiomasMED(TipoInformante):
 class Cuestionario(models.Model):
     titulo = models.CharField(max_length='100')
     encabezado = models.TextField()
-    inicio = models.DateTimeField('Inicio de la Encuesta')
-    fin=models.DateTimeField('Finalización de la Encuesta')
+    inicio = models.DateTimeField(u'Inicio de la Encuesta')
+    fin=models.DateTimeField(u'Finalización de la Encuesta')
+    # Obligatoriedad de todas las preguntas del cuestionario
+    preguntas_obligatorias = models.BooleanField(default=True)
     informante = models.ForeignKey(TipoInformante, blank=True, null=True)
     periodoEvaluacion = models.ForeignKey('PeriodoEvaluacion', blank=True, null=True, 
                                           related_name='cuestionarios', verbose_name=u'Periodo de Evaluación'

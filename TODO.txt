@@ -1,6 +1,7 @@
 
 Mejoras
  * Pendiente validar vigencia de encuestas para docentes y comisiones academicas
+ * Validar migracion de docentes desde  mas de una carrera hacia mas de una carrera (OLD SEDD)
  * Mejorar relacion Cuestionario - Seccion - Pregunta 
  * Manejar carrera como modelo separado, necesitamos carrera_id?
  * Manejar 'seccion' (matituina, vespertina, nocturna) en las asignaturas?

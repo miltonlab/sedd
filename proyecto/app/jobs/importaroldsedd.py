@@ -84,7 +84,7 @@ class Job(BaseJob):
             carrera = carreras.get((row[4], row[5]), None)
             try:
                 DocentePeriodoAcademico.objects.get(periodoAcademico__id=id_periodo, 
-                                                    usuario__cedula=cedula, carrera=carrera)
+                                                    usuario__cedula=cedula)
             except DocentePeriodoAcademico.DoesNotExist:
                 dict_usuario = dict(username=cedula, password='', first_name=row[1].decode('latin1').title(),
                                     last_name=row[2].decode('latin1').title(), cedula=cedula, 
@@ -102,5 +102,6 @@ class Job(BaseJob):
         cursor.close()
         conexion.close()
 
-j=Job()
-j.execute()
+if __name__ == '__main__':
+    j=Job()
+    j.execute()
