@@ -239,12 +239,15 @@ class AsignaturaDocente(models.Model):
         return u"{0} >> {1}".format(self.docente, self.asignatura.nombre)
 
 
+# Todas las carreras
+carreras = Asignatura.objects.values_list('carrera', 'carrera').order_by('carrera').distinct()
+
 class DocentePeriodoAcademico(models.Model):
     usuario = models.ForeignKey('Usuario', related_name='docentePeriodosAcademicos')
     periodoAcademico = models.ForeignKey('PeriodoAcademico', related_name='docentes',
-                                         verbose_name='Periodo Académico', db_column='periodo_academico_id')
+                                         verbose_name=u'Periodo Académico', db_column='periodo_academico_id')
     # Atributo agregado por efectos de migracion de docentes sin informacion de asignaturas
-    carrera = models.CharField(max_length='500', blank=True, null=True)
+    carrera = models.CharField(max_length='500', choices=carreras, blank=True, null=True)
     migrado = models.BooleanField()
     
     class Meta:
@@ -253,8 +256,9 @@ class DocentePeriodoAcademico(models.Model):
 
     def get_carreras(self):
         """ Devuelve una lista de String: Carreras junto con el Área a la que pertenecen """
-        carreras  = AsignaturaDocente.objects.filter(docente__id=self.id).values_list(
-            'asignatura__carrera', 'asignatura__area').distinct()
+        carreras  = AsignaturaDocente.objects.filter(
+            docente_periodoAcademico=Configuracion.getPeriodoAcademicoActual(),
+            docente__id=self.id).values_list('asignatura__carrera', 'asignatura__area').distinct()
         return ['|'.join(c) for c in carreras]
 
 
@@ -274,11 +278,11 @@ class DocentePeriodoAcademico(models.Model):
 
 
 # Todas las carrera que riguen en el Periodo Académico Actual
-carreras = AsignaturaDocente.objects.filter(
+carreras_areas = AsignaturaDocente.objects.filter(
     docente__periodoAcademico=Configuracion.getPeriodoAcademicoActual()).values_list(
     'asignatura__carrera', 'asignatura__area').order_by(
     'asignatura__carrera').distinct()
-carreras_areas = [('|'.join(c),'|'.join(c)) for c in  carreras]
+carreras_areas = [('|'.join(c),'|'.join(c)) for c in  carreras_areas]
 
 class DireccionCarrera(models.Model):
     # Nombre de la Carrera más el Área

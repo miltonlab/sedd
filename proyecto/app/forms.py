@@ -85,6 +85,7 @@ class EstudianteAsignaturaDocenteAdminForm(forms.ModelForm):
             self.initial['paralelo'] = instance.paralelo
 
 class AsignaturaDocenteAdminForm(forms.ModelForm):
+    """ Formulario para AsignaturaDocente en Linea en el objeto DocentePeriodoAcademico """ 
     carrera = forms.CharField(widget=forms.TextInput(attrs={'size':'80', 'readonly':'readonly'}))
     semestre = forms.CharField(widget=forms.TextInput(attrs={'readonly':'readonly'}))
     paralelo = forms.CharField(widget=forms.TextInput(attrs={'readonly':'readonly'}))
