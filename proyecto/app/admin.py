@@ -96,18 +96,13 @@ class OfertaAcademicaSGAEnLinea(admin.TabularInline):
 
 class PeriodoEvaluacionAdmin(admin.ModelAdmin):
     filter_horizontal = ('areasSGA',)
-    #model = models.PeriodoEvaluacion
-    ###extra = 1
-    
 
 class PeriodoAcademicoAdmin(admin.ModelAdmin):
-    ###inlines = (PeriodoEvaluacionEnLinea,)
     filter_horizontal = ('ofertasAcademicasSGA',)
 
 
 class EstudianteAsignaturaDocenteEnLinea(admin.StackedInline):
     model = models.EstudianteAsignaturaDocente
-    # form = EstudianteAsignaturaDocenteAdminForm
     extra = 1
     verbose_name = 'Asignaturas de Estudiante'
     raw_id_fields = ('asignaturaDocente',)
@@ -122,7 +117,6 @@ class EstudiantePeriodoAcademicoAdmin(admin.ModelAdmin):
 
         
 class EstudianteAsignaturaDocenteAdmin(admin.ModelAdmin):
-    # form = EstudianteAsignaturaDocenteAdminForm
     raw_id_fields = ('asignaturaDocente','estudiante')
     search_fields = ('estudiante__usuario__cedula', 'estudiante__usuario__first_name',
                      'estudiante__usuario__last_name', 'asignaturaDocente__asignatura__carrera',
@@ -141,7 +135,6 @@ class EstudianteAsignaturaDocenteAdmin(admin.ModelAdmin):
     
 class AsignaturaDocenteAdmin(admin.ModelAdmin):
     actions = ['clonar_asignaturadocente']
-    ### form = AsignaturaDocenteAdminForm
     raw_id_fields = ('asignatura','docente')
     search_fields = ('docente__usuario__cedula', 'docente__usuario__first_name',
                      'docente__usuario__last_name','asignatura__carrera', 'asignatura__nombre',
@@ -149,7 +142,6 @@ class AsignaturaDocenteAdmin(admin.ModelAdmin):
     list_per_page = 30
     list_display = ( 'get_nombre_corto', 'get_carrera', 'get_semestre', 'get_paralelo')
     fields = ('docente','asignatura')
-    ###fields = ('docente','asignatura','carrera','semestre', 'paralelo')
 
     def validar_clonar(self, request, queryset):
         paralelo = request.POST['paralelo']

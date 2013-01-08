@@ -42,7 +42,7 @@
 	  {% if da.evaluado %}
 	  {{ da.cuestionario.titulo|upper }}
 	  {% else %}
-	  <a href="{% url encuesta_responder da.cuestionario.id %}">
+	  <a href="{% url encuestas id_docente=request.session.docente.id id_asignatura=0 id_tinformante=5 id_cuestionario=da.cuestionario.id %}">
 	  {{ da.cuestionario.titulo|upper }}
 	  </a>
 	  {% endif %}

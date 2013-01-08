@@ -254,16 +254,16 @@ def director_docentes(request, num_carrera):
     return render_to_response('app/director_docentes.html', datos, context_instance=RequestContext(request))
 
 
-def encuestas(request, id_docente, id_asignatura=0, id_tinformante=0):
+def encuestas(request, id_docente, id_asignatura=0, id_tinformante=0, id_cuestionario=0):
     """ 
     Lista las encuestas para los informantes en el presente periodo de evaluación
     @param id_docente: Docente a ser evaluado
     @param id_asignatura: Asignatura que dicta el docente a evaluar 
     @param id_informante: Id Tipo Informante 1 Estudiante, 5 Docente, 6 Directivos 
+    @param id_cuestionario: Solo en el caso de cuestionarios para docentes
     """
     datos = dict()
     title=''
-    print id_tinformante
     periodoEvaluacionActual = Configuracion.getPeriodoEvaluacionActual()
     cuestionarios = []
     periodo_finalizado = False
@@ -273,9 +273,6 @@ def encuestas(request, id_docente, id_asignatura=0, id_tinformante=0):
         periodo_no_iniciado = True
     # Periodo Vigente
     elif periodoEvaluacionActual.vigente():
-        print 'estudiante: ', request.session.get('estudiante', None)
-        print 'docente: ', request.session.get('docente', None)
-        print 'director_carrera: ', request.session.get('director_carrera', None)
         #
         # Ha ingresado como ESTUDIANTE
         #
@@ -336,9 +333,14 @@ def encuestas(request, id_docente, id_asignatura=0, id_tinformante=0):
         #
         # Ha ingresado como DOCENTE
         #
-        elif id_tinformante == '5':
-            pass
+        elif id_tinformante == '5' and id_cuestionario:
+            """ 
+            Se filtra la peticion de encuestas de autoevaluacion de docentes desde el index
+            por este controlador para reutilizar la validación de vigencia  de PeridoEvaluacion
+            """
+            return redirect('/encuesta/responder/' + id_cuestionario) 
         """
+        ###
             # Cuestionarios disponibles ya han sido evaluados? Forma pythonica de comparar, contar y sumar
             # Un docente tiene evaluaciones de la dirección de carrera y autoevaluaciones
             evaluados = sum([e.cuestionario in cuestionarios for e in docente.evaluaciones.all()])
@@ -485,6 +487,7 @@ def cargar_ofertas_sga(request, periodoAcademicoId):
     except Exception, e:
         log.error("Error recargando ofertas SGA: " + str(e))
         return HttpResponse("error: "+str(e))
+
 
 # =============================================================================
 # Resumen de Evaluaciones en el Admin
