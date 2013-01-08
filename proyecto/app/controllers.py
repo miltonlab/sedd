@@ -11,6 +11,8 @@ from django.contrib.auth.decorators import login_required
 from django.forms.forms import NON_FIELD_ERRORS
 from django.contrib import messages
 from django.db.models import Q
+from django.utils import simplejson
+from django import forms
 
 from proyecto.app.models import Configuracion
 from proyecto.app.models import Cuestionario
@@ -28,18 +30,16 @@ from proyecto.app.models import PeriodoAcademico
 from proyecto.app.models import PeriodoEvaluacion
 from proyecto.app.models import Tabulacion
 from proyecto.app.models import TabulacionSatisfaccion2012
+from proyecto.app.models import TabulacionAdicionales2012
 from proyecto.app.models import OfertaAcademicaSGA
 from proyecto.app.models import AreaSGA
 from proyecto.app.forms import ResultadosESE2012Form
+from proyecto.app.forms import ResultadosEAAD2012Form
 from proyecto.app.forms import ResultadosForm
-
 from proyecto.tools.sgaws.cliente import SGA
 from proyecto.settings import SGAWS_USER, SGAWS_PASS
 
 from datetime import datetime
-from django import forms
-from django.utils import simplejson
-
 import logging
 logg = logging.getLogger('logapp')
 
@@ -646,28 +646,30 @@ def menu_resultados_carrera(request, id_periodo_evaluacion):
     """
     try:
         periodoEvaluacion=PeriodoEvaluacion.objects.get(id=id_periodo_evaluacion)
+        print periodoEvaluacion
         tabulacion = Tabulacion.objects.get(periodoEvaluacion=periodoEvaluacion)
+        print tabulacion
+        # Para los Docentes Coordinadores de Carrera 
+        if request.session.has_key('carreras_director'):
+            carrera = request.session['carrera']
+            area = request.session['area']
+        # Para la Comisión de Evaluación (Administración)
+        else:
+            area = request.GET['area']
+            carrera = request.GET['carrera']
         if tabulacion.tipo == 'ESE2012':
             tabulacion = TabulacionSatisfaccion2012(periodoEvaluacion)
-            # TODO: Un docente puede ser coordinador de mas de un carrera ?
-            area = ''
-            carrera = ''
-            # Para los Docentes Coordinadores de Carrera 
-            if request.session.has_key('carreras_director'):
-                carrera = request.session['carrera']
-                area = request.session['area']
-            # Para la Comisión de Evaluación Administración
-            else:
-                area = request.GET['area']
-                carrera = request.GET['carrera']
             form = ResultadosESE2012Form(tabulacion, area, carrera)
             formulario_formateado = render_to_string("admin/app/formulario_ese2012.html", dict(form=form))
-            return HttpResponse(formulario_formateado)
-        
+        elif tabulacion.tipo == 'EAAD2012':
+            tabulacion = TabulacionAdicionales2012(periodoEvaluacion)
+            form = ResultadosEAAD2012Form(tabulacion, area, carrera)            
+            formulario_formateado = render_to_string("admin/app/formulario_eaad2012.html", dict(form=form))
+        return HttpResponse(formulario_formateado)
     except PeriodoEvaluacion.DoesNotExist:
         logg.error(u"No Existe el Periodo de Evaluación: {0}".format(id_periodo_evaluacion))
     except Exception, ex:
-        logg.error('Error: ' + str(ex))
+        logg.error('Error en vista menu_resultados_carrera: ' + str(ex))
         
 
 def mostrar_resultados(request):

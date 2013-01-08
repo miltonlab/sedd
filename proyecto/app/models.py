@@ -661,7 +661,8 @@ class PeriodoEvaluacion(models.Model):
 
 # TODO: Modelar de mejor manera la funcionalidad
 tipos_tabulacion = (
-    (u'ESE2012', u'Tabulación  Satisfacción Estudiantil 2012'),
+    (u'ESE2012', u'Tabulación Satisfacción Estudiantil 2012'),
+    (u'EAAD2012', u'Tabulación Actividades Adicionales Docencia 2012'),
 )
 
 class Tabulacion(models.Model):
@@ -670,7 +671,7 @@ class Tabulacion(models.Model):
     conjunto de encuestas pertenecientes a un Periodo de Evaluación.
     """
     descripcion = models.CharField(max_length='250')
-    tipo = models.CharField( max_length='20', unique=True, choices= tipos_tabulacion)
+    tipo = models.CharField( max_length='20', unique=True, choices=tipos_tabulacion)
     periodoEvaluacion = models.OneToOneField('PeriodoEvaluacion', related_name='tabulacion', blank=True, null=True)
 
     class Meta:
@@ -679,7 +680,34 @@ class Tabulacion(models.Model):
     def __unicode__(self):
         return self.descripcion
 
-    
+
+class TabulacionAdicionales2012:
+    tipo = u'EAAD2012'
+    descripcion = u'Evaluación Actividades Adicionales a la Docencia 2012'
+
+    def __init__(self, periodoEvaluacion=None):
+        self.periodoEvaluacion = periodoEvaluacion
+        self.calculos = (
+            # codigo, descripcion, metodo, titulo 
+            ('a',u'Resultados de la Evaluación de Actividades Adicionales a la Docencia POR DOCENTE',
+            self.por_docente, u'Evaluación Actividades Adicionales por Docente'),
+            ('b',u'Resultados de la Evaluación de Actividades Adicionales a la Docencia POR CARRERA',
+             self.por_carrera, u'Evaluación Actividades Adicionales por Carrera'),
+        )
+        
+    def por_docente(self, siglas_area, nombre_carrera, id_docente):
+        """
+        Resultados de la Evaluación de Actividades Adicionales a la Docencia 2012 POR DOCENTE
+        """
+        pass
+
+    def por_carrera(self, siglas_area, nombre_carrera):
+        """ 
+        Resultados de la Evaluación de Actividades Adicionales a la Docencia 2012 POR CARRERA
+        """
+        pass
+
+
 class TabulacionSatisfaccion2012:
     # Se hecha de menos las clases Abstractas y el polimorfismo
     # Esta clase no se persiste
@@ -710,7 +738,7 @@ class TabulacionSatisfaccion2012:
         )
  
 
-    # TODO Pendiente refactorizar 
+    # TODO: Pendiente refactorizar 
     def por_docente(self, siglas_area, nombre_carrera, id_docente):
         """
         Satisfacción Estudiantil de un docente en los  módulos, cursos, unidades o talleres
