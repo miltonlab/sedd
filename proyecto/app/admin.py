@@ -282,7 +282,9 @@ class ContestacionEnLinea(admin.TabularInline):
 class EvaluacionAdmin(admin.ModelAdmin):
     # Si no se especifica fields no se muestra la vista de modificacion
     search_fields = ('estudianteAsignaturaDocente__estudiante__usuario__cedula',
-                     'estudianteAsignaturaDocente__asignaturaDocente__docente__usuario__cedula')
+                     'estudianteAsignaturaDocente__asignaturaDocente__docente__usuario__cedula',
+                     'docentePeriodoAcademico__usuario__cedula',
+                     'directorCarrera__usuario__cedula')
     list_per_page = 30
     list_filter = ('fechaInicio', 'fechaFin',)
     date_hierarchy = 'fechaFin'
