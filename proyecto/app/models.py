@@ -418,6 +418,8 @@ class Cuestionario(models.Model):
 class Contestacion(models.Model):
     pregunta = models.IntegerField()
     respuesta = models.TextField()
+    # Adicionales a la respuesta propiamente establecida
+    observaciones = models.TextField(null=True, blank=True)
     evaluacion = models.ForeignKey('Evaluacion', related_name='contestaciones')
 
     class Meta:
@@ -545,9 +547,13 @@ class Pregunta(models.Model):
     codigo = models.CharField(max_length='5', null=True, blank=True)
     texto = models.TextField()
     descripcion = models.TextField(null=True, blank=True)
+    # Observaciones adicionales a la contestación o respuesta 
+    # Se almacena solo un titulo o tema de las observaciones
+    observaciones = models.CharField(max_length='70', null=True, blank=True)
     orden = models.IntegerField()
     tipo = models.ForeignKey(TipoPregunta)
     seccion = models.ForeignKey(Seccion, related_name='preguntas')
+
     
     def __unicode__(self):
         return u'{0}'.format(self.texto)
@@ -562,7 +568,7 @@ class Pregunta(models.Model):
 class ItemPregunta(models.Model):
     # Valor para la contestación de la pregunta
     texto = models.CharField(max_length='50')
-    # Observaciones adicionales para la contestación
+    # Notas adicionales aclaratorias para el Item de pregunta
     descripcion = models.CharField(max_length='70', null=True, blank=True)
     pregunta = models.ForeignKey(Pregunta, related_name='items')
     orden = models.IntegerField()
@@ -758,7 +764,7 @@ class TabulacionSatisfaccion2012:
             evaluacion__estudianteAsignaturaDocente__asignaturaDocente__asignatura__carrera=nombre_carrera).filter(
             # Unica diferencia con respecto al método 'por_carrera'
             evaluacion__estudianteAsignaturaDocente__asignaturaDocente__docente__id=id_docente).filter(
-            # Recordatorio: 'pregunta' en Cuestionario es int no de tipo Pregunta
+            # Recordatorio: 'pregunta' en Contestación es int no de tipo Pregunta
             pregunta__in=indicadores).values('pregunta').annotate(MS=Count('respuesta')).filter(
             respuesta='4').order_by('pregunta')
         conteo_s=Contestacion.objects.filter(evaluacion__cuestionario__periodoEvaluacion=self.periodoEvaluacion).filter(
@@ -787,11 +793,11 @@ class TabulacionSatisfaccion2012:
             respuesta='1').order_by('pregunta')
         conteos = []
         for i in indicadores:
-            conteo = {}            
+            conteo = {}
             for c in conteo_ms:
                 if c['pregunta'] == i:
                     conteo.update(c)
-                    # Se intercambia por el objeto completo por versatilidad
+                    # Se intercambia por el objeto completo, por versatilidad
                     conteo['pregunta'] = Pregunta.objects.get(id=i)
             for c in conteo_s:
                 if c['pregunta'] == i:
@@ -1259,7 +1265,8 @@ class Usuario(User):
                          u'Ing.':u'Ing.', u'doctor':u'Dr.', u'doctora':u'Dra.', u'master':u'Ms.',
                          u'mg.':u'Mg.', u'licenciado':u'Lic.', u'licenciada':u'Lic.', u'economista':u'Eco.', u'eco.':u'Eco.', u'medico':u'Dr.',
                          u'dra.':u'Dra.',u'dr.':u'Dr.',u'lic.':u'Lic.', u'licdo.':u'Lic.',u'ing.':u'Ing.', u'phd.':u'Phd.',u'médico':u'Dr.',
-                         u'odontólogo': u'Odont.', u'odontóloga': u'Odont.', u'odontologo': u'Odont.', u'odontologa': u'Odont.'  
+                         u'odontólogo': u'Odont.', u'odontóloga': u'Odont.', u'odontologo': u'Odont.', u'odontologa': u'Odont.', 
+                         u'esp.':u'Esp.', u'Especialista':u'Esp.'  
                          }
         palabras = self.titulo.split() if self.titulo else ""
         for p in palabras:

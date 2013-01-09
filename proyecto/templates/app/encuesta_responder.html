@@ -24,7 +24,6 @@
 	border: 2px white solid;
 	background-color: #B4CBE5;
 	text-align: center;
-	width: 25%;
         display: table-cell;
 	/* Para cortar las palabras al ancho de la celda */
         word-break: break-all;
@@ -184,7 +183,7 @@ $(document).ready(function(){
 
 	  {% for pregunta in seccion.preguntas.all %}
 	  <tr>
-	    <td class="td-tabla-contenedor" width="65%" colspan="{% ifequal pregunta.tipo.tipo 'Ensayo' %} 2 {% endifequal %} ">
+	    <td class="td-tabla-contenedor" width="60%" colspan="{% ifequal pregunta.tipo.tipo 'Ensayo' %} 2 {% endifequal %} ">
 	      {% if cuestionario.secciones.all|length > 1 %} 
 	      <b>
 		{% if pregunta.codigo %} {{ pregunta.codigo }}. {% else %} 
@@ -207,12 +206,14 @@ $(document).ready(function(){
 
 	      {% ifequal pregunta.tipo.tipo 'SeleccionUnica' %}
 	    
-	      <td width="35%" class="td-tabla-contenedor">
+	      <td class="td-tabla-contenedor" width="40%">
 		<table id="tabla-items">
 		  <tbody>
 		    <tr>
 		      {% for item in pregunta.items.all %}
-		      <td class="td-item-seleccion" {% if not item.descripcion %} style="vertical-align: middle;" {% endif %}>
+		      <!--Dividir para el numero exacto de items de la pregunta Ej. width: 25%-->
+		      <td class="td-item-seleccion" {% if not item.descripcion %} style="vertical-align: middle;" {% endif %}
+			  {% if not pregunta.observaciones %} style="width:25%;" {%else%} style="width:20%;" {% endif %} >
 			  <input type="radio" name="pregunta-{{ pregunta.id }}" 
 				 value="{{ item.texto }}"> </input> 
 			  <b> {{ item.texto }} </b>
@@ -220,6 +221,14 @@ $(document).ready(function(){
 			  {% if item.descripcion %} {{ item.descripcion }} {% endif %}
 		      </td>
 		      {% endfor%}
+
+		      {% if pregunta.observaciones %}
+		      <td id="observaciones">
+			{{pregunta.observaciones|safe}}:
+			<textarea name="observaciones-pregunta-{{ pregunta.id }}" rows="6" style="width: 100%;"></textarea>
+		      </td>
+		      {% endif %}
+
 		    </tr>
 		  </tbody>
 		</table>

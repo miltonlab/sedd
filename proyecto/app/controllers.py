@@ -457,14 +457,18 @@ def encuesta_grabar(request):
 
     evaluacion.fechaFin = datetime.now().date()
     evaluacion.horaFin = datetime.now().time()
+    print request.POST.items()
     evaluacion.save()
     for k,v in request.POST.items():
         if k.startswith('csrf'):
             continue
-        id_pregunta = int(k.split('-')[1])
-        contestacion = Contestacion(pregunta = id_pregunta, respuesta=v)
-        contestacion.evaluacion = evaluacion
-        contestacion.save()
+        if k.startswith('pregunta'):
+            id_pregunta = int(k.split('-')[1])
+            # Solo se graban las observaciones de las preguntas respondidas
+            observaciones = request.POST['observaciones-pregunta-' + str(id_pregunta)]
+            contestacion = Contestacion(pregunta=id_pregunta, respuesta=v, observaciones=observaciones)
+            contestacion.evaluacion = evaluacion
+            contestacion.save()
     logg.info("Nueva Evaluacion realizada: {0}".format(evaluacion))
     return render_to_response('app/encuesta_finalizada.html', datos, context_instance=RequestContext(request))
 
