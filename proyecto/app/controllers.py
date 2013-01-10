@@ -464,8 +464,10 @@ def encuesta_grabar(request):
             continue
         if k.startswith('pregunta'):
             id_pregunta = int(k.split('-')[1])
-            # Solo se graban las observaciones de las preguntas respondidas
-            observaciones = request.POST['observaciones-pregunta-' + str(id_pregunta)]
+            observaciones = None
+            if Pregunta.objects.get(id=id_pregunta).observaciones:
+                # Solo se graban las observaciones de las preguntas respondidas
+                observaciones = request.POST['observaciones-pregunta-' + str(id_pregunta)]
             contestacion = Contestacion(pregunta=id_pregunta, respuesta=v, observaciones=observaciones)
             contestacion.evaluacion = evaluacion
             contestacion.save()
