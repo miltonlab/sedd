@@ -76,10 +76,36 @@ function validarEnsayos(){
     return true;
 };
 
+function validarObservaciones(){
+    /* Validación en Evaluacion de Actividades Adicionales a la Docencia 2011-2012 */
+    var flag = true;
+    $.each($('#formulario input[name^="pregunta"]:radio:checked'), function(){
+	var p = $(this).attr("name");
+	var r = $(this).attr("value");
+	var np = p.split('-')[1]; //Numero de la pregunta
+	var o = 'observaciones-pregunta-' + np;
+	var observaciones = $('textarea[name='+o+']').val();
+	if (r != '1' && observaciones == ''){
+	    alert('Faltan ingresar fuentes de verificación')
+	    flag=false;
+	    return flag;
+	}
+    });
+    return flag;
+}
 
 function grabarEncuesta(){
-    
+    /* Se trata de la Evaluacion de Actividades Adicionales a la Docencia 2011-2012 */
+    {% ifequal cuestionario.periodoEvaluacion.id 2 %}
+    if (validarObservaciones()){
+	$('#formulario').submit();
+    } else {
+	return false;
+    }
+    {% endifequal %}
+    /* Para el resto de casos de Periodos de Evaluacion */
     $('#formulario').submit();
+
 
     /*$.ajax({
 	url: "/encuesta/grabar/",
