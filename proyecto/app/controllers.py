@@ -334,25 +334,9 @@ def encuestas(request, id_docente, id_asignatura=0, id_tinformante=0, id_cuestio
         # Ha ingresado como DOCENTE
         #
         elif id_tinformante == '5' and id_cuestionario:
-            """ 
-            Se filtra la peticion de encuestas de autoevaluacion de docentes desde el index
-            por este controlador para reutilizar la validación de vigencia  de PeridoEvaluacion
-            """
+            # Se filtra la peticion de encuestas de autoevaluacion de docentes desde el index
+            # por este controlador para reutilizar la validación de vigencia de PeridoEvaluacion
             return redirect('/encuesta/responder/' + id_cuestionario) 
-        """
-        ###
-            # Cuestionarios disponibles ya han sido evaluados? Forma pythonica de comparar, contar y sumar
-            # Un docente tiene evaluaciones de la dirección de carrera y autoevaluaciones
-            evaluados = sum([e.cuestionario in cuestionarios for e in docente.evaluaciones.all()])
-            # Compara cuestionarios evaluados con cuestionarios establecidos
-            if evaluados >= len(cuestionarios):
-                # TODO: Controlar cuando hay más de una autoevaluación para el docente
-                request.session['docente_autoevaluado'] = True
-                return redirect('/index/')
-        # Si solo hay una encuesta del tipo correspondiente
-        if len(cuestionarios) == 1:
-            return redirect('/encuesta/responder/' + str(cuestionarios[0].id))
-        """
     #Si ha expirado el periodo de Evaluacion
     elif periodoEvaluacionActual.finalizado():
         periodo_finalizado = True
@@ -368,13 +352,11 @@ def encuesta_responder(request, id_cuestionario):
     #
     # Encuesta dirigida a ESTUDIANTES
     #
-    if cuestionario.informante.tipo == 'Estudiante':
+    info_estudiante = ('EstudianteNovel', 'Estudiante', 'EstudianteMED', 'InstitutoIdiomas')
+    if cuestionario.informante.tipo in info_estudiante:
         area = request.session['area']
         carrera = request.session['carrera']
         estudianteAsignaturaDocente = request.session['estudianteAsignaturaDocente']
-        # Si ya ha contestado este cuestionario
-        if estudianteAsignaturaDocente.evaluaciones.filter(cuestionario=cuestionario).count() > 0:
-            return redirect('/estudiante/asignaturas/docentes/' + request.session['num_carrera'])
         evaluacion.estudianteAsignaturaDocente = estudianteAsignaturaDocente
         title = u"{0}>>{1}>>{2}>>{3}".format(area, carrera, 
                                              estudianteAsignaturaDocente.asignaturaDocente.asignatura.nombre,
@@ -385,7 +367,6 @@ def encuesta_responder(request, id_cuestionario):
     # Encuesta para DIRECCIONES DE CARRERA
     #
     elif cuestionario.informante.tipo == 'Directivos': 
-    #request.session.get('director_carrera', None) and request.session.get('docente_evaluar', None):
         area = request.session['area']
         carrera = request.session['carrera']
         director_carrera = request.session['director_carrera']
@@ -429,35 +410,51 @@ def encuesta_responder(request, id_cuestionario):
 
 
 def encuesta_grabar(request):
+    print 'Nueva peticion para encuesta_grabar()'
     datos = dict(num_carrera=request.session.get('num_carrera', None))
     evaluacion = request.session.get('evaluacion', None)
+    if not evaluacion:
+        return render_to_response('app/encuesta_finalizada.html', datos, context_instance=RequestContext(request))     
+
     #
     # Encuesta dirigida a ESTUDIANTES
     #
-    if request.session.get('estudianteAsignaturaDocente', None):
+    info_estudiante = ('EstudianteNovel', 'Estudiante', 'EstudianteMED', 'InstitutoIdiomas')
+    if evaluacion.cuestionario.informante.tipo in info_estudiante:
+    ###if request.session.get('estudianteAsignaturaDocente', None):
         estudianteAsignaturaDocente = request.session['estudianteAsignaturaDocente']
         # Si se regresa a grabar otra vez la misma encuesta
-        if not evaluacion or Evaluacion.objects.filter(
-            estudianteAsignaturaDocente = estudianteAsignaturaDocente).filter(
-            cuestionario = evaluacion.cuestionario).count() > 0:
+        if Evaluacion.objects.filter(estudianteAsignaturaDocente = estudianteAsignaturaDocente
+                                     ).filter(cuestionario = evaluacion.cuestionario).count() > 0:
             request.session['evaluacion'] = None
             request.session['estudianteAsignaturaDocente'] = None
             return render_to_response('app/encuesta_finalizada.html',
                                   datos, context_instance=RequestContext(request))     
     #
-    # Encuesta dirigida a DIRECTORES DE CARRERA
+    # Encuesta dirigida a DIRECTORES DE CARRERA 
     #
-    elif request.session.get('director_carrera', None):
-        pass
+    elif evaluacion.cuestionario.informante.tipo == 'Directivos':
+        docente_evaluar = request.session['docente_evaluar']
+        director_carrera = request.session['director_carrera']
+        # Si ya ha contestado este cuestionario y se intenta grabar otra vez
+        if docente_evaluar.evaluaciones.filter(cuestionario=evaluacion.cuestionario,
+                                               directorCarrera=director_carrera).count() > 0:
+            request.session['evaluacion'] = None
+            return render_to_response('app/encuesta_finalizada.html', datos, 
+                                      context_instance=RequestContext(request))     
     #
-    # Encuesta de Autoevaluación dirigida a DOCENTES
+    # Encuesta dirigida a DOCENTES 
     #
-    elif request.session.get('docente', None):
-        pass
-
+    elif evaluacion.cuestionario.informante.tipo == 'Docente':
+        docente = request.session.get('docente', None)
+        # Si ya ha contestado este cuestionario y se intenta grabar otra vez
+        if docente.evaluaciones.filter(cuestionario=evaluacion.cuestionario).count() > 0:
+            request.session['evaluacion'] = None
+            return render_to_response('app/encuesta_finalizada.html', datos, 
+                                      context_instance=RequestContext(request))     
+    # Grabacion luego de las validaciones
     evaluacion.fechaFin = datetime.now().date()
     evaluacion.horaFin = datetime.now().time()
-    print request.POST.items()
     evaluacion.save()
     for k,v in request.POST.items():
         if k.startswith('csrf'):
@@ -659,10 +656,11 @@ def menu_resultados_carrera(request, id_periodo_evaluacion):
         if request.session.has_key('carreras_director'):
             carrera = request.session['carrera']
             area = request.session['area']
-        # Para la Comisión de Evaluación (Administración)
+        # Para la Comision de Evaluacion (Administracion)
         else:
             area = request.GET['area']
             carrera = request.GET['carrera']
+        # Especifico para el Tipo de Tabulacion - Periodo de Evaluacion
         if tabulacion.tipo == 'ESE2012':
             tabulacion = TabulacionSatisfaccion2012(periodoEvaluacion)
             form = ResultadosESE2012Form(tabulacion, area, carrera)

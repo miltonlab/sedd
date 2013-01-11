@@ -2,6 +2,7 @@
 
 from django.db import models
 from django.db.models import Count
+from django.db.models import exceptions
 from proyecto.tools.sgaws.cliente import SGA
 from proyecto import settings
 from django.contrib.auth.models import User
@@ -705,7 +706,26 @@ class TabulacionAdicionales2012:
         """
         Resultados de la Evaluación de Actividades Adicionales a la Docencia 2012 POR DOCENTE
         """
-        pass
+        docente = DocentePeriodoAcademico.objects.get(id=id_docente)
+        try:
+            # Autoevaluacion de Actividades Adicionales del Docente
+            autoevaluacion=docente.evaluaciones.get(cuestionario__periodoEvaluacion__id=2,
+                                                    cuestionario__informante__tipo='Docente')
+        except django.db.models.exceptions.MultipleObjectsReturned:
+            # Existe una evaluacion duplicada
+            logg.warning('Evaluacion duplicada docente {0} en periodo:{1}'.format(docente, 2))
+            # Se toma la primera evaluacion
+            autoevaluacion = docente.evaluaciones.filter(cuestionario__periodoEvaluacion__id=2,
+                                                         cuestionario__informante__tipo='Docente')[0]
+        # Solo de seleccion unica
+        contestaciones = [c for c in autoevaluacion.contestaciones.all() if Pregunta.objects.get(id=r.pregunta).tipo.id==2]
+        total = sum([int(c.respuesta) for c in contestaciones])
+        peso = total / float(len(contestaciones))
+        porcentaje_docente = (peso * 100 / float(4))
+        # Se coloca en Contestacion un objeto Pregunta en vez del id
+        for c in contestaciones:
+            c.pregunta = Pregunta.objects.get(id=c.pregunta)        
+        return dict(contestaciones=contestaciones)
 
     def por_carrera(self, siglas_area, nombre_carrera):
         """ 
@@ -724,9 +744,6 @@ class TabulacionSatisfaccion2012:
         
     def __init__(self, periodoEvaluacion=None):
         self.periodoEvaluacion = periodoEvaluacion
-        #Tabulacion.__init__(self)
-        #self.tipo = u'ESE2012'
-        #self.descripcion = u'Encuesta de Satisfacción Estudiantil 2012'
         self.calculos = (
             # codigo, descripcion, metodo, titulo 
             ('a',u'La valoracion global de la Satisfacción Estudiantil por DOCENTE',
