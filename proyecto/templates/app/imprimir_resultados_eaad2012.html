@@ -1,0 +1,126 @@
+<html>
+  <head>  
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8"/>
+    <title> Resultados Evaluación de Actividades Adicionales a la Docencia 2011 - 2012 </title>
+    <style type="text/css">
+    body {
+	font-family: Helvetica, Arial, Sans;
+    }
+    table {
+	margin-top: 10px;
+	margin-bottom: 10px;
+	width: 75%;
+	borderspacing: 0;
+    }
+    th {
+	text-align: center;
+	border: 1px solid gray;
+        font-size: 13px;
+    }
+    td {
+	text-align: left;
+	border: 1px solid gray;
+        font-size: 13px;
+    }
+
+    </style>
+  </head>
+  <body>
+    <center>
+      <img width="75px" height="75px" src="/static/images/unl_logo.png"/>
+      <h4> {{ "Unversidad Nacional de Loja"|upper }} </h4>
+      <h3 style="margin-bottom: 3px;"> Evaluación Actividades Adicionales a la Docencia 2011 - 2012 </h3>
+      {{ titulo|safe }}
+
+      <!-- Primera Parte -->
+
+      <h4> Autoevaluación </h4>
+      <table id="tabla-autoevaluacion" width="100%" cellspacing="0" >
+	<th rowspan="2" style="width: 5%;"> Nro. </th>
+	<th rowspan="2" style="width: 75%"> Indicadores </th>
+	<th colspan="4"> Valoración </th>
+	<tr>
+	  <th style="width: 5%;"> 4 <br/> (MS) </th>
+	  <th style="width: 5%;"> 3 <br/> (S)  </th>
+	  <th style="width: 5%;"> 2 <br/> (PS) </th>
+	  <th style="width: 5%;"> 1 <br/> (INS) </th>
+	</tr>
+	{% for c in contestaciones1 %}
+	<tr>
+	  <td style="text-align: right;"> <b> {{ c.pregunta.codigo }} </b> </td>
+	  <td> 
+	    {{ c.pregunta.texto }}
+	  </td>
+	  <td style="text-align: center;"> {% ifequal c.respuesta '4' %} <b>4</b> {% endifequal %}</td>
+	  <td style="text-align: center;"> {% ifequal c.respuesta '3' %} <b>3</b> {% endifequal %}</td>
+	  <td style="text-align: center;"> {% ifequal c.respuesta '2' %} <b>2</b> {% endifequal %}</td>
+	  <td style="text-align: center;"> {% ifequal c.respuesta '1' %} <b>1</b> {% endifequal %}</td>
+	</tr>
+	{% endfor %}
+	<tr> 
+	  <td colspan="2" style="text-align: right;">
+	    <b>  Número de Actividades: <br/> Evaluación: </b> 
+	  </td>
+	  <td colspan="4" style="text-align: center;">
+	    <b> {{ contestaciones1|length }} <br/> {{ porcentaje1|floatformat:"2" }}% </b> 
+	  </td>
+	</tr>
+      </table>
+
+      <!-- Segunda parte  -->
+
+      <h4> Evaluación de la Comisión Académica </h4>
+      <table id="tabla-evaluacion" width="100%" cellspacing="0" >
+	<th rowspan="2" style="width: 5%;"> Nro. </th>
+	<th rowspan="2" style="width: 75%"> Indicadores </th>
+	<th colspan="4"> Valoración </th>
+	<tr>
+	  <th style="width: 5%;"> 4 <br/> (MS) </th>
+	  <th style="width: 5%;"> 3 <br/> (S)  </th>
+	  <th style="width: 5%;"> 2 <br/> (PS) </th>
+	  <th style="width: 5%;"> 1 <br/> (INS) </th>
+	</tr>
+	{% for c in contestaciones2 %}
+	<tr>
+	  <td style="text-align: right;"> <b> {{ c.pregunta.codigo }} </b> </td>
+	  <td> 
+	    {{ c.pregunta.texto }}
+	  </td>
+	  <td style="text-align: center;"> {% ifequal c.respuesta '4' %} <b>4</b> {% endifequal %}</td>
+	  <td style="text-align: center;"> {% ifequal c.respuesta '3' %} <b>3</b> {% endifequal %}</td>
+	  <td style="text-align: center;"> {% ifequal c.respuesta '2' %} <b>2</b> {% endifequal %}</td>
+	  <td style="text-align: center;"> {% ifequal c.respuesta '1' %} <b>1</b> {% endifequal %}</td>
+	</tr>
+	{% endfor %}
+	<tr> 
+	  <td colspan="2" style="text-align: right;">
+	    <b>  Número de Actividades: <br/> Evaluación: </b> 
+	  </td>
+	  <td colspan="4" style="text-align: center;">
+	    <b> {{ contestaciones2|length }} <br/> {{ porcentaje2|floatformat:"2" }}% </b> 
+	  </td>
+	</tr>
+      </table>
+      <h4> Resultado </h4>
+      <table cellspacing="5">
+	<tr>
+	  <td style="text-align: right; width: 80%; valign: middle;"> 
+	    <h3> Valor total obtenido </h3> 
+	  </td>
+	  <td style="text-align: center; width: 20%;">
+	    <h1> {{ total|floatformat:"2" }}% </h1> 
+	  </td>
+	</tr>
+      </table>
+
+      <div id="pie" style="font-size: 9px; color: #666666">
+	<hr style="margin-bottom: 6px;"/>
+	Unidad de Telecomunicaciones e Infomacion - Departamento de Desarrollo de Software <br>
+	Correo Sistema de Evaluacion: 
+	<a href="mailto:evaluacion.docente@unl.edu.ec"> <u>evaluacion.docente@unl.edu.ec</u> </a> <br/>
+	Loja - Ecuador
+      </div>
+
+    </center>
+  </body>
+</html>

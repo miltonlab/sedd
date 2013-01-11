@@ -707,25 +707,56 @@ class TabulacionAdicionales2012:
         Resultados de la Evaluación de Actividades Adicionales a la Docencia 2012 POR DOCENTE
         """
         docente = DocentePeriodoAcademico.objects.get(id=id_docente)
+        # Procesamiento de la Autoevaluacion del Docente #
         try:
             # Autoevaluacion de Actividades Adicionales del Docente
             autoevaluacion=docente.evaluaciones.get(cuestionario__periodoEvaluacion__id=2,
                                                     cuestionario__informante__tipo='Docente')
-        except django.db.models.exceptions.MultipleObjectsReturned:
+        except exceptions.MultipleObjectsReturned:
             # Existe una evaluacion duplicada
-            logg.warning('Evaluacion duplicada docente {0} en periodo:{1}'.format(docente, 2))
+            logg.warning('Autoevaluacion duplicada docente {0} en periodo:{1}'.format(docente, 2))
             # Se toma la primera evaluacion
             autoevaluacion = docente.evaluaciones.filter(cuestionario__periodoEvaluacion__id=2,
                                                          cuestionario__informante__tipo='Docente')[0]
+        except Evaluacion.DoesNotExist:
+            logg.warning(u'No existe autoevaluación del docente {0} en periodo:{1}'.format(docente, 2))
+            return None
         # Solo de seleccion unica
-        contestaciones = [c for c in autoevaluacion.contestaciones.all() if Pregunta.objects.get(id=r.pregunta).tipo.id==2]
-        total = sum([int(c.respuesta) for c in contestaciones])
-        peso = total / float(len(contestaciones))
-        porcentaje_docente = (peso * 100 / float(4))
-        # Se coloca en Contestacion un objeto Pregunta en vez del id
-        for c in contestaciones:
+        contestaciones1 = [c for c in autoevaluacion.contestaciones.all() if Pregunta.objects.get(id=c.pregunta).tipo.id==2]
+        total1 = sum([int(c.respuesta) for c in contestaciones1])
+        peso = total1 / float(len(contestaciones1))
+        porcentaje1 = (peso * 100 / float(4))
+        # Se coloca en Contestacion un objeto Pregunta en vez del id_pregunta entero
+        for c in contestaciones1:
             c.pregunta = Pregunta.objects.get(id=c.pregunta)        
-        return dict(contestaciones=contestaciones)
+        # Procesamiento de la Evaluacion de la Comision Academica #
+        try:
+            # Evaluacion de Actividades Adicionales del Docente por parte de los Directivos
+            evaluacion=docente.evaluaciones.get(cuestionario__periodoEvaluacion__id=2,
+                                                    cuestionario__informante__tipo='Directivos')
+        except exceptions.MultipleObjectsReturned:
+            # Existe una evaluacion duplicada
+            logg.warning('Evaluacion duplicada docente {0} en periodo:{1}'.format(docente, 2))
+            # Se toma la primera evaluacion
+            evaluacion = docente.evaluaciones.filter(cuestionario__periodoEvaluacion__id=2,
+                                                         cuestionario__informante__tipo='Directivos')[0]
+        except Evaluacion.DoesNotExist:
+            logg.warning(u'No existe evaluación de directivos para el docente {0} en periodo:{1}'.format(docente, 2))
+            return None
+        # Solo de seleccion unica
+        contestaciones2 = [c for c in evaluacion.contestaciones.all() if Pregunta.objects.get(id=c.pregunta).tipo.id==2]
+        total2 = sum([int(c.respuesta) for c in contestaciones2])
+        peso = total2 / float(len(contestaciones2))
+        porcentaje2 = (peso * 100 / float(4))
+        # Se coloca en Contestacion un objeto Pregunta en vez del id_pregunta entero
+        for c in contestaciones2:
+            c.pregunta = Pregunta.objects.get(id=c.pregunta)     
+        # Valor Total obtenido con  ponderacion: Comision Academica 80% - Docente 20% 
+        total = (porcentaje1 * 20 / 100) + (porcentaje2 * 80 / 100) 
+        return dict(contestaciones1=contestaciones1, porcentaje1=porcentaje1, 
+                    contestaciones2=contestaciones2, porcentaje2=porcentaje2,
+                    total=total)
+
 
     def por_carrera(self, siglas_area, nombre_carrera):
         """ 

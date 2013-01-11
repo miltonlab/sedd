@@ -685,19 +685,21 @@ def mostrar_resultados(request):
     opcion = request.POST['opciones']
     periodoEvaluacion=PeriodoEvaluacion.objects.get(id=int(id_periodo))
     tabulacion = periodoEvaluacion.tabulacion
+
+    # Encuesta de Satisfaccion Estudiantil 2012
     if tabulacion.tipo == 'ESE2012':
-        # Tipo específico de Tabulación
         tabulacion = TabulacionSatisfaccion2012(periodoEvaluacion)
         metodo =  [c[2] for c in tabulacion.calculos if c[0] == opcion][0]
         titulo = request.session['area'] + '<br/> <b>' + request.session['carrera'] + '</b><br/>'
         titulo += [c[3] for c in tabulacion.calculos if c[0] == opcion][0]
-        # Por docente
         resultados = {}
+        # Por docente
         if opcion == 'a':
             id_docente = request.POST['docentes']
             if id_docente != '':
                 titulo += u': <b>{0}</b>'.format(DocentePeriodoAcademico.objects.get(id=int(id_docente)))
                 resultados = metodo(request.session['area'], request.session['carrera'], int(id_docente))
+        # Por campos
         elif opcion == 'c':
             id_seccion = request.POST['campos']
             if id_seccion != '':
@@ -708,6 +710,7 @@ def mostrar_resultados(request):
                     datos = dict(resultados=resultados, titulo=titulo)
                     return render_to_response('app/imprimir_otros_ese2012.html', datos,
                                               context_instance=RequestContext(request));
+        # Por indicadores
         elif opcion == 'd':
             id_pregunta = request.POST['indicadores']
             if id_pregunta != '':
@@ -716,10 +719,34 @@ def mostrar_resultados(request):
         # Para el resto de casos
         else:
             resultados = metodo(request.session['area'], request.session['carrera'])
-        resultados['titulo'] = titulo
+        if resultados:
+            resultados['titulo'] = titulo
+        plantilla = 'app/imprimir_resultados_ese2012.html'
 
-        return render_to_response('app/imprimir_resultados_ese2012.html', resultados,
-                                  context_instance=RequestContext(request));
+    # Evaluacion de Actividades Adiconales a la Docencia 2011 - 2012
+    if tabulacion.tipo == 'EAAD2012':
+        tabulacion = TabulacionAdicionales2012(periodoEvaluacion)
+        metodo =  [c[2] for c in tabulacion.calculos if c[0] == opcion][0]
+        titulo = request.session['area'] + '<br/> <b>' + request.session['carrera'] + '</b><br/>'
+        titulo += [c[3] for c in tabulacion.calculos if c[0] == opcion][0]
+        # Por docente
+        resultados = {}
+        if opcion == 'a':
+            id_docente = request.POST['docentes']
+            if id_docente != '':
+                titulo += u': <b>{0}</b>'.format(DocentePeriodoAcademico.objects.get(id=int(id_docente)))
+                # Referencia a lo que devuelve el metodo especifico invocado sobre la instancia de Tabulacion 
+                resultados = metodo(request.session['area'], request.session['carrera'], int(id_docente))
+        elif opcion == 'z':
+            pass
+        # Para el resto de casos
+        else:
+            resultados = metodo(request.session['area'], request.session['carrera'])
+        if resultados:
+            resultados['titulo'] = titulo
+        plantilla = 'app/imprimir_resultados_eaad2012.html'
+
+    return render_to_response(plantilla, resultados, context_instance=RequestContext(request));
 
 
 def resultados(request):
