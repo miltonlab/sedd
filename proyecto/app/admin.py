@@ -278,11 +278,8 @@ class EvaluacionAdmin(admin.ModelAdmin):
                      'docentePeriodoAcademico__usuario__cedula',
                      'directorCarrera__usuario__cedula')
     list_per_page = 30
-    list_filter = ('fechaInicio', 'fechaFin',)
+    list_filter = ('cuestionario__periodoEvaluacion', 'cuestionario__informante',  'fechaInicio', 'fechaFin',)
     date_hierarchy = 'fechaFin'
-    # inlines = (ContestacionEnLinea,)
-    # problema al presentar estudianteAsignaturaDocente
-    #fields = ('estudianteAsignaturaDocente', 'cuestionario', 'fechaFin', 'horaFin')
     fields = ('cuestionario', 'fechaFin', 'horaFin')
     readonly_fields = ('cuestionario', 'fechaFin', 'horaFin')
 

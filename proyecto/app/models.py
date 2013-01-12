@@ -602,9 +602,9 @@ class PeriodoEvaluacion(models.Model):
     areasSGA = models.ManyToManyField(AreaSGA, related_name='periodosEvaluacion', verbose_name=u'Areas Académicas SGA')
     
     class Meta:
-        ordering = ['inicio']
-        verbose_name = 'Periodo Evaluación'
-        verbose_name_plural = 'Periodos de Evaluación'
+        ordering = ['inicio', 'fin']
+        verbose_name = u'Periodo Evaluación'
+        verbose_name_plural = u'Periodos de Evaluación'
         
     def noIniciado(self):
         ahora = datetime.today()
