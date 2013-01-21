@@ -724,7 +724,7 @@ class TabulacionAdicionales2012:
         # Solo de seleccion unica
         contestaciones1 = [c for c in autoevaluacion.contestaciones.all() if Pregunta.objects.get(id=c.pregunta).tipo.id==2]
         total1 = sum([int(c.respuesta) for c in contestaciones1])
-        peso = total1 / float(len(contestaciones1))
+        peso = (total1 / float(len(contestaciones1))) if len(contestaciones1) > 0  else 0
         porcentaje1 = (peso * 100 / float(4))
         # Se coloca en Contestacion un objeto Pregunta en vez del id_pregunta entero
         for c in contestaciones1:
@@ -746,7 +746,7 @@ class TabulacionAdicionales2012:
         # Solo de seleccion unica
         contestaciones2 = [c for c in evaluacion.contestaciones.all() if Pregunta.objects.get(id=c.pregunta).tipo.id==2]
         total2 = sum([int(c.respuesta) for c in contestaciones2])
-        peso = total2 / float(len(contestaciones2))
+        peso = (total2 / float(len(contestaciones2))) if len(contestaciones2) > 0 else 0
         porcentaje2 = (peso * 100 / float(4))
         # Se coloca en Contestacion un objeto Pregunta en vez del id_pregunta entero
         for c in contestaciones2:
