@@ -492,8 +492,8 @@ class Resultados(models.Model):
     Clase para forzar un enlace desde al admin de la app
     """
     class Meta:
-        #managed = False
         verbose_name_plural = 'Resultados'
+
         
 class TipoPregunta(models.Model):
     # TODO: Clase Abstracta
@@ -669,7 +669,7 @@ class PeriodoEvaluacion(models.Model):
 # TODO: Modelar de mejor manera la funcionalidad
 tipos_tabulacion = (
     (u'ESE2012', u'Tabulación Satisfacción Estudiantil 2012'),
-    (u'EAAD2012', u'Tabulación Actividades Adicionales Docencia 2012'),
+    (u'EAAD2012', u'Tabulación Actividades Adicionales Docencia 2011-2012'),
 )
 
 class Tabulacion(models.Model):
@@ -753,9 +753,28 @@ class TabulacionAdicionales2012:
             c.pregunta = Pregunta.objects.get(id=c.pregunta)     
         # Valor Total obtenido con  ponderacion: Comision Academica 80% - Docente 20% 
         total = (porcentaje1 * 20 / 100) + (porcentaje2 * 80 / 100) 
+####
+
+        contestaciones = {}
+        contestaciones['secciones'] = []
+        # Los dos cuestionarios tienen las mismas secciones
+        for s in autoevaluacion.cuestionario.secciones.all():
+            seccion = {'titulo':s.titulo, 'resultados': []}
+            for p in s.preguntas.all():
+                l1 = [c.respuesta for c in contestaciones1 if c.pregunta.codigo == p.codigo]
+                docente = l1[0] if l1 else ''
+                l2 = [c.respuesta for c in contestaciones2 if c.pregunta.codigo == p.codigo]
+                comision = l2[0] if l2 else ''
+                if docente or comision:
+                    seccion['resultados'].append({'codigo':p.codigo, 'texto':p.texto, 'comision':comision, 'docente':docente})
+            contestaciones['secciones'].append(seccion)
+        num_actividades = sum([len(s['resultados']) for s in contestaciones['secciones']])
+        contestaciones['num_actividades'] = num_actividades
+#revisar ?????
+#####
         return dict(contestaciones1=contestaciones1, porcentaje1=porcentaje1, 
                     contestaciones2=contestaciones2, porcentaje2=porcentaje2,
-                    total=total)
+                    contestaciones=contestaciones, total=total)
 
 
     def por_carrera(self, siglas_area, nombre_carrera):

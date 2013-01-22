@@ -28,88 +28,63 @@
   <body>
     <center>
       <img width="75px" height="75px" src="/static/images/unl_logo.png"/>
-      <h4> {{ "Unversidad Nacional de Loja"|upper }} </h4>
-      <h3 style="margin-bottom: 3px;"> Evaluación Actividades Adicionales a la Docencia 2011 - 2012 </h3>
-      {{ titulo|safe }}
+      <h4> 
+      {{ "Unversidad Nacional de Loja"|upper }}  <br/>
+      Comisión de Evaluación Interna <br/>
+      EVALUACIÓN DEL DESEMPEÑO ACADÉMICO <p/>
+      {{ "Resultados de la Evaluación de Actividades Adicionales a la Docencia 2011-2012"|upper }}
 
-      <!-- Primera Parte -->
+      <!-- Tabla de encabezado -->
 
-      <h4> Autoevaluación </h4>
-      <table id="tabla-autoevaluacion" width="100%" cellspacing="0" >
-	<th rowspan="2" style="width: 5%;"> Nro. </th>
-	<th rowspan="2" style="width: 75%"> Indicadores </th>
-	<th colspan="4"> Valoración </th>
+      <table id="tabla-docente" width="100%" border="0">
 	<tr>
-	  <th style="width: 5%;"> 4 <br/> (MS) </th>
-	  <th style="width: 5%;"> 3 <br/> (S)  </th>
-	  <th style="width: 5%;"> 2 <br/> (PS) </th>
-	  <th style="width: 5%;"> 1 <br/> (INS) </th>
+	  <td width="10%"><b>AREA</b></td> <td width="90%">{{ area }}</td>
 	</tr>
-	{% for c in contestaciones1 %}
 	<tr>
-	  <td style="text-align: right;"> <b> {{ c.pregunta.codigo }} </b> </td>
-	  <td> 
-	    {{ c.pregunta.texto }}
-	  </td>
-	  <td style="text-align: center;"> {% ifequal c.respuesta '4' %} <b>4</b> {% endifequal %}</td>
-	  <td style="text-align: center;"> {% ifequal c.respuesta '3' %} <b>3</b> {% endifequal %}</td>
-	  <td style="text-align: center;"> {% ifequal c.respuesta '2' %} <b>2</b> {% endifequal %}</td>
-	  <td style="text-align: center;"> {% ifequal c.respuesta '1' %} <b>1</b> {% endifequal %}</td>
+	  <td width="10%"><b>CARRERA</b></td> <td width="90%">{{ carrera }}</td>
 	</tr>
-	{% endfor %}
-	<tr> 
-	  <td colspan="2" style="text-align: right;">
-	    <b>  Número de Actividades: <br/> Evaluación: </b> 
-	  </td>
-	  <td colspan="4" style="text-align: center;">
-	    <b> {{ contestaciones1|length }} <br/> {{ porcentaje1|floatformat:"2" }}% </b> 
-	  </td>
+	<tr>
+	  <td width="10%"><b>DOCENTE</b></td> <td width="90%">{{ docente }}</td>
 	</tr>
       </table>
 
-      <!-- Segunda parte  -->
-
-      <h4> Evaluación de la Comisión Académica </h4>
-      <table id="tabla-evaluacion" width="100%" cellspacing="0" >
-	<th rowspan="2" style="width: 5%;"> Nro. </th>
-	<th rowspan="2" style="width: 75%"> Indicadores </th>
-	<th colspan="4"> Valoración </th>
+      <!-- Tabla Central -->
+      <table id="tabla-resultados" width="100%" cellspacing="0" >
+	<th rowspan="2" colspan="2" style="width: 80%;"> ACIVIDADES </th>
+	<th colspan="2"> INFORMANTES </th>
 	<tr>
-	  <th style="width: 5%;"> 4 <br/> (MS) </th>
-	  <th style="width: 5%;"> 3 <br/> (S)  </th>
-	  <th style="width: 5%;"> 2 <br/> (PS) </th>
-	  <th style="width: 5%;"> 1 <br/> (INS) </th>
+	  <th> COMISION </th>
+	  <th> DOCENTE </th>
 	</tr>
-	{% for c in contestaciones2 %}
+	{% for seccion in contestaciones.secciones %}
 	<tr>
-	  <td style="text-align: right;"> <b> {{ c.pregunta.codigo }} </b> </td>
-	  <td> 
-	    {{ c.pregunta.texto }}
-	  </td>
-	  <td style="text-align: center;"> {% ifequal c.respuesta '4' %} <b>4</b> {% endifequal %}</td>
-	  <td style="text-align: center;"> {% ifequal c.respuesta '3' %} <b>3</b> {% endifequal %}</td>
-	  <td style="text-align: center;"> {% ifequal c.respuesta '2' %} <b>2</b> {% endifequal %}</td>
-	  <td style="text-align: center;"> {% ifequal c.respuesta '1' %} <b>1</b> {% endifequal %}</td>
+	  <td colspan="4"> <b> {{ seccion.titulo|upper }} </b> </td> 
+	</tr>
+	{% for r in seccion.resultados %}
+	<tr>
+	  <td width="5%" style="vertical-align: top;"> {{ r.codigo }} </td>
+	  <td width="75%" style=""> {{ r.texto }} </td>
+	  <td style="text-align: center;"> {{ r.comision }} </td>
+	  <td style="text-align: center;"> {{ r.docente }}</td>
 	</tr>
 	{% endfor %}
-	<tr> 
-	  <td colspan="2" style="text-align: right;">
-	    <b>  Número de Actividades: <br/> Evaluación: </b> 
-	  </td>
-	  <td colspan="4" style="text-align: center;">
-	    <b> {{ contestaciones2|length }} <br/> {{ porcentaje2|floatformat:"2" }}% </b> 
-	  </td>
-	</tr>
+	{% endfor %}
       </table>
-      <h4> Resultado </h4>
-      <table cellspacing="5">
+
+      <!-- Tabla de Resultados -->
+
+      <table width="100%">
 	<tr>
-	  <td style="text-align: right; width: 80%; valign: middle;"> 
-	    <h3> Valor total obtenido </h3> 
-	  </td>
-	  <td style="text-align: center; width: 20%;">
-	    <h1> {{ total|floatformat:"2" }}% </h1> 
-	  </td>
+	  <td width="80%"> <h3> Número de Actividades:  </h3></td>
+	  <td colspan="2" style="text-align: center;"> <h3> {{ contestaciones.num_actividades }} </h3> </td>
+	</tr>
+	<tr> 
+	  <td rowspan="2"> <h3> Valoración Global Actividades Adicionales: </h3></td>
+	  <td style="text-align: center;"> <h3> {{ porcentaje1|floatformat:"2" }}% </h3> </td>
+	  <td style="text-align: center;"> <h3> {{ porcentaje2|floatformat:"2" }}% </h3> </td>
+	</tr>
+	<tr>
+	  <td colspan="2" style="text-align: center; vertical-align: center;"> <h1> {{ total|floatformat:"2" }}% </h1> </td>	  
 	</tr>
       </table>
 

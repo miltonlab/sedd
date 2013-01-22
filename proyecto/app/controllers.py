@@ -725,16 +725,19 @@ def mostrar_resultados(request):
 
     # Evaluacion de Actividades Adiconales a la Docencia 2011 - 2012
     if tabulacion.tipo == 'EAAD2012':
+        # Nombre completo del Area para su presentacion en el reporte
+        area = AreaSGA.objects.get(siglas=request.session['area']).nombre
+        carrera = request.session['carrera']
         tabulacion = TabulacionAdicionales2012(periodoEvaluacion)
         metodo =  [c[2] for c in tabulacion.calculos if c[0] == opcion][0]
-        titulo = request.session['area'] + '<br/> <b>' + request.session['carrera'] + '</b><br/>'
-        titulo += [c[3] for c in tabulacion.calculos if c[0] == opcion][0]
+       
         # Por docente
         resultados = {}
         if opcion == 'a':
             id_docente = request.POST['docentes']
             if id_docente != '':
-                titulo += u': <b>{0}</b>'.format(DocentePeriodoAcademico.objects.get(id=int(id_docente)))
+                ###titulo += u': <b>{0}</b>'.format(DocentePeriodoAcademico.objects.get(id=int(id_docente)))
+                docente = DocentePeriodoAcademico.objects.get(id=int(id_docente))
                 # Referencia a lo que devuelve el metodo especifico invocado sobre la instancia de Tabulacion 
                 resultados = metodo(request.session['area'], request.session['carrera'], int(id_docente))
         elif opcion == 'z':
@@ -743,9 +746,11 @@ def mostrar_resultados(request):
         else:
             resultados = metodo(request.session['area'], request.session['carrera'])
         if resultados:
-            resultados['titulo'] = titulo
+            resultados['docente'] = docente
+            resultados['carrera'] = carrera
+            resultados['area'] = area
         plantilla = 'app/imprimir_resultados_eaad2012.html'
-
+      
     return render_to_response(plantilla, resultados, context_instance=RequestContext(request));
 
 
