@@ -92,13 +92,13 @@
 
       <table width="100%">
 	<tr>
-	  <td width="80%"> <h3> Número de Actividades:  </h3></td>
+	  <td width="70%"> <h3> Número de Actividades:  </h3></td>
 	  <td colspan="2" style="text-align: center;"> <h3> {{ contestaciones.num_actividades }} </h3> </td>
 	</tr>
 	<tr> 
 	  <td rowspan="2"> <h3> Valoración Global Actividades Adicionales: </h3></td>
-	  <td style="text-align: center;"> <h3> {{ porcentaje1|floatformat:"2" }}% </h3> </td>
-	  <td style="text-align: center;"> <h3> {{ porcentaje2|floatformat:"2" }}% </h3> </td>
+	  <td style="text-align: center;"> <h3> Comision: {{ porcentaje1|floatformat:"2" }}% </h3> </td>
+	  <td style="text-align: center;"> <h3> Docente: {{ porcentaje2|floatformat:"2" }}% </h3> </td>
 	</tr>
 	<tr>
 	  <td colspan="2" style="text-align: center; vertical-align: center;"> <h1> {{ total|floatformat:"2" }}% </h1> </td>	  
