@@ -758,15 +758,26 @@ class TabulacionAdicionales2012:
         contestaciones = {}
         contestaciones['secciones'] = []
         # Los dos cuestionarios tienen las mismas secciones
+        # TODO: Creo que se puede mejorar el este codigo
         for s in autoevaluacion.cuestionario.secciones.all():
             seccion = {'titulo':s.titulo, 'resultados': []}
             for p in s.preguntas.all():
                 l1 = [c.respuesta for c in contestaciones1 if c.pregunta.codigo == p.codigo]
-                docente = l1[0] if l1 else ''
+                valor_docente = l1[0] if l1 else ''
+                l1 = [c.observaciones for c in contestaciones1 if c.pregunta.codigo == p.codigo]
+                observaciones_docente = l1[0] if l1 else ''
                 l2 = [c.respuesta for c in contestaciones2 if c.pregunta.codigo == p.codigo]
-                comision = l2[0] if l2 else ''
-                if docente or comision:
-                    seccion['resultados'].append({'codigo':p.codigo, 'texto':p.texto, 'comision':comision, 'docente':docente})
+                valor_comision = l2[0] if l2 else ''
+                l2 = [c.observaciones for c in contestaciones2 if c.pregunta.codigo == p.codigo]
+                observaciones_comision = l2[0] if l2 else ''
+                porcentaje_docente = int(valor_docente)*25 if valor_docente else ''
+                porcentaje_comision = int(valor_comision)*25 if valor_comision else ''
+                if valor_docente or valor_comision:
+                    seccion['resultados'].append({'codigo':p.codigo, 'texto':p.texto, 
+                                                  'valor_comision':valor_comision, 'valor_docente':valor_docente,
+                                                  'porcentaje_comision':porcentaje_comision, 'porcentaje_docente':porcentaje_docente,
+                                                  'observaciones_comision':observaciones_comision, 
+                                                  'observaciones_docente':observaciones_docente})
             contestaciones['secciones'].append(seccion)
         num_actividades = sum([len(s['resultados']) for s in contestaciones['secciones']])
         contestaciones['num_actividades'] = num_actividades

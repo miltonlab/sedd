@@ -22,6 +22,10 @@
 	border: 1px solid gray;
         font-size: 13px;
     }
+    textarea {
+	font-size: 10px;
+	overflow: hidden;
+    }
 
     </style>
   </head>
@@ -49,23 +53,36 @@
       </table>
 
       <!-- Tabla Central -->
+
       <table id="tabla-resultados" width="100%" cellspacing="0" >
-	<th rowspan="2" colspan="2" style="width: 80%;"> ACIVIDADES </th>
-	<th colspan="2"> INFORMANTES </th>
+	<th rowspan="3" colspan="2" style="width: 80%;"> ACIVIDADES </th>
+	<th colspan="4"> INFORMANTES </th>
+	<th rowspan="3"> Fuente de Verificación </th>
 	<tr>
-	  <th> COMISION </th>
-	  <th> DOCENTE </th>
+	  <th colspan="2"> COMISION </th>
+	  <th colspan="2"> DOCENTE </th>
+	</tr>
+	<tr>
+	  <th width="4%"> Esc. </th>
+	  <th width="4%"> % </th>
+	  <th width="4%"> Esc. </th>
+	  <th width="4%"> % </th>
 	</tr>
 	{% for seccion in contestaciones.secciones %}
 	<tr>
-	  <td colspan="4"> <b> {{ seccion.titulo|upper }} </b> </td> 
+	  <td colspan="7"> <b> {{ seccion.titulo|upper }} </b> </td> 
 	</tr>
 	{% for r in seccion.resultados %}
 	<tr>
-	  <td width="5%" style="vertical-align: top;"> {{ r.codigo }} </td>
-	  <td width="75%" style=""> {{ r.texto }} </td>
-	  <td style="text-align: center;"> {{ r.comision }} </td>
-	  <td style="text-align: center;"> {{ r.docente }}</td>
+	  <td width="4%"> {{ r.codigo }} </td>
+	  <td width="70%" style=""> {{ r.texto }}  </td>
+	  <td style="text-align: center;"> {{ r.valor_comision }} </td>
+	  <td style="text-align: center;"> {%if r.porcentaje_comision%} {{ r.porcentaje_comision }}% {%endif%}</td>
+	  <td style="text-align: center;"> {{ r.valor_docente }} </td>
+	  <td style="text-align: center;"> {%if r.porcentaje_docente%} {{ r.porcentaje_docente }}% {%endif%}</td>
+	  <td> 
+	    <textarea readonly="readonly" rows="4">COMISION: {{ r.observaciones_comision }} DOCENTE: {{ r.observaciones_docente }}  </textarea>
+	  </td>
 	</tr>
 	{% endfor %}
 	{% endfor %}
