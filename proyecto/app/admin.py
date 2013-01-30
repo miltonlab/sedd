@@ -37,7 +37,7 @@ class PreguntaAdmin(admin.ModelAdmin):
             numeracion = request.POST['numeracion']
             if longitud == '' or numeracion == '':
                 return
-            # Si se trata de una pregunta de Selección por predeterminada
+            # Si se trata de una pregunta de Seleccion por predeterminada
             obj.save()
             longitud = int(longitud)
             if numeracion == '1':

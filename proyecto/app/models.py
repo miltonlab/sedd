@@ -62,6 +62,7 @@ class PeriodoAcademico(models.Model):
 
     def cargarOfertasSGA(self):
         proxy = SGA(settings.SGAWS_USER, settings.SGAWS_PASS)
+        print "fechas del periodo para ofertas: {0} {1}".format(self.inico, self.fin)
         ofertas_dict = proxy.ofertas_academicas(self.inicio, self.fin)
         ofertas = [OfertaAcademicaSGA(idSGA=oa['id'], descripcion=oa['descripcion'])  for oa in ofertas_dict]
         for oa in ofertas:
@@ -84,12 +85,15 @@ class PeriodoAcademico(models.Model):
             nuevo = True
         super(PeriodoAcademico, self).save(*args, **kwargs)
         if nuevo:
-            self.cargarOfertasSGA()
-            
+            try:
+                self.cargarOfertasSGA()
+            except Exception, ex: 
+                logg.error("Error al cargar ofertas academicas del SGA: {0}".format(ex))
+
     class Meta:
         ordering = ['inicio']
-        verbose_name = 'Periodo Académico'
-        verbose_name_plural = 'Periodos Académicos'
+        verbose_name = u'Periodo Académico'
+        verbose_name_plural = u'Periodos Académicos'
         
     def __unicode__(self):
         return self.nombre

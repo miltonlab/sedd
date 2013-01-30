@@ -22,7 +22,7 @@ class myHTTPTransport (HTTPTransport):
         cls.username = u
         cls.passwd = p
           
-    def call(self, addr, data, namespace, soapaction=None, encoding=None,http_proxy=None, config=Config):
+    def call(self, addr, data, namespace, soapaction=None, encoding=None,http_proxy=None, config=Config, timeout=60):
         if not isinstance(addr, SOAPAddress):
             addr=SOAPAddress(addr, config)
         if self.username != None:
