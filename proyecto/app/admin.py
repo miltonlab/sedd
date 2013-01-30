@@ -19,7 +19,8 @@ class PreguntaAdmin(admin.ModelAdmin):
     inlines = (ItemPreguntaEnLinea,)
     fields = ('seccion','orden', 'codigo', 'texto', 'descripcion', 'tipo')
     search_fields = ('texto', 'descripcion')
-    list_filter = ('seccion__cuestionario__periodoEvaluacion', 'seccion__cuestionario', 'seccion')
+    list_filter = ('seccion__cuestionario__periodoEvaluacion__periodoAcademico', 
+                   'seccion__cuestionario__periodoEvaluacion', 'seccion__cuestionario')
     list_per_page = 30
 
     # Sobreescrito
@@ -66,12 +67,14 @@ class SeccionEnLinea(admin.TabularInline):
 class SeccionAdmin(admin.ModelAdmin):
     #inlines = (PreguntaEnLinea,)
     fields = ('cuestionario', 'titulo', 'descripcion', 'orden')
-    list_filter = ('cuestionario__periodoEvaluacion', 'cuestionario')
+    list_filter = ('cuestionario__periodoEvaluacion__periodoAcademico', 'cuestionario__periodoEvaluacion', 
+                   'cuestionario')
 
 class CuestionarioAdmin(admin.ModelAdmin):
     actions = ['clonar_cuestionario']
     inlines = (SeccionEnLinea,)
     save_as = True
+    list_filter = ('periodoEvaluacion__periodoAcademico', 'periodoEvaluacion')
 
     # Acción para copiar un cuestionario en el Admin
     def clonar_cuestionario(self, request, queryset):
@@ -96,6 +99,7 @@ class OfertaAcademicaSGAEnLinea(admin.TabularInline):
 
 class PeriodoEvaluacionAdmin(admin.ModelAdmin):
     filter_horizontal = ('areasSGA',)
+    list_filter = ('periodoAcademico',)
 
 class PeriodoAcademicoAdmin(admin.ModelAdmin):
     filter_horizontal = ('ofertasAcademicasSGA',)
@@ -114,7 +118,7 @@ class EstudiantePeriodoAcademicoAdmin(admin.ModelAdmin):
     search_fields = ('usuario__username','usuario__cedula','usuario__last_name','usuario__first_name')
     inlines = (EstudianteAsignaturaDocenteEnLinea,)
     raw_id_fields = ('usuario',)
-
+    list_filter = ('periodoAcademico',)
         
 class EstudianteAsignaturaDocenteAdmin(admin.ModelAdmin):
     raw_id_fields = ('asignaturaDocente','estudiante')
@@ -123,6 +127,7 @@ class EstudianteAsignaturaDocenteAdmin(admin.ModelAdmin):
                      'asignaturaDocente__asignatura__semestre' )
     list_per_page = 30
     list_display = ('estudiante', 'get_asignatura', 'get_area', 'get_carrera', 'get_semestre', 'get_paralelo')
+    list_filter = ('estudiante__periodoAcademico',)
     # Algunos campos se toman del formulario
     # fields = ('estudiante','asignaturaDocente','carrera','semestre', 'paralelo', 'estado')
 
@@ -142,6 +147,7 @@ class AsignaturaDocenteAdmin(admin.ModelAdmin):
     list_per_page = 30
     list_display = ( 'get_nombre_corto', 'get_carrera', 'get_semestre', 'get_paralelo')
     fields = ('docente','asignatura')
+    list_filter = ('docente__periodoAcademico',)
 
     def validar_clonar(self, request, queryset):
         paralelo = request.POST['paralelo']
@@ -224,16 +230,18 @@ class DocentePeriodoAcademicoAdmin(admin.ModelAdmin):
     search_fields = ('usuario__cedula','usuario__last_name','usuario__first_name') 
     inlines = (AsignaturaDocenteEnLinea,)
     raw_id_fields = ('usuario',)
+    list_filter = ('periodoAcademico',)
 
 
 class DireccionCarreraAdmin(admin.ModelAdmin):
     raw_id_fields = ('director',)
 
+
 class AsignaturaAdmin(admin.ModelAdmin):
     list_display = ('carrera','semestre','paralelo', '__unicode__')
     list_display_links = ('__unicode__',)
     search_fields = ('idSGA','area','carrera','semestre','paralelo','nombre',)
-    list_filter = ('area','carrera','semestre','tipo',)
+    list_filter = ('periodoAcademico', 'area','carrera','semestre','tipo',)
     list_per_page = 20
     # TODO: combobox
     #readonly_fields = ('area','carrera','semestre','paralelo','tipo',)
@@ -278,7 +286,8 @@ class EvaluacionAdmin(admin.ModelAdmin):
                      'docentePeriodoAcademico__usuario__cedula',
                      'directorCarrera__usuario__cedula')
     list_per_page = 30
-    list_filter = ('cuestionario__periodoEvaluacion', 'cuestionario__informante',  'fechaInicio', 'fechaFin',)
+    list_filter = ('cuestionario__periodoEvaluacion__periodoAcademico', 'cuestionario__periodoEvaluacion', 
+                   'cuestionario__informante',  'fechaInicio', 'fechaFin',)
     date_hierarchy = 'fechaFin'
     fields = ('cuestionario', 'fechaFin', 'horaFin')
     readonly_fields = ('cuestionario', 'fechaFin', 'horaFin')
@@ -290,7 +299,7 @@ class ResultadosAdmin(admin.ModelAdmin):
     pass
     
 class TabulacionAdmin(admin.ModelAdmin):
-    pass
+    list_filter = ('periodoEvaluacion__periodoAcademico', 'periodoEvaluacion')
 
 
 admin.site.register(models.Cuestionario,CuestionarioAdmin)

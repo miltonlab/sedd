@@ -1,13 +1,17 @@
 SEDD [Sistema de Evaluacion de Docentes]
 =========================================
 
+
 Instalación
 ------------------------------------------------------------------
- - Renombrar settings.cfg a settings.py y configurar cuentas
+ - Renombrar settings.cfg a settings.py y configurar cuentas de acceso
  - Modificar y copiar proyecto/apache/sedd.cfg a /etc/apache2/sites-enabled 
- - Aumentar el tamaño de first_name y last_name en el modelo auth.User 
- - Reiniciar apache (por cada cambio)
+ - Reiniciar apache
 
+### Cambios en el codigo fuente de Django
+ * Cambiar el ancho de #changelist-filter en "...django/contrib/admin/media/css/changelists.css"
+ * Aumentar el tamaño de first_name y last_name en el modelo "...django/contrib/auth/models.py"
+ * Cambiar el ancho de .dashboard #content "...django/contrib/admin/media/css/base.css"
 
 Requerimientos
 -------------------------------------------------------------------
@@ -31,3 +35,8 @@ Requerimientos
    - libmysqlclient-dev 5.5.27
    
 
+Historial de cambios importantes
+-------------------------------------------------------------------
+
+ * Compatibilidad en el uso de la libreria soappy, desde la version 0.12.0 hacia versiones superiores hasta la 0.12.5:
+   - Agregado parámetro timeout en "proyecto.app.tools.sgaws.cliente.myHTTPTransport.call"

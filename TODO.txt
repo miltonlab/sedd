@@ -1,12 +1,10 @@
-llenar en  produccion 
 
-Mejoras
- * Pendiente validar vigencia de encuestas para docentes y comisiones academicas
+### Posibles Mejoras 
+ * Rediseñar las relaciones PeriodoAcademico,Estudiante,Docente,Asignatura (Pueden eliminarse 2)
  * Validar migracion de docentes desde  mas de una carrera hacia mas de una carrera (OLD SEDD)
- * Mejorar relacion Cuestionario - Seccion - Pregunta 
+ * Mejorar relacion Cuestionario - Seccion - Pregunta con el patron Composite
  * Manejar carrera como modelo separado, necesitamos carrera_id?
- * Manejar 'seccion' (matituina, vespertina, nocturna) en las asignaturas?
 
-Datos para pruebas
- 1103659833 Luis Chamba
- 1103770903 Edison Leonardo Coronel Romero
+## Datos para pruebas
+ * 1103659833 Docente 
+ * 1103770903 Docente Coordinador

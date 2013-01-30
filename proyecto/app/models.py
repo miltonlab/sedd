@@ -62,7 +62,6 @@ class PeriodoAcademico(models.Model):
 
     def cargarOfertasSGA(self):
         proxy = SGA(settings.SGAWS_USER, settings.SGAWS_PASS)
-        print "fechas del periodo para ofertas: {0} {1}".format(self.inico, self.fin)
         ofertas_dict = proxy.ofertas_academicas(self.inicio, self.fin)
         ofertas = [OfertaAcademicaSGA(idSGA=oa['id'], descripcion=oa['descripcion'])  for oa in ofertas_dict]
         for oa in ofertas:
@@ -102,17 +101,20 @@ class PeriodoAcademico(models.Model):
 class Asignatura(models.Model):
     area = models.CharField(max_length='20')
     carrera = models.CharField(max_length='100')
-    semestre = models.CharField(max_length='10', verbose_name='módulo')
+    semestre = models.CharField(max_length='10', verbose_name=u'módulo')
     paralelo = models.CharField(max_length='50')
     seccion = models.CharField(max_length='10')
     nombre = models.TextField()
     tipo = models.CharField(max_length='15')
-    creditos = models.IntegerField(verbose_name='número de créditos')
-    duracion = models.FloatField(verbose_name='duración en horas')
+    creditos = models.IntegerField(verbose_name=u'número de créditos')
+    duracion = models.FloatField(verbose_name=u'duración en horas')
     inicio = models.DateField(null=True, verbose_name='inicia')
     fin = models.DateField(null=True, verbose_name='termina')
-    # Campocombinado id_unidad:id_paralelo
+    # Campo combinado id_unidad:id_paralelo
     idSGA = models.CharField(max_length='15', db_column='id_sga')
+    periodoAcademico = models.ForeignKey('PeriodoAcademico', related_name='asignaturas',
+                                         verbose_name=u'Periodo Académico', db_column='periodo_academico_id')
+
 
     def esVigente(self):
         """ Determina si la asignatura se dicta dentro del Periodo de Evaluación Actual """

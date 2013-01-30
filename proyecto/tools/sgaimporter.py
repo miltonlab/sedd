@@ -39,7 +39,7 @@ def importar(periodoAcademicoId, periodoEvaluacionId=None):
         if periodoEvaluacionId:
             periodoEvaluacion = PeriodoEvaluacion.objects.get(id=periodoEvaluacionId)
     except PeriodoAcademico.DoesNotExist, PeriodoEvaluacion.DoesNotExist:
-        print "Periodo Academico o  Periodo de Evaluacion no encontrados en la BD"
+        log.error("Periodo Academico o  Periodo de Evaluacion no encontrados en la BD")
         return
 
     for oa in periodoAcademico.ofertasAcademicasSGA.all():
@@ -65,7 +65,8 @@ def importar(periodoAcademicoId, periodoEvaluacionId=None):
                     js_ud = json.loads(r_ud)
                     if js_ud[0] != '_error':
                         unidades_docentes = js_ud[6]
-                        for id_unidad, unidad, horas, creditos, obligatoria, inicio, fin, cedula, nombres, apellidos, titulo in unidades_docentes:
+                        for id_unidad, unidad, horas, creditos, obligatoria, inicio, fin, 
+                        cedula, nombres, apellidos, titulo in unidades_docentes:
                             # Si se ha especificado un periodo de evaluacion
                             # se importa unicamente las unidades que se estan dictando actualmente
                             # TODO: probar snippet
@@ -84,12 +85,13 @@ def importar(periodoAcademicoId, periodoEvaluacionId=None):
                                         continue
 			    """
                             # Tratamiento de los saltos de línea dentro del nombre de la unidad
-                            unidad = unidad.replace('\r\n',' ')[0:-1]
+                            ###unidad = unidad.replace('\r\n',' ')[0:-1]
+                            unidad = unidad.replace('\r\n',' ').strip()[0:-1]
+                            # El idSGA tiene similitud con del id_horario_semana en el SGA
                             dict_unidad = dict(
-                                # El idSGA tiene similitud con del id_horario_Semana en el SGA
                                 idSGA="{0}:{1}".format(id_unidad, id_paralelo), area=area, carrera=carrera,
-                                semestre=modulo, paralelo=paralelo, seccion=seccion, nombre=unidad,
-                                creditos=creditos, duracion=horas, inicio=fecha_inicio, fin=fecha_fin
+                                semestre=modulo, paralelo=paralelo, seccion=seccion, nombre=unidad, creditos=creditos, 
+                                duracion=horas, inicio=fecha_inicio, fin=fecha_fin, periodoAcademico=periodoAcademico
                                 )
                             dict_usuario_docente = dict(
                                 username=cedula, password='', first_name=nombres.title(), last_name=apellidos.title(),
