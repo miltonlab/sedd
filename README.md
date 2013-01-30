@@ -1,15 +1,16 @@
+SEDD [Sistema de Evaluacion de Docentes]
+=========================================
 
-
-Instalación:
-==================================================================
+Instalación
+------------------------------------------------------------------
  - Renombrar settings.cfg a settings.py y configurar cuentas
  - Modificar y copiar proyecto/apache/sedd.cfg a /etc/apache2/sites-enabled 
  - Aumentar el tamaño de first_name y last_name en el modelo auth.User 
  - Reiniciar apache (por cada cambio)
 
 
-Requerimientos: 
-===================================================================
+Requerimientos
+-------------------------------------------------------------------
  * Sistema Operativo: Debian squeeze backports
  * python-django 1.3
  * ptyhon-django-extensions 0.4.2
@@ -19,8 +20,7 @@ Requerimientos:
  * libapache2-mod-wsgi 3.3	(modulo para desplegar en apache)
  * south 0.7.3          	(Migraciones)
 
-Opcionales 
--------------------------------------------------------------------
+#### Opcionales 
 
  * django-chronograph 0.3.1 (Admin de Tareas)
    - python-dateutil 1.4.1    
