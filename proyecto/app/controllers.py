@@ -140,6 +140,15 @@ def index(request):
                                       area=dc.carrera.split('|')[1] )
                                  for i,dc in enumerate(docente.direcciones.all()) ]
             request.session['carreras_director'] = carreras_director
+        #
+        # Se trata de un docente que es PAR ACADEMICO
+        #
+        elif docente.parAcademico:
+            cuestionarios_pares = [c for c in periodoEvaluacion.cuestionarios.all() 
+                                   if c.informante.tipo == 'ParAcademico']
+            request.session['cuestionarios_pares'] = cuestionarios_pares
+
+
     except DocentePeriodoAcademico.DoesNotExist:
         noDocente = True
 

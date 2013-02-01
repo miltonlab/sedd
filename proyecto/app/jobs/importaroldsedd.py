@@ -95,7 +95,7 @@ class Job(BaseJob):
                     logg.info('Carrera del sistema anterior no encontrada: {0}, {1}, {2}'.
                              format(row[4], row[5], row[6]))
                     continue
-                docente = DocentePeriodoAcademico(usuario=usuario, periodoAcademico=periodoAcademico, carrera=carrera, migrado=True)
+                docente = DocentePeriodoAcademico(usuario=usuario, periodoAcademico=periodoAcademico, carrera=carrera)
                 docente.save()
                 logg.info('Migrado el docente {0}'.format(docente))
                 nuevos.append(docente)

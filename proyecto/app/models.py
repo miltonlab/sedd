@@ -257,7 +257,8 @@ class DocentePeriodoAcademico(models.Model):
                                          verbose_name=u'Periodo Académico', db_column='periodo_academico_id')
     # Atributo agregado por efectos de migracion de docentes sin informacion de asignaturas
     carrera = models.CharField(max_length='500', choices=carreras, blank=True, null=True)
-    migrado = models.BooleanField()
+    # Pertenece a la Comision Academica de la Carrera?
+    parAcademico = models.BooleanField()
     
     class Meta:
         verbose_name = 'Docente'
