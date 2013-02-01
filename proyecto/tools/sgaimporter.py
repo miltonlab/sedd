@@ -28,7 +28,8 @@ def importar(periodoAcademicoId, periodoEvaluacionId=None):
     """ Importar unidades en primera instancia"""
     sga = SGA(proyecto.settings.SGAWS_USER, proyecto.settings.SGAWS_PASS)    
     thetime = datetime.datetime.now().strftime("%Y-%m-%d")
-    log.basicConfig(filename= "../tmp/sgaimporter-%s.log" % thetime,
+    directory = os.path.abspath(os.path.dirname(__file__)
+    log.basicConfig(filename= directory  + '../../tmp/sgaimporter-%s.log' % thetime),    
                     level   = log.DEBUG, 
                     datefmt = '%Y/%m/%d %I:%M:%S %p', 
                     format  = '%(asctime)s : %(levelname)s - %(message)s')
@@ -65,8 +66,7 @@ def importar(periodoAcademicoId, periodoEvaluacionId=None):
                     js_ud = json.loads(r_ud)
                     if js_ud[0] != '_error':
                         unidades_docentes = js_ud[6]
-                        for id_unidad, unidad, horas, creditos, obligatoria, inicio, fin, 
-                        cedula, nombres, apellidos, titulo in unidades_docentes:
+                        for id_unidad, unidad, horas, creditos, obligatoria, inicio, fin, cedula, nombres, apellidos, titulo in unidades_docentes:
                             # Si se ha especificado un periodo de evaluacion
                             # se importa unicamente las unidades que se estan dictando actualmente
                             # TODO: probar snippet

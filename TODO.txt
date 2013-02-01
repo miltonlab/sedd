@@ -1,3 +1,5 @@
+### Para la proxima migracion a produccion:
+ * Agregar en la BD el nuevo tipo informante ParAcademico
 
 ### Posibles Mejoras 
  * Rediseñar las relaciones PeriodoAcademico,Estudiante,Docente,Asignatura (Pueden eliminarse 2)

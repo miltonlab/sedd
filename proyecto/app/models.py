@@ -17,8 +17,10 @@ logg = logging.getLogger('logapp')
 
 class Configuracion(models.Model):
     """ Configuraciones Globales de la Aplicación """
-    periodoAcademicoActual = models.OneToOneField('PeriodoAcademico', null=True, blank=True, verbose_name='Periodo Académico Actual')
-    periodoEvaluacionActual = models.OneToOneField('PeriodoEvaluacion', null=True, blank=True, verbose_name='Periodo Evaluación Actual')
+    periodoAcademicoActual = models.OneToOneField('PeriodoAcademico', null=True, blank=True, 
+                                                  verbose_name='Periodo Académico Actual')
+    periodoEvaluacionActual = models.OneToOneField('PeriodoEvaluacion', null=True, blank=True, 
+                                                   verbose_name='Periodo Evaluación Actual')
 
     @classmethod
     def getPeriodoAcademicoActual(self):
@@ -329,7 +331,6 @@ class TipoInformante(models.Model):
     def __unicode__(self):
         return self.tipo
 
-
 class InformanteDocente(TipoInformante):
     def __init__(self):
         TipoInformante.__init__(self)
@@ -351,6 +352,11 @@ class InformanteDirectivos(TipoInformante):
     def __init__(self):
         TipoInformante.__init__(self)
         self.tipo = 'Directivos'
+
+class InformanteParAcademico(TipoInformante):
+    def __init__(self):
+        TipoInformante.__init__(self)
+        self.tipo = 'ParAcademico'
 
 class InformanteInstitutoIdiomas(TipoInformante):
     def __init__(self):
@@ -529,18 +535,24 @@ class Ensayo(TipoPregunta):
 
 class Seccion(models.Model):
     titulo = models.CharField(max_length='50')
-    descripcion  = models.CharField(max_length='100')
+    descripcion  = models.CharField(max_length='100', blank=True, null=True)
     orden = models.IntegerField()
-    seccionPadre = models.ForeignKey('self', null=True, blank=True, db_column='seccion_padre_id',
+    codigo = models.CharField(max_length='20', null=True, blank=True)
+    # Una subseccion esta relacionada con otra Seccion en vez de un Cuestionario
+    superseccion = models.ForeignKey('self', null=True, blank=True, db_column='superseccion_id',
                                      related_name='subsecciones', verbose_name=u'Sección Padre')
-    cuestionario = models.ForeignKey(Cuestionario, related_name='secciones')
+    # Una seccion normalmente esta relacionada con un Cuestionario
+    cuestionario = models.ForeignKey(Cuestionario, related_name='secciones', null=True, blank=True)
 
     def preguntas_ordenadas(self):
         return self.pregunta_set.order_by('orden')
 
     def __unicode__(self):
-        return u'{0} > Cuestionario: {1}'.format(self.titulo, self.cuestionario.titulo)
-
+        if self.cuestionario:
+            return u'{0} > Cuestionario: {1}'.format(self.titulo, self.cuestionario.titulo)
+        elif self.superseccion:
+            return u'{0} > SeccionPadre: {1}'.format(self.titulo, self.superseccion.titulo)
+ 
     def __repr__(self):
          return u'{0} > Cuestionario: {1}'.format(self.titulo, self.cuestionario)
 
@@ -551,7 +563,7 @@ class Seccion(models.Model):
 
         
 class Pregunta(models.Model):
-    codigo = models.CharField(max_length='5', null=True, blank=True)
+    codigo = models.CharField(max_length='20', null=True, blank=True)
     texto = models.TextField()
     descripcion = models.TextField(null=True, blank=True)
     # Observaciones adicionales a la contestación o respuesta 
@@ -676,6 +688,7 @@ class PeriodoEvaluacion(models.Model):
 tipos_tabulacion = (
     (u'ESE2012', u'Tabulación Satisfacción Estudiantil 2012'),
     (u'EAAD2012', u'Tabulación Actividades Adicionales Docencia 2011-2012'),
+    (u'EDA2013', u'Tabulación Evaluación del Desempeño Académico 2012-2013')
 )
 
 class Tabulacion(models.Model):
@@ -692,6 +705,22 @@ class Tabulacion(models.Model):
         
     def __unicode__(self):
         return self.descripcion
+
+
+class TabulacionEvaluacion2013:
+    tipo = u'EDA2013'
+    descripcion = u'Evaluación del Desempeño Académico 2012-2013'
+
+    def __init__(self, periodoEvaluacion=None):
+        self.periodoEvaluacion = periodoEvaluacion
+        self.calculos = (
+            # codigo, descripcion, metodo, titulo 
+            ('a',u'Resultados de la Evaluación del Desempeño Académico POR DOCENTE',
+             self.por_docente, u'Evaluación del Desempeño Académico por Docente'),
+            )
+
+    def por_docente(self, siglas_area, nombre_carrera, id_docente):
+        return None
 
 
 class TabulacionAdicionales2012:
@@ -759,8 +788,6 @@ class TabulacionAdicionales2012:
             c.pregunta = Pregunta.objects.get(id=c.pregunta)     
         # Valor Total obtenido con  ponderacion: Comision Academica 80% - Docente 20% 
         total = (porcentaje1 * 20 / 100) + (porcentaje2 * 80 / 100) 
-####
-
         contestaciones = {}
         contestaciones['secciones'] = []
         # Los dos cuestionarios tienen las mismas secciones
@@ -787,8 +814,6 @@ class TabulacionAdicionales2012:
             contestaciones['secciones'].append(seccion)
         num_actividades = sum([len(s['resultados']) for s in contestaciones['secciones']])
         contestaciones['num_actividades'] = num_actividades
-#revisar ?????
-#####
         return dict(contestaciones1=contestaciones1, porcentaje1=porcentaje1, 
                     contestaciones2=contestaciones2, porcentaje2=porcentaje2,
                     contestaciones=contestaciones, total=total)

@@ -60,19 +60,23 @@ class PreguntaEnLinea(admin.TabularInline):
     model = models.Pregunta
     extra = 1
 
-class SeccionEnLinea(admin.TabularInline):
+class SubSeccionEnLinea(admin.TabularInline):
     model = models.Seccion
     extra = 1
+    verbose_name = u'Subsección'
+    verbose_name_plural = 'Subsecciones'
+    exclude = ('cuestionario',)
 
 class SeccionAdmin(admin.ModelAdmin):
-    #inlines = (PreguntaEnLinea,)
-    fields = ('cuestionario', 'titulo', 'descripcion', 'orden')
+    inlines = (SubSeccionEnLinea,)
+    fields = ('cuestionario', 'codigo', 'titulo', 'descripcion', 'orden')
     list_filter = ('cuestionario__periodoEvaluacion__periodoAcademico', 'cuestionario__periodoEvaluacion', 
                    'cuestionario')
 
+
 class CuestionarioAdmin(admin.ModelAdmin):
     actions = ['clonar_cuestionario']
-    inlines = (SeccionEnLinea,)
+    ###inlines = (SeccionEnLinea,)
     save_as = True
     list_filter = ('periodoEvaluacion__periodoAcademico', 'periodoEvaluacion')
 
@@ -128,8 +132,6 @@ class EstudianteAsignaturaDocenteAdmin(admin.ModelAdmin):
     list_per_page = 30
     list_display = ('estudiante', 'get_asignatura', 'get_area', 'get_carrera', 'get_semestre', 'get_paralelo')
     list_filter = ('estudiante__periodoAcademico',)
-    # Algunos campos se toman del formulario
-    # fields = ('estudiante','asignaturaDocente','carrera','semestre', 'paralelo', 'estado')
 
     # Permitir filtros
     def lookup_allowed(self, key, value):
