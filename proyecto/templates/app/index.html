@@ -7,7 +7,8 @@
 {% block content %}
 
 <p/>
-<!-- Si es Estudiante -->
+
+<!-- Estudiante -->
 {% if request.session.estudiante %}
 {% if request.session.carreras_estudiante|length > 0 %}
 <h1> Carreras del Estudiante </h1>
@@ -24,11 +25,14 @@
 </ul>
 <hr/>
 {% endif %}
-{% endif %} <!-- End Estudiante -->
+{% endif %} 
 
+<!-- End Estudiante -->
+
+
+<!-- Docente -->
 
 {% if request.session.docente %}
-
 <h1> Encuestas para Autoevaluación del Docente </h1>
 <!--ul style="margin-top: 20px;"-->
   <!--h3--> 
@@ -50,26 +54,31 @@
 	</h3>
       </ul>
       {% empty %}
-      <h3> No existen encuestas para el Docente el presente Periodo.</h3>
+      <ul>
+	<h3> No existen encuestas para el Docente el presente Periodo.</h3>
+      </ul>
       {% endfor %}
   <!--/h3-->
 <!--/ul-->  
 <hr/>
-{% endif %} <!-- End Docente -->
+{% endif %} 
+
+<!-- Fin Docente -->
 
 
-<!-- Si es docente director/coordinador de carrera  --> 
-{% if request.session.docente.direcciones.count > 0 %}
+<!-- Par Academico -->
 
-<h1 style="margin-top: 20px;"> Encuestas para Comisión Académica de Carrera </h1>
+{% if request.session.docente.parAcademico %}
+
+<h1 style="margin-top: 20px;"> Encuestas para Pares Académicos de la Carrera </h1>
 <ul style="margin-top: 20px;">
-  {% if not request.session.cuestionarios_directivos %} 
-  <h3> No existen encuestas para la Comisión Académica en el presente Periodo.</h3>
+  {% if not request.session.cuestionarios_pares_academicos %} 
+  <h3> No existen encuestas para Pares Académicos en el presente Periodo.</h3>
   {% else %}
-  {% for carrera in request.session.carreras_director %}
+  {% for carrera in request.session.carreras_pares_academicos %}
   <h3> 
     <li>
-      <a href="{% url proyecto.app.controllers.director_docentes carrera.num_carrera %} ">
+      <a href="{% url pares_academicos_docentes carrera.num_carrera %} ">
 	SELECCIONAR DOCENTES DE LA CARRERA {{ carrera.nombre|upper }} [{{ carrera.area|upper }}]
       </a> 
     </li> 
@@ -78,6 +87,35 @@
   {% endif %}
 </ul>
 <hr/>
+{% endif %}
+<!-- Fin Par Academico -->
+
+
+<!-- Evaluciones Director de Carrera  --> 
+
+{% if request.session.docente.direcciones.count > 0 %}
+
+<h1 style="margin-top: 20px;"> Encuestas para Coordinadores Carrera </h1>
+<ul style="margin-top: 20px;">
+  {% if not request.session.cuestionarios_directivos %} 
+  <h3> No existen encuestas para los Coordinadores en el presente Periodo.</h3>
+  {% else %}
+  {% for carrera in request.session.carreras_director %}
+  <h3> 
+    <li>
+      <a href="{% url director_docentes carrera.num_carrera %} ">
+	SELECCIONAR DOCENTES DE LA CARRERA {{ carrera.nombre|upper }} [{{ carrera.area|upper }}]
+      </a> 
+    </li> 
+  </h3>
+  {% endfor %}
+  {% endif %}
+</ul>
+<hr/>
+
+<!-- Fin Evaluaciones Director de Carrera -->
+
+<!-- Resultados -->  
 
 <h1 style="margin-top: 20px;"> Resultados de Evaluaciones de la Carrera </h1>
 <ul style="margin-top: 20px;">
@@ -92,7 +130,9 @@
 </ul>
 <hr/>
 
-{% endif %} <!-- End Coordinación de carrera-->
+{% endif %} 
+
+<!-- Fin Resultados -->
 
 
 {% endblock %}

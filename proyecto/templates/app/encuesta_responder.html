@@ -159,7 +159,7 @@ $(document).ready(function(){
 	  </div>
 
 	  <!-- Encuesta dirigida a los ESTUDIANTES -->
-	  {#% if cuestionario.informante.tipo in ('Estudiante', 'EstudianteNovel', 'EstudianteMED', 'InstitutoIdiomas' %#}
+	  {#% if cuestionario.informante.tipo.startswith('Estudiante') %#}
 	  {% if asignaturaDocente %}
 	  <div id="datos_academicos" style="line-height: 18px;">
 	    Area: <b> {{ asignaturaDocente.asignatura.area }} </b> <br/>
@@ -175,8 +175,8 @@ $(document).ready(function(){
 	  </div>
 	  {% endif %}
 
-	  <!-- Encuesta dirigida a los DIRECCIONES DE CARRERA -->
-	  {% if cuestionario.informante.tipo == 'Directivos' %}
+	  <!-- Encuesta dirigida a los DIRECTORES DE CARRERA -->
+	  {% if 'Directivo' in cuestionario.informante.tipo %}
 	  <div id="datos_academicos" style="line-height: 18px;">
 	    AREA: <b> {{ request.session.area }} </b> <br/>
 	    CARRERA: <b> {{ request.session.carrera }} </b> <br/>
@@ -185,7 +185,17 @@ $(document).ready(function(){
 	  </div>
 	  {% endif %}
 
-	  <!-- Encuesta de autoevaluación para los DOCENTES -->
+	  <!-- Encuesta dirigida a los PARES ACADEMICOS -->
+	  {% if 'ParAcademico' in cuestionario.informante.tipo %}
+	  <div id="datos_academicos" style="line-height: 18px;">
+	    AREA: <b> {{ request.session.area }} </b> <br/>
+	    CARRERA: <b> {{ request.session.carrera }} </b> <br/>
+	    MÓDULO: (<b>X</b>) <br/>
+	    NOMBRE DEL PROFESOR (A) EVALUADO (A): <b> {{ request.session.docente_evaluar }} </b>
+	  </div>
+	  {% endif %}
+
+	  <!-- Encuesta de autoevaluacion para los DOCENTES -->
 	  {% if cuestionario.informante.tipo == 'Docente' %}
 	  <div id="datos_academicos" style="line-height: 18px;">
 	    AREA: <b> {{ request.session.areas_docente }} </b> <br/>

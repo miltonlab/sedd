@@ -19,13 +19,17 @@ urlpatterns = patterns('',
         'proyecto.app.controllers.estudiante_asignaturas_docentes'),
     # Recibe un número de carrera de la sesion                       
     url(r'^director/docentes/(\d{1})/$', 
-        'proyecto.app.controllers.director_docentes'),
+        'proyecto.app.controllers.director_docentes',
+        name='director_docentes'),
+    # Recibe un número de carrera de la sesion                  
+    url(r'^pares_academicos/docentes/(\d{1})/$', 'proyecto.app.controllers.pares_academicos_docentes', 
+        name='pares_academicos_docentes'),
     url(r'^encuestas/(?P<id_docente>\d{1,5})/(?P<id_asignatura>\d{1,5})/(?P<id_tinformante>\d{1,2})/(?P<id_cuestionario>\d{1,2})/', 
         'proyecto.app.controllers.encuestas', name='encuestas'),
     url(r'^encuesta/responder/(\d{1,5})/$', 'proyecto.app.controllers.encuesta_responder',
         name='encuesta_responder'),
     url(r'^encuesta/grabar/$', 'proyecto.app.controllers.encuesta_grabar'),
-    # Recibe número de carrera
+    # Recibe numero de carrera
     url(r'^resultados/carrera/(\d{1})/$', 'proyecto.app.controllers.resultados_carrera'),
     url(r'^resultados/periodo/(\d{1,2})/$', 'proyecto.app.controllers.menu_resultados_carrera'),
     url(r'^resultados/mostrar/$', 'proyecto.app.controllers.mostrar_resultados'),                       

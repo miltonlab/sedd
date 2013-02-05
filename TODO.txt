@@ -1,5 +1,8 @@
 ### Para la proxima migracion a produccion:
+ * Cambiar los Tipos de Informantes en la BD EstudianteIdiomas, Directivo, y agregar los nuevos por
+cuestiones de la evaluacion 2013 en el Instituto de Idiomas...
  * Agregar en la BD el nuevo tipo informante ParAcademico
+ * Cambiar el periodo Academico Actual en el admin
 
 ### Posibles Mejoras 
  * Rediseñar las relaciones PeriodoAcademico,Estudiante,Docente,Asignatura (Pueden eliminarse 2)

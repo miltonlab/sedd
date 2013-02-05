@@ -264,13 +264,20 @@ class DocentePeriodoAcademico(models.Model):
         verbose_name = 'Docente'
         unique_together = ('usuario','periodoAcademico')
 
-    def get_carreras(self):
-        """ Devuelve una lista de String: Carreras junto con el Área a la que pertenecen """
-        carreras  = AsignaturaDocente.objects.filter(
-            docente_periodoAcademico=Configuracion.getPeriodoAcademicoActual(),
+    def get_carreras_areas(self):
+        """ Devuelve una lista de tuplas (carrera, area) pero unicamente del PeriodoAcademicoActual """
+        lista_carreras_areas  = AsignaturaDocente.objects.filter(
+            docente__periodoAcademico=Configuracion.getPeriodoAcademicoActual(),
             docente__id=self.id).values_list('asignatura__carrera', 'asignatura__area').distinct()
-        return ['|'.join(c) for c in carreras]
+        if self.carrera and self.carrera not in [c[0] for c in lista_carreras_areas]:
+            lista_carreras_areas.append(self.carrera, '')
+        return lista_carreras_areas
 
+    def get_carreras(self):
+        return [c[0] for c in self.get_carreras_areas() if c[0]]
+
+    def get_areas(self):
+        return [c[1] for c in self.get_carreras_areas() if c[1]]
 
     def paralelos(self):
         result = self.asignaturasDocente.values_list('asignatura__area', 'asignatura__carrera',
@@ -325,13 +332,13 @@ class DireccionCarrera(models.Model):
 
 
 class TipoInformante(models.Model): 
-    # TODO: Clase Abstracta
-    tipo = models.CharField(max_length='20', unique=True)
-    descripcion = models.CharField(max_length='100')
+    tipo = models.CharField(max_length='50', unique=True)
+    descripcion = models.CharField(max_length='200')
 
     def __unicode__(self):
         return self.tipo
 
+"""
 class InformanteDocente(TipoInformante):
     def __init__(self):
         TipoInformante.__init__(self)
@@ -359,10 +366,10 @@ class InformanteParAcademico(TipoInformante):
         TipoInformante.__init__(self)
         self.tipo = 'ParAcademico'
 
-class InformanteInstitutoIdiomas(TipoInformante):
+class InformanteEstudianteIdiomas(TipoInformante):
     def __init__(self):
         TipoInformante.__init__(self)
-        self.tipo = 'InstitutoIdiomas'
+        self.tipo = 'EstudianteIdiomas'
 
 class InformanteEstudianteMED(TipoInformante):
     def __init__(self):
@@ -373,6 +380,7 @@ class InformanteIdiomasMED(TipoInformante):
     def __init__(self):
         TipoInformante.__init__(self)
         self.tipo = 'Idiomas MED'
+"""
 
 class Cuestionario(models.Model):
     titulo = models.CharField(max_length='100')
@@ -459,9 +467,11 @@ class Evaluacion(models.Model):
     estudianteAsignaturaDocente = models.ForeignKey('EstudianteAsignaturaDocente', related_name='evaluaciones', null=True, default=None)
     # Evaluaciones de DOCENTES. Pueden ser evaluaciones y autoevaluaciones 
     docentePeriodoAcademico = models.ForeignKey('DocentePeriodoAcademico', related_name='evaluaciones', null=True)
+    # Evaluaciones de PARES ACADEMICOS # Docente Par Academico
+    parAcademico = models.ForeignKey('DocentePeriodoAcademico', related_name='evaluaciones_par_academico', null=True)
     # Evaluaciones de DIRECCIONES DE CARRERA # Docente Director
-    directorCarrera = models.ForeignKey('DocentePeriodoAcademico', related_name='evaluaciones', null=True)
-    # Evaluaciones de DIRECCIONES DE CARRERA # Nombre de la Carrera más el Área
+    directorCarrera = models.ForeignKey('DocentePeriodoAcademico', related_name='evaluaciones_director', null=True)
+    # Evaluaciones de DIRECCIONES DE CARRERA # Nombre de la Carrera mas el Área
     carreraDirector =  models.CharField(max_length=255, choices=carreras_areas, 
                                         verbose_name=u'Carrera-Area', blank=True, null=True)
 
@@ -469,9 +479,12 @@ class Evaluacion(models.Model):
         # Evaluacion del Estudiante a sus docentes
         if self.estudianteAsignaturaDocente:
             evaluador = self.estudianteAsignaturaDocente.estudiante
-        # Evaluación de la Comisión Académica de la Carrera al docente
+        # Evaluacion del Director de Carrera
         elif self.directorCarrera and self.docentePeriodoAcademico:
             evaluador = self.directorCarrera
+        # Evaluacion del Par Academico de la Carrera
+        elif self.parAcademico and self.docentePeriodoAcademico:
+            evaluador = self.parAcademico
         # Autoevaluacion del docente
         elif self.docentePeriodoAcademico:
             evaluador = self.docentePeriodoAcademico
@@ -481,8 +494,11 @@ class Evaluacion(models.Model):
         # Evaluacion del Estudiante a sus docentes
         if self.estudianteAsignaturaDocente:
             evaluado = self.estudianteAsignaturaDocente.asignaturaDocente.docente
-        # Evaluación de la Comisión Académica de la Carrera al docente
+        # Evaluacion del Director de la Carrera al docente
         elif self.directorCarrera and self.docentePeriodoAcademico:
+            evaluado = self.docentePeriodoAcademico
+        # Evaluacion del Par Academico de la Carrera al docente
+        elif self.parAcademico and self.docentePeriodoAcademico:
             evaluado = self.docentePeriodoAcademico
         # Autoevaluacion del docente
         elif self.docentePeriodoAcademico:
@@ -767,15 +783,15 @@ class TabulacionAdicionales2012:
             c.pregunta = Pregunta.objects.get(id=c.pregunta)        
         # Procesamiento de la Evaluacion de la Comision Academica #
         try:
-            # Evaluacion de Actividades Adicionales del Docente por parte de los Directivos
+            # Evaluacion de Actividades Adicionales del Docente por parte de los Directivo
             evaluacion=docente.evaluaciones.get(cuestionario__periodoEvaluacion__id=2,
-                                                    cuestionario__informante__tipo='Directivos')
+                                                    cuestionario__informante__tipo='Directivo')
         except exceptions.MultipleObjectsReturned:
             # Existe una evaluacion duplicada
             logg.warning('Evaluacion duplicada docente {0} en periodo:{1}'.format(docente, 2))
             # Se toma la primera evaluacion
             evaluacion = docente.evaluaciones.filter(cuestionario__periodoEvaluacion__id=2,
-                                                         cuestionario__informante__tipo='Directivos')[0]
+                                                         cuestionario__informante__tipo='Directivo')[0]
         except Evaluacion.DoesNotExist:
             logg.warning(u'No existe evaluación de directivos para el docente {0} en periodo:{1}'.format(docente, 2))
             return None
@@ -861,7 +877,7 @@ class TabulacionSatisfaccion2012:
         """
         if siglas_area == u'ACE':
             secciones = Seccion.objects.filter(cuestionario__in=self.periodoEvaluacion.cuestionarios.all(),
-                                               cuestionario__informante__tipo=u'InstitutoIdiomas')
+                                               cuestionario__informante__tipo=u'EstudianteIdiomas')
         else:
             secciones = Seccion.objects.filter(cuestionario__in=self.periodoEvaluacion.cuestionarios.all(),
                                                cuestionario__informante__tipo=u'Estudiante')        
@@ -953,7 +969,7 @@ class TabulacionSatisfaccion2012:
         # Todas las Secciones de todos los cuestionarios que pertenecen al periodo de evaluación establecido
         if siglas_area == u'ACE':
             secciones = Seccion.objects.filter(cuestionario__in=self.periodoEvaluacion.cuestionarios.all(),
-                                               cuestionario__informante__tipo=u'InstitutoIdiomas')
+                                               cuestionario__informante__tipo=u'EstudianteIdiomas')
         else:
             secciones = Seccion.objects.filter(cuestionario__in=self.periodoEvaluacion.cuestionarios.all(),
                                                cuestionario__informante__tipo=u'Estudiante')
@@ -1206,7 +1222,7 @@ class TabulacionSatisfaccion2012:
         # Todas las Secciones de todos los cuestionarios que pertenecen al periodo de evaluación establecido
         if siglas_area == u'ACE':
             secciones = Seccion.objects.filter(cuestionario__in=self.periodoEvaluacion.cuestionarios.all(),
-                                               cuestionario__informante__tipo=u'InstitutoIdiomas')
+                                               cuestionario__informante__tipo=u'EstudianteIdiomas')
         else:
             secciones = Seccion.objects.filter(cuestionario__in=self.periodoEvaluacion.cuestionarios.all(),
                                                cuestionario__informante__tipo=u'Estudiante')
@@ -1271,7 +1287,7 @@ class TabulacionSatisfaccion2012:
         # Todas las Secciones de todos los cuestionarios que pertenecen al periodo de evaluación establecido
         if siglas_area == u'ACE':
             secciones = Seccion.objects.filter(cuestionario__in=self.periodoEvaluacion.cuestionarios.all(),
-                                               cuestionario__informante__tipo=u'InstitutoIdiomas')
+                                               cuestionario__informante__tipo=u'EstudianteIdiomas')
         else:
             secciones = Seccion.objects.filter(cuestionario__in=self.periodoEvaluacion.cuestionarios.all(),
                                                cuestionario__informante__tipo=u'Estudiante')

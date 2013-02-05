@@ -255,7 +255,7 @@ class AsignaturaAdmin(admin.ModelAdmin):
             'fields': ('nombre', 'tipo', 'creditos')
             }),
         ('Duracion', {
-            'fields': ('duracion', 'inicio', 'fin')
+            'fields': ('duracion', 'inicio', 'fin', 'periodoAcademico')
             }),        
         
         )
@@ -303,6 +303,8 @@ class ResultadosAdmin(admin.ModelAdmin):
 class TabulacionAdmin(admin.ModelAdmin):
     list_filter = ('periodoEvaluacion__periodoAcademico', 'periodoEvaluacion')
 
+class TipoInformanteAdmin(admin.ModelAdmin):
+    pass
 
 admin.site.register(models.Cuestionario,CuestionarioAdmin)
 admin.site.register(models.Seccion,SeccionAdmin)
@@ -319,4 +321,5 @@ admin.site.register(models.Usuario, UsuarioAdmin)
 admin.site.register(models.Configuracion, ConfiguracionAdmin)
 admin.site.register(models.Evaluacion, EvaluacionAdmin)
 admin.site.register(models.Tabulacion, TabulacionAdmin)
+admin.site.register(models.TipoInformante, TipoInformanteAdmin)
 admin.site.register(models.Resultados, ResultadosAdmin)
