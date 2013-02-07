@@ -28,8 +28,8 @@ def importar(periodoAcademicoId, periodoEvaluacionId=None):
     """ Importar unidades en primera instancia"""
     sga = SGA(proyecto.settings.SGAWS_USER, proyecto.settings.SGAWS_PASS)    
     thetime = datetime.datetime.now().strftime("%Y-%m-%d")
-    directory = os.path.abspath(os.path.dirname(__file__)
-    log.basicConfig(filename= directory  + '../../tmp/sgaimporter-%s.log' % thetime),    
+    directory = os.path.abspath(os.path.dirname(__file__))
+    log.basicConfig(filename= directory  + '../../tmp/sgaimporter-%s.log' % thetime,    
                     level   = log.DEBUG, 
                     datefmt = '%Y/%m/%d %I:%M:%S %p', 
                     format  = '%(asctime)s : %(levelname)s - %(message)s')

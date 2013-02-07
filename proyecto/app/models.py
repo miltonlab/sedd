@@ -383,7 +383,9 @@ class InformanteIdiomasMED(TipoInformante):
 """
 
 class Cuestionario(models.Model):
-    titulo = models.CharField(max_length='100')
+    # Nombre corto para identificacion de objeto
+    nombre = models.CharField(max_length='150', default='Cuestionario Sin Nombre')
+    titulo = models.CharField(max_length='255')
     encabezado = models.TextField()
     inicio = models.DateTimeField(u'Inicio de la Encuesta')
     fin=models.DateTimeField(u'Finalización de la Encuesta')
@@ -395,7 +397,7 @@ class Cuestionario(models.Model):
                                           )
     
     def __unicode__(self):
-        return self.titulo
+        return self.nombre
 
     def clonar(self):
         """
@@ -551,10 +553,13 @@ class Ensayo(TipoPregunta):
 
 
 class Seccion(models.Model):
-    titulo = models.CharField(max_length='50')
+    # Nombre corto para identificacion de objeto
+    nombre = models.CharField(max_length='150', default=u'Sección de Cuestionario Sin Nombre')
+    titulo = models.CharField(max_length='200')
     descripcion  = models.CharField(max_length='100', blank=True, null=True)
     orden = models.IntegerField()
     codigo = models.CharField(max_length='20', null=True, blank=True)
+    puntaje = models.IntegerField(null=True)
     # Una subseccion esta relacionada con otra Seccion en vez de un Cuestionario
     superseccion = models.ForeignKey('self', null=True, blank=True, db_column='superseccion_id',
                                      related_name='subsecciones', verbose_name=u'Sección Padre')
@@ -566,13 +571,10 @@ class Seccion(models.Model):
 
     def __unicode__(self):
         if self.cuestionario:
-            return u'{0} > Cuestionario: {1}'.format(self.titulo, self.cuestionario.titulo)
+            return u'Sección de Cuestionario {0} > {1}'.format(self.nombre, self.cuestionario)
         elif self.superseccion:
-            return u'{0} > SeccionPadre: {1}'.format(self.titulo, self.superseccion.titulo)
+            return u'Subsección de Cuestionario {0} > SeccionPadre: {1}'.format(self.nombre, self.superseccion)
  
-    def __repr__(self):
-         return u'{0} > Cuestionario: {1}'.format(self.titulo, self.cuestionario)
-
     class Meta:
         ordering = ['orden']
         verbose_name = u'sección'
@@ -628,7 +630,8 @@ class AreaSGA(models.Model):
 
 
 class PeriodoEvaluacion(models.Model):
-    nombre = models.CharField(max_length='300')
+    nombre = models.CharField(max_length='100')
+    titulo = models.CharField(max_length='300')
     descripcion = models.TextField(null=True)
     observaciones = models.TextField(null=True, blank=True)
     inicio = models.DateTimeField()

@@ -50,7 +50,7 @@
 			  {% if periodoEvaluacionActual %}
 			  <a href="{% url proyecto.app.controllers.login %}">
 			    >>> <u> <b style="color: black; font-weight: 250%; font-size: 14px;"> 
-				{{ periodoEvaluacionActual|upper }} </b>  </u>
+				{{ periodoEvaluacionActual.titulo|upper }} </b>  </u>
 			  </a>
 			  {% else %}
 			  >>> <b> No existen Procesos de Evaluacion actualmente </b>

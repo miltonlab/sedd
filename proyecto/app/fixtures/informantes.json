@@ -1,0 +1,90 @@
+[
+    {
+        "pk": 8, 
+        "model": "app.tipoinformante", 
+        "fields": {
+            "descripcion": "Estudiante de la Modalidad a Distancia", 
+            "tipo": "EstudianteMED"
+        }
+    }, 
+    {
+        "pk": 9, 
+        "model": "app.tipoinformante", 
+        "fields": {
+            "descripcion": "Estudiante de Idiomas MED", 
+            "tipo": "IdiomasMED"
+        }
+    }, 
+    {
+        "pk": 1, 
+        "model": "app.tipoinformante", 
+        "fields": {
+            "descripcion": "", 
+            "tipo": "Estudiante"
+        }
+    }, 
+    {
+        "pk": 3, 
+        "model": "app.tipoinformante", 
+        "fields": {
+            "descripcion": "Estudiante de Primer Semestre", 
+            "tipo": "Estudiante Novel"
+        }
+    }, 
+    {
+        "pk": 5, 
+        "model": "app.tipoinformante", 
+        "fields": {
+            "descripcion": "Docente", 
+            "tipo": "Docente"
+        }
+    }, 
+    {
+        "pk": 10, 
+        "model": "app.tipoinformante", 
+        "fields": {
+            "descripcion": "", 
+            "tipo": "ParAcademico"
+        }
+    }, 
+    {
+        "pk": 7, 
+        "model": "app.tipoinformante", 
+        "fields": {
+            "descripcion": "Estudiante del Instituto de Idiomas", 
+            "tipo": "EstudianteIdiomas"
+        }
+    }, 
+    {
+        "pk": 6, 
+        "model": "app.tipoinformante", 
+        "fields": {
+            "descripcion": "Directivos", 
+            "tipo": "Directivo"
+        }
+    }, 
+    {
+        "pk": 11, 
+        "model": "app.tipoinformante", 
+        "fields": {
+            "descripcion": "Docente del Instituto de Idiomas", 
+            "tipo": "DocenteIdiomas"
+        }
+    }, 
+    {
+        "pk": 12, 
+        "model": "app.tipoinformante", 
+        "fields": {
+            "descripcion": "Pares Acad\u00e9micos del Instituto de Idiomas", 
+            "tipo": "ParAcademicoIdiomas"
+        }
+    }, 
+    {
+        "pk": 13, 
+        "model": "app.tipoinformante", 
+        "fields": {
+            "descripcion": "Director de Carrera del Instituto de Idiomas", 
+            "tipo": "DirectivoIdiomas"
+        }
+    }
+]

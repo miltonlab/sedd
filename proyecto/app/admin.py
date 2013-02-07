@@ -80,16 +80,16 @@ class CuestionarioAdmin(admin.ModelAdmin):
     save_as = True
     list_filter = ('periodoEvaluacion__periodoAcademico', 'periodoEvaluacion')
 
-    # Acción para copiar un cuestionario en el Admin
+    # Accion para copiar un cuestionario en el Admin
     def clonar_cuestionario(self, request, queryset):
         cantidad = queryset.count()
         if cantidad == 1:
             objeto = queryset.all()[0]
             objeto.clonar()
-            mensaje = 'Se ha clonado satisfactoriamente el Cuestinario'
+            mensaje = u'Se ha clonado satisfactoriamente el Cuestinario'
             self.message_user(request, mensaje)
         else:
-            mensaje = 'Debe seleccionar uno solo Cuestionario! Ha seleccionado %s' % (str(cantidad))
+            mensaje = u'Debe seleccionar uno solo Cuestionario! Ha seleccionado %s' % (str(cantidad))
             messages.error(request, mensaje)
 
     clonar_cuestionario.short_description = "Crear Copia de Cuestionario"
