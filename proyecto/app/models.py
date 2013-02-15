@@ -395,9 +395,12 @@ class Cuestionario(models.Model):
     periodoEvaluacion = models.ForeignKey('PeriodoEvaluacion', blank=True, null=True, 
                                           related_name='cuestionarios', verbose_name=u'Periodo de Evaluación'
                                           )
-    
-    def __unicode__(self):
-        return self.nombre
+    def get_preguntas(self):
+        """ Obtiene todas las preguntas de todas las secciones y subsecciones """
+        preguntas = []
+        for s in self.secciones.all():
+            preguntas.extend(s.get_preguntas())
+        return preguntas
 
     def clonar(self):
         """
@@ -438,6 +441,8 @@ class Cuestionario(models.Model):
                     nuevoItem.save()
         return nuevo
 
+    def __unicode__(self):
+        return self.nombre
 
 class Contestacion(models.Model):
     pregunta = models.IntegerField()
@@ -559,45 +564,56 @@ class Seccion(models.Model):
     descripcion  = models.CharField(max_length='100', blank=True, null=True)
     orden = models.IntegerField()
     codigo = models.CharField(max_length='20', null=True, blank=True)
-    puntaje = models.IntegerField(null=True)
+    puntaje = models.IntegerField(null=True, blank=True)
     # Una subseccion esta relacionada con otra Seccion en vez de un Cuestionario
     superseccion = models.ForeignKey('self', null=True, blank=True, db_column='superseccion_id',
                                      related_name='subsecciones', verbose_name=u'Sección Padre')
     # Una seccion normalmente esta relacionada con un Cuestionario
     cuestionario = models.ForeignKey(Cuestionario, related_name='secciones', null=True, blank=True)
 
+    def get_cuestionario(self):
+        """ Metodo recursivo hasta llegar a la seccion padre que tiene Cuestionario """
+        if self.superseccion:
+            return self.superseccion.get_cuestionario()
+        elif self.cuestionario:
+            return self.cuestionario
+            
+    def get_preguntas(self):
+        """ Metodo recursivo hasta llegar a las secciones que no tiene subsecciones  """
+        preguntas = []
+        if self.subsecciones.count() > 0:
+            for sub in self.subsecciones.all():
+                preguntas.extend(sub.get_preguntas())
+        preguntas.extend(self.preguntas.all())
+        return preguntas
+
     def preguntas_ordenadas(self):
         return self.pregunta_set.order_by('orden')
 
     def __unicode__(self):
         if self.cuestionario:
-            return u'Sección de Cuestionario {0} > {1}'.format(self.nombre, self.cuestionario)
+            return u'Sección  {0} '.format(self.nombre)
         elif self.superseccion:
-            return u'Subsección de Cuestionario {0} > SeccionPadre: {1}'.format(self.nombre, self.superseccion)
- 
+            return u'Subsección {0}'.format(self.nombre)
+
     class Meta:
         ordering = ['orden']
         verbose_name = u'sección'
         verbose_name_plural = 'secciones'
-
         
 class Pregunta(models.Model):
     codigo = models.CharField(max_length='20', null=True, blank=True)
     texto = models.TextField()
     descripcion = models.TextField(null=True, blank=True)
-    # Observaciones adicionales a la contestación o respuesta 
+    # Observaciones adicionales a la contestacion o respuesta 
     # Se almacena solo un titulo o tema de las observaciones
     observaciones = models.CharField(max_length='70', null=True, blank=True)
     orden = models.IntegerField()
     tipo = models.ForeignKey(TipoPregunta)
     seccion = models.ForeignKey(Seccion, related_name='preguntas')
 
-    
     def __unicode__(self):
         return u'{0}'.format(self.texto)
-
-    def __repr__(self):
-        return u'{0} > {1}'.format(self.texto, self.seccion.titulo)
 
     class Meta:
         ordering = ['seccion__orden','orden']
@@ -708,7 +724,7 @@ class PeriodoEvaluacion(models.Model):
 tipos_tabulacion = (
     (u'ESE2012', u'Tabulación Satisfacción Estudiantil 2012'),
     (u'EAAD2012', u'Tabulación Actividades Adicionales Docencia 2011-2012'),
-    (u'EDA2013', u'Tabulación Evaluación del Desempeño Académico 2012-2013')
+    (u'EDA2013', u'Tabulación Evaluación del Desempeño Docente 2012-2013')
 )
 
 class Tabulacion(models.Model):
@@ -729,7 +745,7 @@ class Tabulacion(models.Model):
 
 class TabulacionEvaluacion2013:
     tipo = u'EDA2013'
-    descripcion = u'Evaluación del Desempeño Académico 2012-2013'
+    descripcion = u'Evaluación del Desempeño Docente 2012-2013'
 
     def __init__(self, periodoEvaluacion=None):
         self.periodoEvaluacion = periodoEvaluacion
@@ -740,6 +756,15 @@ class TabulacionEvaluacion2013:
             )
 
     def por_docente(self, siglas_area, nombre_carrera, id_docente):
+        # ids de preguntas por informante
+        preguntas = {}
+        for informante in ('Estudiante', 'Docente', 'ParAcademico', 'Directivo'):
+            preguntas[informante] = Pregunta.objects.filter(
+                seccion__superseccion__cuestionario__informante__tipo=informante, 
+                seccion__superseccion__cuestionario__periodoEvaluacion=self.periodoEvaluacion,
+                tipo__tipo=u'SeleccionUnica').values(id, flat=True)
+        evaluaciones = {}
+        # .....
         return None
 
 
@@ -891,16 +916,16 @@ class TabulacionSatisfaccion2012:
             evaluacion__cuestionario__periodoEvaluacion__tabulacion__tipo='ESE2012').filter(
             evaluacion__estudianteAsignaturaDocente__asignaturaDocente__asignatura__area=siglas_area).filter(
             evaluacion__estudianteAsignaturaDocente__asignaturaDocente__asignatura__carrera=nombre_carrera).filter(
-            # Unica diferencia con respecto al método 'por_carrera'
+            # Unica diferencia con respecto al metodo 'por_carrera'
             evaluacion__estudianteAsignaturaDocente__asignaturaDocente__docente__id=id_docente).filter(
-            # Recordatorio: 'pregunta' en Contestación es int no de tipo Pregunta
+            # Recordatorio: 'pregunta' en Contestacion es int no de tipo Pregunta
             pregunta__in=indicadores).values('pregunta').annotate(MS=Count('respuesta')).filter(
             respuesta='4').order_by('pregunta')
         conteo_s=Contestacion.objects.filter(evaluacion__cuestionario__periodoEvaluacion=self.periodoEvaluacion).filter(
             evaluacion__cuestionario__periodoEvaluacion__tabulacion__tipo='ESE2012').filter(
             evaluacion__estudianteAsignaturaDocente__asignaturaDocente__asignatura__area=siglas_area).filter(
             evaluacion__estudianteAsignaturaDocente__asignaturaDocente__asignatura__carrera=nombre_carrera).filter(
-            # Unica diferencia con respecto al método 'por_carrera'
+            # Unica diferencia con respecto al metodo 'por_carrera'
             evaluacion__estudianteAsignaturaDocente__asignaturaDocente__docente__id=id_docente).filter(            
             pregunta__in=indicadores).values('pregunta').annotate(S=Count('respuesta')).filter(
             respuesta='3').order_by('pregunta')
@@ -908,7 +933,7 @@ class TabulacionSatisfaccion2012:
             evaluacion__cuestionario__periodoEvaluacion__tabulacion__tipo='ESE2012').filter(
             evaluacion__estudianteAsignaturaDocente__asignaturaDocente__asignatura__area=siglas_area).filter(
             evaluacion__estudianteAsignaturaDocente__asignaturaDocente__asignatura__carrera=nombre_carrera).filter(
-            # Unica diferencia con respecto al método 'por_carrera'
+            # Unica diferencia con respecto al metodo 'por_carrera'
             evaluacion__estudianteAsignaturaDocente__asignaturaDocente__docente__id=id_docente).filter(            
             pregunta__in=indicadores).values('pregunta').annotate(PS=Count('respuesta')).filter(
             respuesta='2').order_by('pregunta')
@@ -916,7 +941,7 @@ class TabulacionSatisfaccion2012:
             evaluacion__cuestionario__periodoEvaluacion__tabulacion__tipo='ESE2012').filter(
             evaluacion__estudianteAsignaturaDocente__asignaturaDocente__asignatura__area=siglas_area).filter(
             evaluacion__estudianteAsignaturaDocente__asignaturaDocente__asignatura__carrera=nombre_carrera).filter(
-            # Unica diferencia con respecto al método 'por_carrera'
+            # Unica diferencia con respecto al metodo 'por_carrera'
             evaluacion__estudianteAsignaturaDocente__asignaturaDocente__docente__id=id_docente).filter(            
             pregunta__in=indicadores).values('pregunta').annotate(INS=Count('respuesta')).filter(
             respuesta='1').order_by('pregunta')
@@ -976,7 +1001,7 @@ class TabulacionSatisfaccion2012:
         else:
             secciones = Seccion.objects.filter(cuestionario__in=self.periodoEvaluacion.cuestionarios.all(),
                                                cuestionario__informante__tipo=u'Estudiante')
-        # Para asegurar que se tomen unicamente preguntas que representen indicadores además
+        # Para asegurar que se tomen unicamente preguntas que representen indicadores ademas
         # Se seleccionan solo ids para poder comparar
         indicadores=Pregunta.objects.filter(seccion__in=secciones).filter(tipo__tipo=u'SeleccionUnica').values_list('id', flat=True)
         conteo_ms=Contestacion.objects.filter(evaluacion__cuestionario__periodoEvaluacion=self.periodoEvaluacion).filter(
@@ -1407,9 +1432,6 @@ class Usuario(User):
     apellidos = property(get_apellidos, set_apellidos)
     abreviatura = property(get_abreviatura)
         
-    def __repr__(self):
-        return u'<[{0}] {1}>'.format(self.cedula, self.get_full_name());
-
     def __unicode__(self):
-        return self.get_full_name()
+        return u'{0} {1}'.format(self.cedula, self.get_full_name());
 

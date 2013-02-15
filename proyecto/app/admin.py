@@ -69,7 +69,7 @@ class SubSeccionEnLinea(admin.TabularInline):
 
 class SeccionAdmin(admin.ModelAdmin):
     inlines = (SubSeccionEnLinea,)
-    fields = ('cuestionario', 'codigo', 'titulo', 'descripcion', 'orden')
+    fields = ('cuestionario', 'codigo', 'nombre', 'titulo', 'descripcion', 'orden', 'puntaje')
     list_filter = ('cuestionario__periodoEvaluacion__periodoAcademico', 'cuestionario__periodoEvaluacion', 
                    'cuestionario')
 
