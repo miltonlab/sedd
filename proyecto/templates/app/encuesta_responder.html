@@ -233,7 +233,8 @@ $(document).ready(function(){
 		<td class="td-tabla-contenedor" width="60%" colspan="{% ifequal pregunta.tipo.tipo 'Ensayo' %} 3 {% endifequal %} ">
 		  <b> 
 			{% if pregunta.codigo %} {{ pregunta.codigo }}. {% else %} {{ pregunta.orden }}. {% endif %} 
-		  </b> 
+		  </b>
+		  {{ pregunta.texto }}		  
 		  <br/>
 		  {{ pregunta.descripcion|safe }} <!-- Puede contener HTML --> 
 		  {% ifequal pregunta.tipo.tipo 'Ensayo' %}
