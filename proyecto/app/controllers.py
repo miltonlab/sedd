@@ -549,7 +549,7 @@ def encuesta_grabar(request):
         par_academico = request.session['docente']
         # Si ya ha contestado este cuestionario y se intenta grabar otra vez
         if docente_evaluar.evaluaciones.filter(cuestionario=evaluacion.cuestionario,
-                                               par_academico=par_academico).count() > 0:
+                                               parAcademico=par_academico).count() > 0:
             request.session['evaluacion'] = None
             return render_to_response('app/encuesta_finalizada.html', datos, 
                                       context_instance=RequestContext(request))     
