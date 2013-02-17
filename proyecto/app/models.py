@@ -95,7 +95,10 @@ class PeriodoAcademico(models.Model):
         ordering = ['inicio']
         verbose_name = u'Periodo Académico'
         verbose_name_plural = u'Periodos Académicos'
-        
+
+    def rango(self):
+        return '{0} / {1}'.format(self.inicio.strftime('%b %Y'), self.fin.strftime('%b %Y'))
+    
     def __unicode__(self):
         return self.nombre
 
@@ -266,11 +269,13 @@ class DocentePeriodoAcademico(models.Model):
 
     def get_carreras_areas(self):
         """ Devuelve una lista de tuplas (carrera, area) pero unicamente del PeriodoAcademicoActual """
-        lista_carreras_areas  = AsignaturaDocente.objects.filter(
+        lista_carreras_areas = []
+        lista_carreras_areas_query  = AsignaturaDocente.objects.filter(
             docente__periodoAcademico=Configuracion.getPeriodoAcademicoActual(),
             docente__id=self.id).values_list('asignatura__carrera', 'asignatura__area').distinct()
-        if self.carrera and self.carrera not in [c[0] for c in lista_carreras_areas]:
-            lista_carreras_areas.append(self.carrera, '')
+        if self.carrera and self.carrera not in [c[0] for c in lista_carreras_areas_query]:
+            lista_carreras_areas.extend(lista_carreras_areas_query)
+            lista_carreras_areas.append((self.carrera, ''))
         return lista_carreras_areas
 
     def get_carreras(self):
@@ -309,7 +314,7 @@ class DireccionCarrera(models.Model):
     director = models.ForeignKey('DocentePeriodoAcademico', verbose_name=u"Coordinador",
                                  related_name="direcciones")
     def __unicode__(self):
-        return u"Coordinación {0}".format(self.carrera)
+        return u"Coordinación {0} - {1}".format(self.carrera, self.director.periodoAcademico.rango())
 
     def get_docentes(self):
         # separa carrera y area

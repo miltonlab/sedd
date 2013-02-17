@@ -2,8 +2,8 @@ tinyMCE.init({
     theme : "advanced",
     /*mode : "textareas",*/
     mode : "exact",
-    /*encabezado de cuestionario, descripcion de pregunta*/
-    elements: 'id_encabezado, id_descripcion',
+    /*encabezado de cuestionario, descripcion de pregunta, texto de pregunta*/
+    elements: 'id_encabezado, id_descripcion, id_texto',
     width: "85%",
     height:  "300",
     theme_advanced_buttons3 : "",

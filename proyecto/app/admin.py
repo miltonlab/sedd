@@ -117,7 +117,7 @@ class EstudianteAsignaturaDocenteEnLinea(admin.StackedInline):
     # fields = ('carrera','semestre','paralelo','asignaturaDocente')
 
 class EstudiantePeriodoAcademicoAdmin(admin.ModelAdmin):
-    list_display = ('cedula', '__unicode__')
+    list_display = ('cedula', '__unicode__', 'periodoAcademico')
     list_per_page = 20
     search_fields = ('usuario__username','usuario__cedula','usuario__last_name','usuario__first_name')
     inlines = (EstudianteAsignaturaDocenteEnLinea,)
@@ -227,7 +227,7 @@ class AsignaturaDocenteEnLinea(admin.TabularInline):
 
     
 class DocentePeriodoAcademicoAdmin(admin.ModelAdmin):
-    list_display = ('cedula', '__unicode__')
+    list_display = ('cedula', '__unicode__', 'periodoAcademico')
     list_per_page = 20
     search_fields = ('usuario__cedula','usuario__last_name','usuario__first_name') 
     inlines = (AsignaturaDocenteEnLinea,)
@@ -236,8 +236,27 @@ class DocentePeriodoAcademicoAdmin(admin.ModelAdmin):
 
 
 class DireccionCarreraAdmin(admin.ModelAdmin):
+    actions = ['actualizar_periodo_academico']
+    list_filter = ('director__periodoAcademico',)
     raw_id_fields = ('director',)
 
+    def actualizar_periodo_academico(self, request, queryset):
+        """
+        Promueve los directores de carrera al presente Periodo Academico
+        seleccionando el mismo docente pero del periodo actual.
+        """
+        periodoAcademico = models.Configuracion.getPeriodoAcademicoActual()
+        cont = 0
+        for dc in queryset.all():
+            docente_actual = models.DocentePeriodoAcademico.objects.get(
+                usuario=dc.director.usuario, periodoAcademico=periodoAcademico)
+            if docente_actual:
+                dc.director = docente_actual
+                cont = cont + 1
+                dc.save()
+        self.message_user(request,'Actualizadas {0} Direcciones de Carrera'.format(cont))
+
+    actualizar_periodo_academico.short_description = u'Actualizar Coordinadores al Periodo Academico Actual'
 
 class AsignaturaAdmin(admin.ModelAdmin):
     list_display = ('carrera','semestre','paralelo', '__unicode__')
