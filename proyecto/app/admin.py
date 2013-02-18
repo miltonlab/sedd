@@ -248,12 +248,16 @@ class DireccionCarreraAdmin(admin.ModelAdmin):
         periodoAcademico = models.Configuracion.getPeriodoAcademicoActual()
         cont = 0
         for dc in queryset.all():
-            docente_actual = models.DocentePeriodoAcademico.objects.get(
-                usuario=dc.director.usuario, periodoAcademico=periodoAcademico)
-            if docente_actual:
-                dc.director = docente_actual
-                cont = cont + 1
-                dc.save()
+            try:
+                docente_actual = models.DocentePeriodoAcademico.objects.get(
+                    usuario=dc.director.usuario, periodoAcademico=periodoAcademico)
+                if docente_actual:
+                    dc.director = docente_actual
+                    cont = cont + 1
+                    dc.save()
+            except models.DocentePeriodoAcademico.DoesNotExist:
+                logg.error('Docente {0} no encontrado en periodo Actual {1}'.format(
+                    dc.director, periodoAcademico))
         self.message_user(request,'Actualizadas {0} Direcciones de Carrera'.format(cont))
 
     actualizar_periodo_academico.short_description = u'Actualizar Coordinadores al Periodo Academico Actual'

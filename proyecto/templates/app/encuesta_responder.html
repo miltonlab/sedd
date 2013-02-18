@@ -234,7 +234,7 @@ $(document).ready(function(){
 		  <b> 
 			{% if pregunta.codigo %} {{ pregunta.codigo }}. {% else %} {{ pregunta.orden }}. {% endif %} 
 		  </b>
-		  {{ pregunta.texto }}		  
+		  {{ pregunta.texto|safe }}
 		  <br/>
 		  {{ pregunta.descripcion|safe }} <!-- Puede contener HTML --> 
 		  {% ifequal pregunta.tipo.tipo 'Ensayo' %}
@@ -289,12 +289,12 @@ $(document).ready(function(){
 		  <b>
 			{% if pregunta.codigo %} {{ pregunta.codigo }}. {% else %} 	{{ seccion.orden }}.{{ pregunta.orden }}. {% endif %}
 		  </b> 
-		  {{ pregunta.texto|upper }}
+		  {{ pregunta.texto|safe }}
 		  {% else %}
 		  <b> 
 			{% if pregunta.codigo %} {{ pregunta.codigo }}. {% else %} {{ pregunta.orden }}. {% endif %} 
 		  </b> 
-		  {{ pregunta.texto|upper }}  
+		  {{ pregunta.texto|safe }}  
 		  {% endif %}
 		  <br/>
 		  {{ pregunta.descripcion|safe }} <!-- Puede contener HTML --> 
