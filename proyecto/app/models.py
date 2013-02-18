@@ -327,6 +327,7 @@ class DireccionCarrera(models.Model):
         return docentes
 
     class Meta:
+        ordering = ['carrera']
         verbose_name = u'Coordinación de Carrera'
         verbose_name_plural = 'Coordinaciones de Carreras'
 
