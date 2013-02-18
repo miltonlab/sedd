@@ -152,9 +152,11 @@ def index(request):
         #
         elif docente.parAcademico:
             if 'ACE' in docente.get_areas():
-                cuestionarios_pares_academicos = periodoEvaluacion.cuestionarios.filter(informante__tipo='ParAcademicoIdiomas')
+                cuestionarios_pares_academicos = periodoEvaluacion.cuestionarios.filter(
+                    informante__tipo='ParAcademicoIdiomas')
             else:
-                cuestionarios_pares_academicos = periodoEvaluacion.cuestionarios.filter(informante__tipo='ParAcademico')
+                cuestionarios_pares_academicos = periodoEvaluacion.cuestionarios.filter(
+                    informante__tipo='ParAcademico')
             request.session['cuestionarios_pares_academicos'] = cuestionarios_pares_academicos
             areas_periodo = periodoEvaluacion.areasSGA.values_list('siglas', flat=True)
             carreras_pares_academicos = docente.asignaturasDocente.filter(asignatura__area__in=areas_periodo).values(

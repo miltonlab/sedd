@@ -344,6 +344,8 @@ class TipoInformante(models.Model):
     def __unicode__(self):
         return self.tipo
 
+    class Meta:
+        ordering = ['descripcion']
 """
 class InformanteDocente(TipoInformante):
     def __init__(self):
@@ -637,7 +639,7 @@ class ItemPregunta(models.Model):
         return self.texto
 
     class Meta:
-        ordering = ['orden']
+        ordering = ['-orden']
 
 
 class AreaSGA(models.Model):

@@ -1,8 +1,9 @@
+
 ### Para la proxima migracion a produccion:
  * Cambiar los Tipos de Informantes en la BD EstudianteIdiomas, Directivo, y agregar los nuevos por
-cuestiones de la evaluacion 2013 en el Instituto de Idiomas...
- * Agregar en la BD el nuevo tipo informante ParAcademico
+cuestiones de la evaluacion 2013 en el Instituto de Idiomas... LOADDATA fixtures
  * Cambiar el periodo Academico Actual en el admin
+ * Cambiar todos los docentes del periodo actual en Coordinaciones de Carrera
 
 ### Posibles Mejoras 
  * Rediseñar las relaciones PeriodoAcademico,Estudiante,Docente,Asignatura (Pueden eliminarse 2)
@@ -13,3 +14,4 @@ cuestiones de la evaluacion 2013 en el Instituto de Idiomas...
 ## Datos para pruebas
  * 1103659833 Docente 
  * 1103770903 Docente Coordinador
+ * 1104495070 Estudiante
