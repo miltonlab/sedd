@@ -73,10 +73,16 @@ class SeccionAdmin(admin.ModelAdmin):
     list_filter = ('cuestionario__periodoEvaluacion__periodoAcademico', 'cuestionario__periodoEvaluacion', 
                    'cuestionario')
 
+"""
+class SeccionEnLinea(admin.TabularInline):
+    # Anidado en Cuestionario 
+    model = models.Seccion
+    inlines = (SubSeccionEnLinea,)
+"""
 
 class CuestionarioAdmin(admin.ModelAdmin):
     actions = ['clonar_cuestionario']
-    ###inlines = (SeccionEnLinea,)
+    ###inlines = ('SeccionEnLinea',)
     save_as = True
     list_filter = ('periodoEvaluacion__periodoAcademico', 'periodoEvaluacion')
 

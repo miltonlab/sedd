@@ -15,6 +15,28 @@ from proyecto.app.models import Seccion
 from proyecto.app.models import Pregunta
 
 
+class ResultadosEvaluacion2013Form(forms.Form):
+    """
+    Formulario Unico para los resultados de la Evaluación del 
+    Desempenoi Docente  2012 - 2013
+    """
+
+    def __init__(self, tabulacion, area, carrera):
+        forms.Form.__init__(self)
+        opciones = [(o[0], o[1]) for o in tabulacion.calculos]
+        self.fields['opciones'] = forms.ChoiceField(widget=forms.RadioSelect(), choices=opciones)
+        # Docentes de la carrera que selecciono el coordinador
+        ids_docentes = set([ad.docente.id for ad in AsignaturaDocente.objects.filter(
+            docente__periodoAcademico=Configuracion.getPeriodoAcademicoActual(), 
+            asignatura__carrera=carrera, asignatura__area=area)])
+        self.fields['docentes'] = forms.ModelChoiceField(
+            queryset=DocentePeriodoAcademico.objects.filter(
+                Q(periodoAcademico=Configuracion.getPeriodoAcademicoActual()) &
+                Q(id__in=ids_docentes) | Q(carrera=carrera)
+                ).order_by('usuario__last_name', 'usuario__first_name')
+            )
+
+
 class ResultadosEAAD2012Form(forms.Form):
     """
     Formulario Único para los resultados de la Evaluación de 
@@ -25,7 +47,7 @@ class ResultadosEAAD2012Form(forms.Form):
         forms.Form.__init__(self)
         opciones = [(o[0], o[1]) for o in tabulacion.calculos]
         self.fields['opciones'] = forms.ChoiceField(widget=forms.RadioSelect(), choices=opciones)
-        # Docentes de la carrera que seleccionó el coordinador
+        # Docentes de la carrera que selecciono el coordinador
         ids_docentes = set([ad.docente.id for ad in AsignaturaDocente.objects.filter(
             docente__periodoAcademico=Configuracion.getPeriodoAcademicoActual(), 
             asignatura__carrera=carrera, asignatura__area=area)])
@@ -35,12 +57,6 @@ class ResultadosEAAD2012Form(forms.Form):
                 Q(id__in=ids_docentes) | Q(carrera=carrera)
                 ).order_by('usuario__last_name', 'usuario__first_name')
             )
-        periodoEvaluacion = tabulacion.periodoEvaluacion
-        cuestionarios = periodoEvaluacion.cuestionarios.all()
-        secciones = Seccion.objects.filter(cuestionario__in=cuestionarios)
-        preguntas = []
-        for s in secciones:
-            preguntas.extend(s.preguntas.all())
 
 
 class ResultadosESE2012Form(forms.Form):
@@ -89,7 +105,7 @@ class ResultadosForm(forms.Form):
     periodo_evaluacion.label = u'Periodo Evaluación'
     area = forms.ModelChoiceField(AreaSGA.objects.none())
     carrera = forms.ModelChoiceField(Asignatura.objects.none())
-    docente = forms.ModelChoiceField(Asignatura.objects.none())
+    # docente = forms.ModelChoiceField(Asignatura.objects.none())
     # semestre = forms.ModelChoiceField(Asignatura.objects.none())
     # paralelo = forms.ModelChoiceField(Asignatura.objects.none())
 

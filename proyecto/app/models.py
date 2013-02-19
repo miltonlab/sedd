@@ -399,7 +399,7 @@ class Cuestionario(models.Model):
     fin=models.DateTimeField(u'Finalización de la Encuesta')
     # Obligatoriedad de todas las preguntas del cuestionario
     preguntas_obligatorias = models.BooleanField(default=True)
-    informante = models.ForeignKey(TipoInformante, blank=True, null=True)
+    informante = models.ForeignKey(TipoInformante)
     periodoEvaluacion = models.ForeignKey('PeriodoEvaluacion', blank=True, null=True, 
                                           related_name='cuestionarios', verbose_name=u'Periodo de Evaluación'
                                           )
@@ -732,7 +732,7 @@ class PeriodoEvaluacion(models.Model):
 tipos_tabulacion = (
     (u'ESE2012', u'Tabulación Satisfacción Estudiantil 2012'),
     (u'EAAD2012', u'Tabulación Actividades Adicionales Docencia 2011-2012'),
-    (u'EDA2013', u'Tabulación Evaluación del Desempeño Docente 2012-2013')
+    (u'EDD2013', u'Tabulación Evaluación del Desempeño Docente 2012-2013')
 )
 
 class Tabulacion(models.Model):
@@ -770,7 +770,7 @@ class TabulacionEvaluacion2013:
             preguntas[informante] = Pregunta.objects.filter(
                 seccion__superseccion__cuestionario__informante__tipo=informante, 
                 seccion__superseccion__cuestionario__periodoEvaluacion=self.periodoEvaluacion,
-                tipo__tipo=u'SeleccionUnica').values(id, flat=True)
+                tipo__tipo=u'SeleccionUnica').values('id')
         evaluaciones = {}
         # .....
         return None

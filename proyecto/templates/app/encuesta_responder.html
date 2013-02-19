@@ -31,7 +31,7 @@
     }
 
     .td-tabla-contenedor {
-        border-bottom: 1px dashed  #B4CBE5;
+        border-bottom: 1px dotted  #B4CBE5;
         border-left: 1px dashed  #B4CBE5;
     }
 
@@ -223,7 +223,7 @@ $(document).ready(function(){
 	  {% for subseccion in seccion.subsecciones.all %}
 	  <tr>
 		<!-- columna subseccion -->
-		<td width="10%" rowspan="{{ subseccion.preguntas.count }}"> 
+		<td class="td-tabla-contenedor" width="10%" rowspan="{{ subseccion.preguntas.count }}"> 
 		   {% if subseccion.codigo %} {{ subseccion.codigo }} {% else %} {{ subseccion.orden }} {% endif %} 
 		</td>
 		<!--/columna subseccion -->
@@ -298,7 +298,9 @@ $(document).ready(function(){
 		  {{ pregunta.texto|safe }}  
 		  {% endif %}
 		  <br/>
+		  {% if pregunta.descripcion %}
 		  {{ pregunta.descripcion|safe }} <!-- Puede contener HTML --> 
+		  {% endif %}
 		  {% ifequal pregunta.tipo.tipo 'Ensayo' %}
 		  <br/>
 		  <textarea name="pregunta-{{ pregunta.id }}" cols="100" rows="10" style="width: 100%;" ></textarea>

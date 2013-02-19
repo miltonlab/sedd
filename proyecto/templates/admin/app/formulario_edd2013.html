@@ -1,0 +1,38 @@
+<style type="text/css">
+input[type=radio] {
+    margin-top: 7px;
+
+}
+fieldset{
+    margin: 15px 0px 15px 0px;
+    width: 75%;
+    padding: 10px 20px 10px 20px;
+}
+#id_campos, #id_indicadores{
+    width: 75%;
+}
+
+</style>
+<fieldset>
+  <legend> Opciones de Resultados </legend>
+  <ol type="a">
+    <li>
+      <label for="id_opciones_0">
+	<input type="radio" id="id_opciones_0" value="a" name="opciones" />  
+	Resultados Evaluación Desempeño Docente por Docente 
+      </label>
+    </li>
+    <ul>
+      <li> {{ form.docentes }} </li>
+    </ul>
+  
+    <!--li>
+      <label for="id_opciones_1">
+	<input type="radio" id="id_opciones_1" value="b" name="opciones" />  
+	Resultados Evaluación Actividades Adicionales por Carrera 
+      </label>
+    </li-->
+  </ol>
+</fieldset>
+
+

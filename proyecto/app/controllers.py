@@ -31,11 +31,10 @@ from proyecto.app.models import PeriodoEvaluacion
 from proyecto.app.models import Tabulacion
 from proyecto.app.models import TabulacionSatisfaccion2012
 from proyecto.app.models import TabulacionAdicionales2012
+from proyecto.app.models import TabulacionEvaluacion2013
 from proyecto.app.models import OfertaAcademicaSGA
 from proyecto.app.models import AreaSGA
-from proyecto.app.forms import ResultadosESE2012Form
-from proyecto.app.forms import ResultadosEAAD2012Form
-from proyecto.app.forms import ResultadosForm
+from proyecto.app.forms import *
 from proyecto.tools.sgaws.cliente import SGA
 from proyecto.settings import SGAWS_USER, SGAWS_PASS
 
@@ -117,8 +116,6 @@ def index(request):
             cuestionarios_docente = periodoEvaluacion.cuestionarios.filter(informante__tipo='DocenteIdiomas')
         else:
             cuestionarios_docente = periodoEvaluacion.cuestionarios.filter(informante__tipo='Docente')
-        ###cuestionarios_docente = [c for c in periodoEvaluacion.cuestionarios.all() 
-        ###                         if c.informante.tipo == 'Docente']
         request.session['cuestionarios_docente'] = cuestionarios_docente
         docente_autoevaluaciones = list()
         cuestionarios_evaluados = [e.cuestionario for e in docente.evaluaciones.all()]
@@ -137,8 +134,6 @@ def index(request):
                 cuestionarios_directivos = periodoEvaluacion.cuestionarios.filter(informante__tipo='DirectivoIdiomas')
             else:
                 cuestionarios_directivos = periodoEvaluacion.cuestionarios.filter(informante__tipo='Directivo')
-            ###cuestionarios_directivos = [c for c in periodoEvaluacion.cuestionarios.all() 
-            ###                     if c.informante.tipo == 'Directivo']
             request.session['cuestionarios_directivos'] = cuestionarios_directivos
             # Se colocan las carreras en las que el docente es coordinador/director
             # El nombre de la carrera contiene también el nombre del area
@@ -247,7 +242,7 @@ def estudiante_asignaturas_docentes(request, num_carrera):
 
 
 def pares_academicos_docentes(request, num_carrera):
-    """ El Par Academico de la Carrera elije el docente a evaluar"""
+    """ El Par Academico de la Carrera elije el docente a evaluar """
     par_academico = request.session['docente']
     carrera = [c['nombre'] for c in request.session['carreras_pares_academicos']
                if c['num_carrera'] == int(num_carrera)][0]
@@ -268,12 +263,12 @@ def pares_academicos_docentes(request, num_carrera):
         (Q(id__in=ids_docentes) or Q(carrera=carrera))).order_by(
         'usuario__last_name', 'usuario__first_name')
     docentes_evaluaciones = list()
-    cuestionarios = request.session['cuestionarios_pares_academicos']
+    cuestionarios_pares_a = request.session['cuestionarios_pares_academicos']
     for d in docentes:
         # Cuestionarios disponibles ya han sido evaluados? Forma pythonica de comparar, contar y sumar
-        cuestionarios_evaluados = sum([e.cuestionario in cuestionarios for e in d.evaluaciones.all()])
+        cuestionarios_evaluados = sum([e.cuestionario in cuestionarios_pares_a for e in d.evaluaciones.all()])
         # Compara cuestionarios evaluados con cuestionarios establecidos
-        if cuestionarios_evaluados >= len(cuestionarios):
+        if cuestionarios_evaluados >= len(cuestionarios_pares_a):
             docentes_evaluaciones.append(dict(docente=d, evaluado=True))
         else:
             docentes_evaluaciones.append(dict(docente=d, evaluado=False))
@@ -778,10 +773,15 @@ def menu_resultados_carrera(request, id_periodo_evaluacion):
             tabulacion = TabulacionSatisfaccion2012(periodoEvaluacion)
             form = ResultadosESE2012Form(tabulacion, area, carrera)
             formulario_formateado = render_to_string("admin/app/formulario_ese2012.html", dict(form=form))
-        elif tabulacion.tipo == 'EAAD2012':
+        elif tabulacion.tipo == 'EAAD2012': 
             tabulacion = TabulacionAdicionales2012(periodoEvaluacion)
             form = ResultadosEAAD2012Form(tabulacion, area, carrera)            
             formulario_formateado = render_to_string("admin/app/formulario_eaad2012.html", dict(form=form))
+        elif tabulacion.tipo == 'EDD2013':
+            tabulacion = TabulacionEvaluacion2013(periodoEvaluacion)
+            form = ResultadosEAAD2012Form(tabulacion, area, carrera)            
+            formulario_formateado = render_to_string("admin/app/formulario_edd2013.html", dict(form=form))
+
         return HttpResponse(formulario_formateado)
     except PeriodoEvaluacion.DoesNotExist:
         logg.error(u"No Existe el Periodo de Evaluación: {0}".format(id_periodo_evaluacion))
@@ -835,7 +835,6 @@ def mostrar_resultados(request):
         if resultados:
             resultados['titulo'] = titulo
         plantilla = 'app/imprimir_resultados_ese2012.html'
-
     # Evaluacion de Actividades Adiconales a la Docencia 2011 - 2012
     if tabulacion.tipo == 'EAAD2012':
         # Nombre completo del Area para su presentacion en el reporte
@@ -863,7 +862,33 @@ def mostrar_resultados(request):
             resultados['carrera'] = carrera
             resultados['area'] = area
         plantilla = 'app/imprimir_resultados_eaad2012.html'
-      
+   # Evaluacion del Desempeño Docente 2012 - 2013
+    if tabulacion.tipo == 'EDD2013':
+        # Nombre completo del Area para su presentacion en el reporte
+        area = AreaSGA.objects.get(siglas=request.session['area']).nombre
+        carrera = request.session['carrera']
+        tabulacion = TabulacionEvaluacion2013(periodoEvaluacion)
+        metodo =  [c[2] for c in tabulacion.calculos if c[0] == opcion][0]
+        # Por docente
+        resultados = {}
+        if opcion == 'a':
+            id_docente = request.POST['docentes']
+            if id_docente != '':
+                docente = DocentePeriodoAcademico.objects.get(id=int(id_docente))
+                # Referencia a lo que devuelve el metodo especifico invocado sobre la instancia de Tabulacion 
+                resultados = metodo(request.session['area'], request.session['carrera'], int(id_docente))
+        elif opcion == 'z':
+            pass
+        # Para el resto de casos
+        else:
+            resultados = metodo(request.session['area'], request.session['carrera'])
+        if resultados:
+            resultados['docente'] = docente
+            resultados['carrera'] = carrera
+            resultados['area'] = area
+        #### plantilla = 'app/imprimir_resultados_edd2013.html'
+        plantilla = 'app/en_construccion.html'
+ 
     return render_to_response(plantilla, resultados, context_instance=RequestContext(request));
 
 

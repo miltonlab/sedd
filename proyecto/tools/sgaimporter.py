@@ -61,7 +61,7 @@ def importar(periodoAcademicoId, periodoEvaluacionId=None):
                 for id_paralelo, seccion, modulo, paralelo, id_modulo in paralelos_carrera:
                     # Para reutilizarlos en la creacion de las relaciones "EstudianteAsignaturaDocente"
                     asignaturas_docentes = []
-                    """ Migración de Docentes y Asignaguras """
+                    """ Migracion de Docentes y Asignaguras """
                     r_ud = sga.wsacademica.sgaws_unidades_docentes_paralelo(id_paralelo=id_paralelo)
                     js_ud = json.loads(r_ud)
                     if js_ud[0] != '_error':
