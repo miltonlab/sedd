@@ -273,8 +273,8 @@ class DocentePeriodoAcademico(models.Model):
         lista_carreras_areas_query  = AsignaturaDocente.objects.filter(
             docente__periodoAcademico=Configuracion.getPeriodoAcademicoActual(),
             docente__id=self.id).values_list('asignatura__carrera', 'asignatura__area').distinct()
+        lista_carreras_areas.extend(lista_carreras_areas_query)
         if self.carrera and self.carrera not in [c[0] for c in lista_carreras_areas_query]:
-            lista_carreras_areas.extend(lista_carreras_areas_query)
             lista_carreras_areas.append((self.carrera, ''))
         return lista_carreras_areas
 
@@ -346,49 +346,7 @@ class TipoInformante(models.Model):
 
     class Meta:
         ordering = ['descripcion']
-"""
-class InformanteDocente(TipoInformante):
-    def __init__(self):
-        TipoInformante.__init__(self)
-        self.tipo = 'Docente'        
 
-    
-class InformanteEstudiante(TipoInformante):
-    def __init__(self):
-        TipoInformante.__init__(self)
-        self.tipo = 'Estudiante'
-
-
-class InformanteEstudianteNovel(TipoInformante):
-    def __init__(self):
-        TipoInformante.__init__(self)
-        self.tipo = 'EstudianteNovel'
-
-class InformanteDirectivos(TipoInformante):
-    def __init__(self):
-        TipoInformante.__init__(self)
-        self.tipo = 'Directivos'
-
-class InformanteParAcademico(TipoInformante):
-    def __init__(self):
-        TipoInformante.__init__(self)
-        self.tipo = 'ParAcademico'
-
-class InformanteEstudianteIdiomas(TipoInformante):
-    def __init__(self):
-        TipoInformante.__init__(self)
-        self.tipo = 'EstudianteIdiomas'
-
-class InformanteEstudianteMED(TipoInformante):
-    def __init__(self):
-        TipoInformante.__init__(self)
-        self.tipo = 'EstudianteMED'
-
-class InformanteIdiomasMED(TipoInformante):
-    def __init__(self):
-        TipoInformante.__init__(self)
-        self.tipo = 'Idiomas MED'
-"""
 
 class Cuestionario(models.Model):
     # Nombre corto para identificacion de objeto
