@@ -146,6 +146,7 @@ def index(request):
         # Se trata de un docente que es PAR ACADEMICO
         #
         elif docente.parAcademico:
+            # TODO: Codigo horrible. Refactorizar con los nuevos metodos de DocentePeriodoAcademico
             if 'ACE' in docente.get_areas():
                 cuestionarios_pares_academicos = periodoEvaluacion.cuestionarios.filter(
                     informante__tipo='ParAcademicoIdiomas')
@@ -176,7 +177,6 @@ def index(request):
                 carreras_pares_academicos.append(dict(num_carrera=len(carreras_pares_academicos), 
                                                       nombre=u'Curso de Ruso', 
                                                       area='ACE'))
-
             request.session['carreras_pares_academicos'] = carreras_pares_academicos
 
     except DocentePeriodoAcademico.DoesNotExist:

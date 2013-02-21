@@ -12,6 +12,7 @@ cuestiones de la evaluacion 2013 en el Instituto de Idiomas... LOADDATA fixtures
  * Manejar carrera como modelo separado, necesitamos carrera_id?
 
 ## Datos para pruebas
- * 1103659833 Docente 
- * 1103770903 Docente Coordinador
+ * 1103659833 Docente Sistemas
+ * 1103786883 Docente para calculos de resultados
+ * 1103770903 Docente Coordinador Sistemas
  * 1104495070 Estudiante

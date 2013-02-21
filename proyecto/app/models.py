@@ -1,12 +1,14 @@
 # -*- coding: utf-8 -*-
 
 from django.db import models
+from django.db import connection
 from django.db.models import Count
 from django.db.models import exceptions
-from proyecto.tools.sgaws.cliente import SGA
-from proyecto import settings
 from django.contrib.auth.models import User
 from datetime import datetime
+
+from proyecto.tools.sgaws.cliente import SGA
+from proyecto import settings
 
 import logging
 logg = logging.getLogger('logapp')
@@ -732,20 +734,26 @@ class TabulacionEvaluacion2013:
                 tipo__tipo=u'SeleccionUnica').values('id')
         evaluaciones = {}
         
-        #####
-        """
-        cuestionario_id = 9 
-        # Calculo de promedios por pregunta
-        ids_preguntas = [p.id for p in Cuestionario.objects.get(id=cuestionario_id).get_preguntas() if p.tipo == TipoPregunta.objects.get(tipo='SeleccionUnica')]
-        ids_contestaciones = Contestacion.objects.filter(evaluacion__docentePeriodoAcademico__id=id_docente, pregunta__in=preguntas)
-        from django.db import connection
+        
+        # Trabajando en calculo de promedios de preguntas, sigue agrupar por secciones (indicadores)
+
+        periodoEvaluacion=self.periodoEvaluacion ###tmp ???
+
+        id_docente = 991 ###tmp
+        cuestionario = Cuestionario.objects.get(periodoEvaluacion=periodoEvaluacion, informante__tipo='Estudiante')
+        # Solo ids 
+        preguntas = [p.id for p in cuestionario.get_preguntas() if p.tipo==TipoPregunta.objects.get(tipo='SeleccionUnica')]
+        # Solo ids ### Prueba de Evaluaciones de resultados  ### aqui tiene que discriminarse el tipo de Informante Cuestionario
+        contestaciones = Contestacion.objects.filter(evaluacion__estudianteAsignaturaDocente__asignaturaDocente__docente__id=id_docente, pregunta__in=preguntas).values_list('id', flat=True)
         cursor = connection.cursor()
-        sql='select pregunta, avg(respuesta::INT) from app_contestacion where id in %s group by pregunta' % str(tuple(ids))
-        cursor.execute(sql)
-        promedios = cursor.fetchall()
+        # Otencion de promedios por pregunta
+        cursor.execute('SELECT pregunta, AVG(respuesta::INT) FROM app_contestacion WHERE id IN %s GROUP BY pregunta', [tuple(contestaciones)])
+        result = cursor.fetchall()
+        # Diccionario a partir de lista compresa de tuplas conformadas por ids de pregunta con sus promedio
+        promedios = dict([(Pregunta.objects.get(id=id_pregunta), promedio) for id_pregunta, promedio in result])
         cursor.close()
         # .....
-        """
+        ###############
         return None
 
 
