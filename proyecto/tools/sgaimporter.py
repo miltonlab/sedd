@@ -90,8 +90,8 @@ def importar(periodoAcademicoId, periodoEvaluacionId=None):
                             # El idSGA tiene similitud con del id_horario_semana en el SGA
                             dict_unidad = dict(
                                 idSGA="{0}:{1}".format(id_unidad, id_paralelo), area=area, carrera=carrera,
-                                semestre=modulo, paralelo=paralelo, seccion=seccion, nombre=unidad, creditos=creditos, 
-                                duracion=horas, inicio=fecha_inicio, fin=fecha_fin, periodoAcademico=periodoAcademico
+                                semestre=modulo, paralelo=paralelo, seccion=seccion, modalidad=modalidad, nombre=unidad, 
+                                creditos=creditos, duracion=horas, inicio=fecha_inicio, fin=fecha_fin, periodoAcademico=periodoAcademico
                                 )
                             dict_usuario_docente = dict(
                                 username=cedula, password='', first_name=nombres.title(), last_name=apellidos.title(),

@@ -164,7 +164,19 @@ def index(request):
             if docente.carrera and docente.carrera not in carreras_aux:
                 # En docente solo existe el nombre de la carrera
                 carreras_pares_academicos.append(dict(num_carrera=len(carreras_pares_academicos), 
-                                                      nombre=docente.carrera, area=''))
+                                                      nombre=docente.carrera, 
+                                                      area=''))
+            aux_carreras = [c['nombre'] for c in carreras_pares_academicos]
+            aux_areas = [c['area'] for c in carreras_pares_academicos]
+            # Por cuestiones de los Pares Academicos de Frances y Ruso
+            if 'ACE' in aux_areas and 'Curso de Ingles' in aux_carreras:
+                carreras_pares_academicos.append(dict(num_carrera=len(carreras_pares_academicos), 
+                                                      nombre=u'Curso de Francés', 
+                                                      area='ACE'))
+                carreras_pares_academicos.append(dict(num_carrera=len(carreras_pares_academicos), 
+                                                      nombre=u'Curso de Ruso', 
+                                                      area='ACE'))
+
             request.session['carreras_pares_academicos'] = carreras_pares_academicos
 
     except DocentePeriodoAcademico.DoesNotExist:

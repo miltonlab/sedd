@@ -109,6 +109,7 @@ class Asignatura(models.Model):
     semestre = models.CharField(max_length='10', verbose_name=u'módulo')
     paralelo = models.CharField(max_length='50')
     seccion = models.CharField(max_length='10')
+    modalidad = models.CharField(max_length='20')
     nombre = models.TextField()
     tipo = models.CharField(max_length='15')
     creditos = models.IntegerField(verbose_name=u'número de créditos')
@@ -730,7 +731,21 @@ class TabulacionEvaluacion2013:
                 seccion__superseccion__cuestionario__periodoEvaluacion=self.periodoEvaluacion,
                 tipo__tipo=u'SeleccionUnica').values('id')
         evaluaciones = {}
+        
+        #####
+        """
+        cuestionario_id = 9 
+        # Calculo de promedios por pregunta
+        ids_preguntas = [p.id for p in Cuestionario.objects.get(id=cuestionario_id).get_preguntas() if p.tipo == TipoPregunta.objects.get(tipo='SeleccionUnica')]
+        ids_contestaciones = Contestacion.objects.filter(evaluacion__docentePeriodoAcademico__id=id_docente, pregunta__in=preguntas)
+        from django.db import connection
+        cursor = connection.cursor()
+        sql='select pregunta, avg(respuesta::INT) from app_contestacion where id in %s group by pregunta' % str(tuple(ids))
+        cursor.execute(sql)
+        promedios = cursor.fetchall()
+        cursor.close()
         # .....
+        """
         return None
 
 
