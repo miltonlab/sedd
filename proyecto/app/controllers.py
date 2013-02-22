@@ -637,16 +637,20 @@ def resumen_evaluaciones(request):
         return render_to_response("admin/app/resumen_evaluaciones.html", datos)
 
 def calcular_resumen(request):
-    if request.is_ajax():
-        id_periodo_evaluacion = int(request.GET['id_periodo_evaluacion'])
-        area = request.GET['area']
-        carrera = request.GET['carrera']
-        semestre = request.GET['semestre']
-        paralelo = request.GET['paralelo']
-        periodoEvaluacion = PeriodoEvaluacion.objects.get(id=id_periodo_evaluacion)
-        resumen = periodoEvaluacion.contabilizar_evaluaciones(area, carrera, semestre, paralelo)
-        # Contiene: estudiantes, completados, faltantes
-        return HttpResponse(simplejson.dumps(resumen), mimetype='application/json')        
+    try:
+        if request.is_ajax():
+            id_periodo_evaluacion = int(request.GET['id_periodo_evaluacion'])
+            area = request.GET['area']
+            carrera = request.GET['carrera']
+            semestre = request.GET['semestre']
+            paralelo = request.GET['paralelo']
+            periodoEvaluacion = PeriodoEvaluacion.objects.get(id=id_periodo_evaluacion)
+            resumen = periodoEvaluacion.contabilizar_evaluaciones(area, carrera, semestre, paralelo)
+            # Contiene: estudiantes, completados, faltantes
+            logg.info("Resumen evaluaciones OK")
+            return HttpResponse(simplejson.dumps(resumen), mimetype='application/json')
+    except Exception, ex:
+        logg.error("Error calculando resumen de evaluaciones {0}".format(ex))
         
     
 def menu_academico_ajax(request):

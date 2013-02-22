@@ -6,11 +6,12 @@ from django.db.models import Count
 from django.db.models import exceptions
 from django.contrib.auth.models import User
 from datetime import datetime
+import lxml.html
+import logging
 
 from proyecto.tools.sgaws.cliente import SGA
 from proyecto import settings
 
-import logging
 logg = logging.getLogger('logapp')
 
 #===================================================================================================
@@ -582,7 +583,9 @@ class Pregunta(models.Model):
     seccion = models.ForeignKey(Seccion, related_name='preguntas')
 
     def __unicode__(self):
-        return u'{0}'.format(self.texto)
+        html = lxml.html.document_fromstring(self.texto)
+        texto_pregunta = html.text_content()
+        return u'{0}'.format(texto_pregunta)
 
     class Meta:
         ordering = ['seccion__orden','orden']
