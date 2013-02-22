@@ -650,7 +650,7 @@ class PeriodoEvaluacion(models.Model):
         que le corresponden en este Periodo de Evaluación.
         """
         try:
-            EstudiantePeriodoAcademico.objects.get(usuario__cedula=cedula)
+            EstudiantePeriodoAcademico.objects.get(usuario__cedula=cedula, periodoAcademico=self.periodoAcademico)
         except EstudiantePeriodoAcademico.DoesNotExist:
             logg.error('Verificar estudiante: dni {} no existe'.format(cedula))
             return False
