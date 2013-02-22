@@ -448,7 +448,7 @@ class Evaluacion(models.Model):
     parAcademico = models.ForeignKey('DocentePeriodoAcademico', related_name='evaluaciones_par_academico', null=True)
     # Evaluaciones de DIRECCIONES DE CARRERA # Docente Director
     directorCarrera = models.ForeignKey('DocentePeriodoAcademico', related_name='evaluaciones_director', null=True)
-    # Evaluaciones de DIRECCIONES DE CARRERA # Nombre de la Carrera mas el Área
+    # Evaluaciones de DIRECCIONES DE CARRERA # Nombre de la Carrera mas el Area
     carreraDirector =  models.CharField(max_length=255, choices=carreras_areas, 
                                         verbose_name=u'Carrera-Area', blank=True, null=True)
 
@@ -670,6 +670,7 @@ class PeriodoEvaluacion(models.Model):
             return False
 
     def contabilizar_evaluaciones(self, area, carrera, semestre=None, paralelo=None):
+        """ Contabiliza evaluaciones de Estudiantes """
         consulta = EstudianteAsignaturaDocente.objects.filter(
             estudiante__periodoAcademico = self.periodoAcademico,
             asignaturaDocente__asignatura__area=area,
@@ -688,7 +689,22 @@ class PeriodoEvaluacion(models.Model):
             else:
                 faltantes +=1
         return dict(estudiantes=total, completados=completados, faltantes=faltantes)
-        
+
+    def contabilizar_evaluadores(self):
+        estudiantes = Evaluacion.objects.filter(
+            cuestionario__periodoEvaluacion=self).values_list(
+            'estudianteAsignaturaDocente__estudiante', flat=True).count()
+        docentes = Evaluacion.objects.filter(
+            cuestionario__periodoEvaluacion=self, docentePeriodoAcademico__isnull=False, 
+            directorCarrera__isnull=True, parAcademico__isnull=True).count()
+        pares = Evaluacion.objects.filter(
+            cuestionario__periodoEvaluacion=self, parAcademico__isnull=False).values(
+            'parAcademico').distinct().count()
+        directores = Evaluacion.objects.filter(
+            cuestionario__periodoEvaluacion=self, directorCarrera__isnull=False).values(
+            'directorCarrera').distinct().count()            
+        return dict(estudiantes=estudiantes, docentes=docentes, pares=pares, directores=directores)
+            
     def __unicode__(self):
         return self.nombre
 

@@ -633,7 +633,8 @@ def resumen_evaluaciones(request):
         form.fields['carrera'] = forms.ModelChoiceField(Asignatura.objects.none())
         form.fields['semestre'] = forms.ModelChoiceField(Asignatura.objects.none())
         form.fields['paralelo'] = forms.ModelChoiceField(Asignatura.objects.none())
-        datos = dict(form=form)
+        periodoEvaluacion = Configuracion.getPeriodoEvaluacionActual()
+        datos = dict(form=form, evaluadores=periodoEvaluacion.contabilizar_evaluadores(), periodoEvaluacion=periodoEvaluacion)
         return render_to_response("admin/app/resumen_evaluaciones.html", datos)
 
 def calcular_resumen(request):
@@ -647,7 +648,6 @@ def calcular_resumen(request):
             periodoEvaluacion = PeriodoEvaluacion.objects.get(id=id_periodo_evaluacion)
             resumen = periodoEvaluacion.contabilizar_evaluaciones(area, carrera, semestre, paralelo)
             # Contiene: estudiantes, completados, faltantes
-            logg.info("Resumen evaluaciones OK")
             return HttpResponse(simplejson.dumps(resumen), mimetype='application/json')
     except Exception, ex:
         logg.error("Error calculando resumen de evaluaciones {0}".format(ex))
@@ -726,7 +726,7 @@ def menu_academico_ajax(request):
         resultado = {'id':id, 'valores':valores}
         return simplejson.dumps(resultado)
     except Exception, ex:
-        logg.error("error ajax: " + str(ex))
+        logg.error("Error en menu_academico_ajax: " + str(ex))
         return ""
     
     

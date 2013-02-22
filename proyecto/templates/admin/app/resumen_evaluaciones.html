@@ -57,6 +57,16 @@ img {
 {% endblock %}
 
 {% block content %}
+<h3> Total de Evaluadores del Periodo {{ periodoEvaluacion }} </h3>
+<table width="100%"> 
+  <tr>
+	<td> Estudiantes: {{ evaluadores.estudiantes }}</td>
+	<td> Docentes: {{ evaluadores.docentes }}</td>
+	<td> Pares Academico: {{ evaluadores.pares }}</td>
+	<td> Coordinadores: {{ evaluadores.directores }}</td>
+  </tr>
+</table>
+<hr/>
 <table>
 {{ form.as_table }}
 </table>
