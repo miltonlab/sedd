@@ -646,7 +646,7 @@ def calcular_resumen(request):
             semestre = request.GET['semestre']
             paralelo = request.GET['paralelo']
             periodoEvaluacion = PeriodoEvaluacion.objects.get(id=id_periodo_evaluacion)
-            resumen = periodoEvaluacion.contabilizar_evaluaciones(area, carrera, semestre, paralelo)
+            resumen = periodoEvaluacion.contabilizar_evaluaciones_estudiantes(area, carrera, semestre, paralelo)
             # Contiene: estudiantes, completados, faltantes
             return HttpResponse(simplejson.dumps(resumen), mimetype='application/json')
     except Exception, ex:

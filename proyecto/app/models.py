@@ -669,7 +669,7 @@ class PeriodoEvaluacion(models.Model):
         else:
             return False
 
-    def contabilizar_evaluaciones(self, area, carrera, semestre=None, paralelo=None):
+    def contabilizar_evaluaciones_estudiantes(self, area, carrera, semestre=None, paralelo=None):
         """ Contabiliza evaluaciones de Estudiantes """
         consulta = EstudianteAsignaturaDocente.objects.filter(
             estudiante__periodoAcademico = self.periodoAcademico,
@@ -691,9 +691,13 @@ class PeriodoEvaluacion(models.Model):
         return dict(estudiantes=total, completados=completados, faltantes=faltantes)
 
     def contabilizar_evaluadores(self):
+        """ 
+        Cuenta los estudiantes, pares academicos y directores que hayan evaluado
+        a por lo menos un docente. No se controla haber evaluado a todos los docentes.
+        """
         estudiantes = Evaluacion.objects.filter(
             cuestionario__periodoEvaluacion=self).values_list(
-            'estudianteAsignaturaDocente__estudiante', flat=True).count()
+            'estudianteAsignaturaDocente__estudiante').distinct().count()
         docentes = Evaluacion.objects.filter(
             cuestionario__periodoEvaluacion=self, docentePeriodoAcademico__isnull=False, 
             directorCarrera__isnull=True, parAcademico__isnull=True).count()
