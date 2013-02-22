@@ -17,10 +17,11 @@ Requerimientos
 -------------------------------------------------------------------
  * Sistema Operativo: Debian squeeze backports
  * python-django 1.3
+ * python-psycopg2 2.4.2
+ * python-lxml 2.3
  * ptyhon-django-extensions 0.4.2
  * python-soappy 0.12.0
  * django-piston 0.2.3
- * python-psycopg2 2.4.2
  * libapache2-mod-wsgi 3.3	(modulo para desplegar en apache)
  * south 0.7.3          	(Migraciones)
 

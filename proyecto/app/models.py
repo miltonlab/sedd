@@ -671,6 +671,7 @@ class PeriodoEvaluacion(models.Model):
 
     def contabilizar_evaluaciones(self, area, carrera, semestre=None, paralelo=None):
         consulta = EstudianteAsignaturaDocente.objects.filter(
+            estudiante__periodoAcademico = self.periodoAcademico,
             asignaturaDocente__asignatura__area=area,
             asignaturaDocente__asignatura__carrera=carrera)
         if semestre and semestre != '':
