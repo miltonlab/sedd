@@ -813,15 +813,17 @@ class TabulacionEvaluacion2013:
                 indicadores.update({seccion:porcentaje})
             # Genera diccionario de diccionarios
             for seccion, porcentaje in indicadores.items():
-                indicador = resultados.get(seccion,{'informantes' : {}})
+                indicador = resultados.get(seccion,None)
+                if not indicador:
+                    indicador = {'informantes' : {}}
+                    resultados[seccion]=indicador
                 indicador['informantes'].update({ informante : porcentaje })
-                resultados.update( {seccion : indicador} )
+                ###resultados.update( {seccion : indicador} )
 
         # Calculos en todos los indicadores de acuerdo al peso de los informantes
         for seccion, resultado in resultados.items():
             valores = resultado['informantes']
             informantes = valores.keys()
-            print 'informantes: ',informantes
             primaria = 0.0
             if informantes == ['directivo', 'paracademico']:
                 primaria = pesos['directivo'] * valores['directivo']
