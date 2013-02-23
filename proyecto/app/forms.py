@@ -15,7 +15,7 @@ from proyecto.app.models import Seccion
 from proyecto.app.models import Pregunta
 
 
-class ResultadosEvaluacion2013Form(forms.Form):
+class ResultadosEDD2013Form(forms.Form):
     """
     Formulario Unico para los resultados de la Evaluación del 
     Desempenoi Docente  2012 - 2013
@@ -25,21 +25,24 @@ class ResultadosEvaluacion2013Form(forms.Form):
         forms.Form.__init__(self)
         opciones = [(o[0], o[1]) for o in tabulacion.calculos]
         self.fields['opciones'] = forms.ChoiceField(widget=forms.RadioSelect(), choices=opciones)
-        # Docentes de la carrera que selecciono el coordinador
-        ids_docentes = set([ad.docente.id for ad in AsignaturaDocente.objects.filter(
-            docente__periodoAcademico=Configuracion.getPeriodoAcademicoActual(), 
-            asignatura__carrera=carrera, asignatura__area=area)])
-        self.fields['docentes'] = forms.ModelChoiceField(
-            queryset=DocentePeriodoAcademico.objects.filter(
-                Q(periodoAcademico=Configuracion.getPeriodoAcademicoActual()) &
-                Q(id__in=ids_docentes) | Q(carrera=carrera)
-                ).order_by('usuario__last_name', 'usuario__first_name')
-            )
+        try:
+            # Docentes de la carrera que selecciono el coordinador en el periodoAcademico respectivo
+            ids_docentes = set([ad.docente.id for ad in AsignaturaDocente.objects.filter(
+                        docente__periodoAcademico=tabulacion.periodoEvaluacion.periodoAcademico, 
+                        asignatura__carrera=carrera, asignatura__area=area)])
+            self.fields['docentes'] = forms.ModelChoiceField(
+                queryset=DocentePeriodoAcademico.objects.filter(
+                    Q(periodoAcademico=tabulacion.periodoEvaluacion.periodoAcademico) &
+                    (Q(id__in=ids_docentes) | Q(carrera=carrera))
+                    ).order_by('usuario__last_name', 'usuario__first_name')
+                )
+        except Exception, ex:
+            logg.error("Error en Formulario Resultados EDD2013: {0}".format(ex))
 
 
 class ResultadosEAAD2012Form(forms.Form):
     """
-    Formulario Único para los resultados de la Evaluación de 
+    Formulario Unico para los resultados de la Evaluación de 
     Actividades Adicionales a la Docencia 2012
     """
 
@@ -47,14 +50,14 @@ class ResultadosEAAD2012Form(forms.Form):
         forms.Form.__init__(self)
         opciones = [(o[0], o[1]) for o in tabulacion.calculos]
         self.fields['opciones'] = forms.ChoiceField(widget=forms.RadioSelect(), choices=opciones)
-        # Docentes de la carrera que selecciono el coordinador
+        # Docentes de la carrera que selecciono el coordinador en el periodoAcademico respectivo
         ids_docentes = set([ad.docente.id for ad in AsignaturaDocente.objects.filter(
-            docente__periodoAcademico=Configuracion.getPeriodoAcademicoActual(), 
+            docente__periodoAcademico=tabulacion.periodoEvaluacion.periodoAcademico, 
             asignatura__carrera=carrera, asignatura__area=area)])
         self.fields['docentes'] = forms.ModelChoiceField(
             queryset=DocentePeriodoAcademico.objects.filter(
-                Q(periodoAcademico=Configuracion.getPeriodoAcademicoActual()) &
-                Q(id__in=ids_docentes) | Q(carrera=carrera)
+                Q(periodoAcademico=tabulacion.periodoEvaluacion.periodoAcademico) &
+                (Q(id__in=ids_docentes) | Q(carrera=carrera))
                 ).order_by('usuario__last_name', 'usuario__first_name')
             )
 

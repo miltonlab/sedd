@@ -751,49 +751,102 @@ class TabulacionEvaluacion2013:
             )
 
     def por_docente(self, siglas_area, nombre_carrera, id_docente):
-        # ids de preguntas por informante
-        preguntas = {}
-        for informante in ('Estudiante', 'Docente', 'ParAcademico', 'Directivo'):
-            preguntas[informante] = Pregunta.objects.filter(
-                seccion__superseccion__cuestionario__informante__tipo=informante, 
-                seccion__superseccion__cuestionario__periodoEvaluacion=self.periodoEvaluacion,
-                tipo__tipo=u'SeleccionUnica').values('id')
-        
-        # Trabajando en calculo de promedios de preguntas, sigue agrupar por secciones (indicadores)
+        resultados = {}
+        pesos = {}
+        if siglas_area == 'ACE':
+            tipos = ('EstudianteIdiomas', 'DocenteIdiomas', 'ParAcademicoIdiomas', 'DirectivoIdiomas')
+        else:
+            tipos = ('Estudiante', 'Docente', 'ParAcademico', 'Directivo')
+        for tipo in tipos:
+            cuestionario = Cuestionario.objects.get(periodoEvaluacion=self.periodoEvaluacion, informante__tipo=tipo)
+            # En caso de tratarse del insituto de idiomas 
+            informante = tipo.lower().replace('idiomas','')
+            # Para los calculos finales
+            pesos.update({informante : cuestionario.peso})  
+            # Solo ids 
+            preguntas = [p.id for p in cuestionario.get_preguntas() if p.tipo==TipoPregunta.objects.get(tipo='SeleccionUnica')]
+            # Solo ids ### Prueba de Evaluaciones de resultados  ### aqui tiene que discriminarse el tipo de Informante Cuestionario
+            if tipo == 'Estudiante':
+                contestaciones = Contestacion.objects.filter(
+                    evaluacion__estudianteAsignaturaDocente__asignaturaDocente__docente__id=id_docente, 
+                    pregunta__in=preguntas).values_list('id', flat=True)
+            elif tipo == 'Docente':
+                contestaciones = Contestacion.objects.filter(
+                    evaluacion__parAcademico__isnull=True, evaluacion__directorCarrera__isnull=True,
+                    evaluacion__docentePeriodoAcademico__id=id_docente, pregunta__in=preguntas
+                    ).values_list('id', flat=True)
+            elif tipo == 'ParAcademico':
+                contestaciones = Contestacion.objects.filter(
+                    evaluacion__parAcademico__isnull=False, evaluacion__directorCarrera__isnull=True,
+                    evaluacion__docentePeriodoAcademico__id=id_docente, pregunta__in=preguntas
+                    ).values_list('id', flat=True)
+            elif tipo == 'Directivo':
+                contestaciones = Contestacion.objects.filter(
+                    evaluacion__directorCarrera__isnull=False, evaluacion__parAcademico__isnull=True,
+                    evaluacion__docentePeriodoAcademico__id=id_docente, pregunta__in=preguntas
+                    ).values_list('id', flat=True)
+            if not contestaciones:
+                print "no hay contestaciones de " + tipo
+                ###resultados.update({tipo.lower(): {}})
+                continue
+            # Otencion de promedios por pregunta
+            cursor = connection.cursor()
+            cursor.execute("""SELECT pregunta, AVG(respuesta::INT) FROM app_contestacion 
+                       WHERE id IN %s GROUP BY pregunta""", [tuple(contestaciones)])
+            result = cursor.fetchall()
+            cursor.close()
+            # Diccionario a partir de lista compresa de tuplas conformadas por ids de pregunta con sus promedio
+            promedios = dict([(Pregunta.objects.get(id=id_pregunta), promedio) for id_pregunta, promedio in result])
+            indicadores = {}
+            # Sumatorias por pregunta
+            for pregunta, promedio in promedios.items():
+                suma = indicadores.get(pregunta.seccion,0) + promedio
+                indicadores[pregunta.seccion] = suma
+            # Promedio por seccion (indicador)
+            for seccion, suma in indicadores.items():
+                promedio = suma / seccion.preguntas.count()
+                indicadores.update({seccion:promedio})
+            # Porcentaje por seccion (indicador)
+            ESCALA_MAXIMA = 4
+            for seccion, promedio in indicadores.items():
+                porcentaje = round((100 * promedio) / ESCALA_MAXIMA)
+                indicadores.update({seccion:porcentaje})
+            # Genera diccionario de diccionarios
+            for seccion, porcentaje in indicadores.items():
+                indicador = resultados.get(seccion,{'informantes' : {}})
+                indicador['informantes'].update({ informante : porcentaje })
+                resultados.update( {seccion : indicador} )
 
-        periodoEvaluacion=Configuracion.getPeriodoEvaluacionActual() ###tmp ???
-        id_docente = 991 ###tmp
-        cuestionario = Cuestionario.objects.get(periodoEvaluacion=periodoEvaluacion, informante__tipo='Estudiante')
-        # Solo ids 
-        preguntas = [p.id for p in cuestionario.get_preguntas() if p.tipo==TipoPregunta.objects.get(tipo='SeleccionUnica')]
-        # Solo ids ### Prueba de Evaluaciones de resultados  ### aqui tiene que discriminarse el tipo de Informante Cuestionario
-        contestaciones = Contestacion.objects.filter(evaluacion__estudianteAsignaturaDocente__asignaturaDocente__docente__id=id_docente, pregunta__in=preguntas).values_list('id', flat=True)
-        cursor = connection.cursor()
-        # Otencion de promedios por pregunta
-        cursor.execute('SELECT pregunta, AVG(respuesta::INT) FROM app_contestacion WHERE id IN %s GROUP BY pregunta', [tuple(contestaciones)])
-        result = cursor.fetchall()
-        cursor.close()
-        # Diccionario a partir de lista compresa de tuplas conformadas por ids de pregunta con sus promedio
-        promedios = dict([(Pregunta.objects.get(id=id_pregunta), promedio) for id_pregunta, promedio in result])
-        indicadores = {}
-        # Sumatorias por pregunta
-        for pregunta, promedio in promedios.items():
-            suma = indicadores.get(pregunta.seccion,0) + promedio
-            indicadores[pregunta.seccion] = suma
-            # Alternativa no muy pythonica
-            # lista = indicadores.get(pregunta.seccion,[])
-            # lista.append(promedio)
-            # indicadores[pregunta.seccion]=lista
-         # Promedio por seccion (indicador)
-        for seccion, suma in indicadores.items():
-            promedio = suma / seccion.preguntas.count()
-            indicadores.update({seccion:promedio})
-        # Porcentaje por seccion (indicador)
-        ESCALA_MAXIMA = 4
-        for seccion, promedio in indicadores.items():
-            porcentaje = round((100 * promedio) / ESCALA_MAXIMA)
-            indicadores.update({seccion:porcentaje})
-        # .....
+        # Calculos en todos los indicadores de acuerdo al peso de los informantes
+        for seccion, resultado in resultados.items():
+            valores = resultado['informantes']
+            informantes = valores.keys()
+            print 'informantes: ',informantes
+            primaria = 0.0
+            if informantes == ['directivo', 'paracademico']:
+                primaria = pesos['directivo'] * valores['directivo']
+                primaria += pesos['paracademico'] * valores['paracademico']
+                primaria = primaria / (pesos['directivo'] + pesos['paracademico'])
+            elif informantes == ['docente', 'directivo', 'paracademico']:
+                # ((mpne + pdir * vdir) + (mpne + ppa * vpa) + (??? + pd * cd))
+                mitad = pesos['estudiante'] / 2
+                primaria =  mitad / 2 + (pesos['directivo'] * valores['directivo'])
+                primaria += mitad / 2 + (pesos['paracademico'] * valores['paracademico'])
+                primaria += mitad + (pesos['docente'] * valores['docente'])
+            elif informantes == ['docente', 'estudiante']:                
+                mitad = (pesos['directivo'] + pesos['paracademico']) / 2
+                primaria = mitad + (pesos['estudiante'] * valores['estudiante'])
+                primaria += mitad + (pesos['docente'] * valores['docente'])
+            elif informantes == ['directivo', 'docente', 'estudiante', 'paracademico']:
+                # (pe + ve) + ((pdir * vdir) + (ppa + vpa)) + (pd * vd))
+                primaria = pesos['estudiante'] * valores['estudiante']
+                primaria += pesos['directivo'] * valores['directivo']
+                primaria += pesos['paracademico'] * valores['paracademico']
+                primaria += pesos['directivo'] * valores['directivo']
+            resultado.update({'primaria' : primaria})
+            resultados.update({seccion : resultado})
+            print seccion.codigo, resultado
+
         ###############
         return None
 

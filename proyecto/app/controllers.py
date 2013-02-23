@@ -773,9 +773,7 @@ def menu_resultados_carrera(request, id_periodo_evaluacion):
     """
     try:
         periodoEvaluacion=PeriodoEvaluacion.objects.get(id=id_periodo_evaluacion)
-        print periodoEvaluacion
         tabulacion = Tabulacion.objects.get(periodoEvaluacion=periodoEvaluacion)
-        print tabulacion
         # Para los Docentes Coordinadores de Carrera 
         if request.session.has_key('carreras_director'):
             carrera = request.session['carrera']
@@ -795,7 +793,7 @@ def menu_resultados_carrera(request, id_periodo_evaluacion):
             formulario_formateado = render_to_string("admin/app/formulario_eaad2012.html", dict(form=form))
         elif tabulacion.tipo == 'EDD2013':
             tabulacion = TabulacionEvaluacion2013(periodoEvaluacion)
-            form = ResultadosEAAD2012Form(tabulacion, area, carrera)            
+            form = ResultadosEDD2013Form(tabulacion, area, carrera)   
             formulario_formateado = render_to_string("admin/app/formulario_edd2013.html", dict(form=form))
 
         return HttpResponse(formulario_formateado)
