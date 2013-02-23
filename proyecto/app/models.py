@@ -362,6 +362,8 @@ class Cuestionario(models.Model):
     # Obligatoriedad de todas las preguntas del cuestionario
     preguntas_obligatorias = models.BooleanField(default=True)
     informante = models.ForeignKey(TipoInformante)
+    # Generalmente de acuerdo al Tipo de Informante
+    peso = models.FloatField(default=1.0)
     periodoEvaluacion = models.ForeignKey('PeriodoEvaluacion', blank=True, null=True, 
                                           related_name='cuestionarios', verbose_name=u'Periodo de Evaluación'
                                           )
@@ -534,7 +536,7 @@ class Seccion(models.Model):
     descripcion  = models.CharField(max_length='100', blank=True, null=True)
     orden = models.IntegerField()
     codigo = models.CharField(max_length='20', null=True, blank=True)
-    puntaje = models.IntegerField(null=True, blank=True)
+    ponderacion = models.FloatField(null=True, blank=True)
     # Una subseccion esta relacionada con otra Seccion en vez de un Cuestionario
     superseccion = models.ForeignKey('self', null=True, blank=True, db_column='superseccion_id',
                                      related_name='subsecciones', verbose_name=u'Sección Padre')
@@ -756,13 +758,10 @@ class TabulacionEvaluacion2013:
                 seccion__superseccion__cuestionario__informante__tipo=informante, 
                 seccion__superseccion__cuestionario__periodoEvaluacion=self.periodoEvaluacion,
                 tipo__tipo=u'SeleccionUnica').values('id')
-        evaluaciones = {}
-        
         
         # Trabajando en calculo de promedios de preguntas, sigue agrupar por secciones (indicadores)
 
-        periodoEvaluacion=self.periodoEvaluacion ###tmp ???
-
+        periodoEvaluacion=Configuracion.getPeriodoEvaluacionActual() ###tmp ???
         id_docente = 991 ###tmp
         cuestionario = Cuestionario.objects.get(periodoEvaluacion=periodoEvaluacion, informante__tipo='Estudiante')
         # Solo ids 
@@ -773,9 +772,27 @@ class TabulacionEvaluacion2013:
         # Otencion de promedios por pregunta
         cursor.execute('SELECT pregunta, AVG(respuesta::INT) FROM app_contestacion WHERE id IN %s GROUP BY pregunta', [tuple(contestaciones)])
         result = cursor.fetchall()
+        cursor.close()
         # Diccionario a partir de lista compresa de tuplas conformadas por ids de pregunta con sus promedio
         promedios = dict([(Pregunta.objects.get(id=id_pregunta), promedio) for id_pregunta, promedio in result])
-        cursor.close()
+        indicadores = {}
+        # Sumatorias por pregunta
+        for pregunta, promedio in promedios.items():
+            suma = indicadores.get(pregunta.seccion,0) + promedio
+            indicadores[pregunta.seccion] = suma
+            # Alternativa no muy pythonica
+            # lista = indicadores.get(pregunta.seccion,[])
+            # lista.append(promedio)
+            # indicadores[pregunta.seccion]=lista
+         # Promedio por seccion (indicador)
+        for seccion, suma in indicadores.items():
+            promedio = suma / seccion.preguntas.count()
+            indicadores.update({seccion:promedio})
+        # Porcentaje por seccion (indicador)
+        ESCALA_MAXIMA = 4
+        for seccion, promedio in indicadores.items():
+            porcentaje = round((100 * promedio) / ESCALA_MAXIMA)
+            indicadores.update({seccion:porcentaje})
         # .....
         ###############
         return None
