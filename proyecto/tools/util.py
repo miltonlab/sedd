@@ -1,11 +1,3 @@
-# -*- coding: utf-8 -*-
-
-"""
-   Tomado de la documentación original de Python 2.7.3
-   13.1. csv — CSV File Reading and Writing
-   url: http://docs.python.org/library/csv.html#examples
-"""
-
 import csv, codecs, cStringIO
 
 class UnicodeWriter:

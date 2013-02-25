@@ -11,7 +11,7 @@ from django_extensions.management.jobs import BaseJob
 class Job(BaseJob):
     """
     Job que exporta todos los estudiantes que contestaron todas las encuestas
-    en la Encuesta de Satisfacción Estudiantil 2012.
+    del Periodo de Evaluacion Actual.
     @author: miltonlab
     @date: 08/08/2012
     """
