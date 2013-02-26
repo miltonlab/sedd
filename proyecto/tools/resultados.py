@@ -32,8 +32,7 @@ def ejecutar(id_periodo_evaluacion):
             total = resultados.get('total',0)
             promedios = resultados.get('promedios', {})
             logg.info('{0} resultados: {1} - {2}'.format(docente, promedios, total))
-            fila = (docente.usuario.cedula, docente.usuario.last_name.split()[0], docente.usuario.last_name.split()[1], 
-                    docente.usuario.first_name.split()[0], docente.usuario.first_name.split()[1], 
+            fila = (docente.usuario.cedula, docente.usuario.last_name, docente.usuario.first_name, 
                     str(round(promedios.get('docente', 0), 2)), str(round(promedios.get('paracademico', 0), 2)), 
                     str(round(promedios.get('directivo', 0), 2)), str(round(promedios.get('estudiante', 0), 2)), 
                     )
