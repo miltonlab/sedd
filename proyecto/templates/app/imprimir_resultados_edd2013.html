@@ -18,7 +18,7 @@
         font-size: 13px;
     }
     td {
-	text-align: left;
+	text-align: center;
 	border: 1px solid gray;
         font-size: 13px;
     }
@@ -42,24 +42,62 @@
 
       <table id="tabla-docente" width="100%" border="0">
 		<tr>
-		  <td width="10%"><b>AREA</b></td> <td width="90%">{{ area }}</td>
+		  <td width="10%"><b>AREA</b></td> <td style="text-align: left;" width="90%">{{ area }}</td>
 		</tr>
 		<tr>
-		  <td width="10%"><b>CARRERA</b></td> <td width="90%">{{ carrera }}</td>
+		  <td width="10%"><b>CARRERA</b></td> <td style="text-align: left;" width="90%">{{ carrera }}</td>
 		</tr>
 		<tr>
-		  <td width="10%"><b>DOCENTE</b></td> <td width="90%">{{ docente }}</td>
+		  <td width="10%"><b>DOCENTE</b></td> <td style="text-align: left;" width="90%">{{ docente }}</td>
 		</tr>
       </table>
 	  
       <!-- Tabla Central -->
 
       <table id="tabla-resultados" width="100%" cellspacing="0" >
+		<tr>
+		  <th rowspan="2">  DESCRIPCION </th>
+		  <th colspan="4">  INFORMANTES </th>
+		  <th colspan="3">  EVALUACION </th>
+		</tr>
+		<tr>
+		  <th> ESTUD. </th>
+		  <th> DOC. </th>
+		  <th> PAR AC. </th>
+		  <th> DIREC. </th>
+		  <th> PRIMARIA </th>
+		  <th> PONDERADA </th>
+		  <th> CUALIT. </th>
+		</tr>
+		<!-- indicador, resultado -->
+		{% for i, r in resultados_indicadores.items %}
+		<tr>
+		  <td> {{ i }} </td>
+		  <td width="10%"> {% if r.informantes.estudiante %} {{ r.informantes.estudiante }} % {% endif %} </td>
+		  <td width="10%"> {% if r.informantes.docente %} {{ r.informantes.docente  }} %  {% endif %}</td>
+		  <td width="10%"> {% if r.informantes.paracademico %} {{ r.informantes.paracademico }} % {% endif %} </td>
+		  <td width="10%"> {% if r.informantes.directivo %} {{ r.informantes.directivo }} % {% endif %} </td>
+		  
+		  <td width="10%"> {% if r.primaria %} {{ r.primaria|floatformat:"2" }} % {% endif %}</td>
+		  <td width="10%"> {{ r.ponderada|floatformat:"2" }} <b>/</b> {{ r.ponderacion_seccion }} </td>
+		  <td width="10%"> {{ r.cualitativa }} </td>
+		</tr>
+		{% endfor %}
 	  </table>
 
       <!-- Tabla de Resultados -->
-
       <table width="100%">
+		<tr>
+		 <td> <b> VALOR TOTAL OBTENIDO: </b> </td>
+		 <td width="10%"> {{ promedios.estudiante|floatformat:"2" }} % </td>
+		 <td width="10%"> {{ promedios.docente|floatformat:"2" }} % </td>
+		 <td width="10%"> {{ promedios.paracademico|floatformat:"2" }} % </td>
+		 <td width="10%"> {{ promedios.directivo|floatformat:"2" }} % </td>
+		 <td width="10%"> <b> {{ promedios.primaria|floatformat:"2" }} %  </b> </td>
+		 <td width="10%"> <b> {{ promedios.ponderada|floatformat:"2" }} / 100 </b> </td>
+		 <td width="10%"> <b> {{ promedios.cualitativa }} </b> </td>
+		 </b>
+		</tr>
 	  </table>
 
       <div id="pie" style="font-size: 9px; color: #666666">

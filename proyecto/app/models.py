@@ -6,6 +6,7 @@ from django.db.models import Count
 from django.db.models import exceptions
 from django.contrib.auth.models import User
 from datetime import datetime
+from collections import OrderedDict
 import lxml.html
 import logging
 
@@ -890,7 +891,6 @@ class TabulacionEvaluacion2013:
             promedio_ponderada += ponderada
             resultado.update({'ponderada' : ponderada})
             resultado.update({'cualitativa' : self._cualificar_valor(primaria)})
-            # end for
 
         if len(resultados_indicadores) == 0:
             # Se detienen los calculos
@@ -906,14 +906,18 @@ class TabulacionEvaluacion2013:
                     'ponderada' : promedio_ponderada,
                     'cualitativa' : self._cualificar_valor(promedio_primaria)
                     }
+        print resultados_indicadores
+        # Se ordena el diccionario por la clave (codigo del indicador)
+        resultados_indicadores = OrderedDict(sorted(resultados_indicadores.items(), key=lambda i: i[0]))
         logg.info('Calculado docente: {0} promedios: {1} total: {2}'.format(id_docente, promedios, promedio_ponderada))
-        return dict(resulados_indicadores=resultados_indicadores, promedios=promedios, total=promedio_ponderada)
+        return dict(resultados_indicadores=resultados_indicadores, promedios=promedios, total=promedio_ponderada)
 
     def _cualificar_valor(self, valor):
-        rangos = {'IS':range(0,26), 'PS':range(26,51), 'S': range(51,76), 'MS':range(76,101)}
+        rangos = {'IS':range(0,41), 'PS':range(41,61), 'S': range(61,81), 'MS':range(81,101)}
         for k,v in rangos.items():
             if v[0] <= valor <= v[-1]:
                 return k
+        return ''
 
 
 class TabulacionAdicionales2012:

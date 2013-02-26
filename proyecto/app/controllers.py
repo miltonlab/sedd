@@ -795,7 +795,6 @@ def menu_resultados_carrera(request, id_periodo_evaluacion):
             tabulacion = TabulacionEvaluacion2013(periodoEvaluacion)
             form = ResultadosEDD2013Form(tabulacion, area, carrera)   
             formulario_formateado = render_to_string("admin/app/formulario_edd2013.html", dict(form=form))
-
         return HttpResponse(formulario_formateado)
     except PeriodoEvaluacion.DoesNotExist:
         logg.error(u"No Existe el Periodo de Evaluación: {0}".format(id_periodo_evaluacion))
@@ -889,6 +888,7 @@ def mostrar_resultados(request):
             id_docente = request.POST['docentes']
             if id_docente != '':
                 docente = DocentePeriodoAcademico.objects.get(id=int(id_docente))
+                print 'estamos aqui .....'
                 # Referencia a lo que devuelve el metodo especifico invocado sobre la instancia de Tabulacion 
                 resultados = metodo(request.session['area'], request.session['carrera'], int(id_docente))
         elif opcion == 'z':
@@ -900,8 +900,8 @@ def mostrar_resultados(request):
             resultados['docente'] = docente
             resultados['carrera'] = carrera
             resultados['area'] = area
-        #### plantilla = 'app/imprimir_resultados_edd2013.html'
-        plantilla = 'app/en_construccion.html'
+        plantilla = 'app/imprimir_resultados_edd2013.html'
+        ###plantilla = 'app/en_construccion.html'
  
     return render_to_response(plantilla, resultados, context_instance=RequestContext(request));
 
