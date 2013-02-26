@@ -56,29 +56,41 @@
 
       <table id="tabla-resultados" width="100%" cellspacing="0" >
 		<tr>
-		  <th rowspan="2">  DESCRIPCION </th>
+		  <th rowspan="3">  DESCRIPCIÓN </th>
 		  <th colspan="4">  INFORMANTES </th>
-		  <th colspan="3">  EVALUACION </th>
+		  <th colspan="3">  EVALUACIÓN </th>
 		</tr>
 		<tr>
-		  <th> ESTUD. </th>
-		  <th> DOC. </th>
-		  <th> PAR AC. </th>
-		  <th> DIREC. </th>
-		  <th> PRIMARIA </th>
-		  <th> PONDERADA </th>
-		  <th> CUALIT. </th>
+		  <th rowspan="2"> ESTUDIANTE </th>
+		  <th rowspan="2"> DOCENTE </th>
+		  <th colspan="2"> COMISIÓN ACADÉMICA </th>
+		  <th rowspan="2"> PRIMARIA </th>
+		  <th rowspan="2">  PONDERAD. </th>
+		  <th rowspan="2"> CUALITAT. </th>
+		</tr>
+		<tr> 
+		  <th> PAR ACAD. </th>
+		  <th> DIRECTIVO </th>
 		</tr>
 		<!-- indicador, resultado -->
 		{% for i, r in resultados_indicadores.items %}
 		<tr>
 		  <td> {{ i }} </td>
-		  <td width="10%"> {% if r.informantes.estudiante %} {{ r.informantes.estudiante }} % {% endif %} </td>
-		  <td width="10%"> {% if r.informantes.docente %} {{ r.informantes.docente  }} %  {% endif %}</td>
-		  <td width="10%"> {% if r.informantes.paracademico %} {{ r.informantes.paracademico }} % {% endif %} </td>
-		  <td width="10%"> {% if r.informantes.directivo %} {{ r.informantes.directivo }} % {% endif %} </td>
-		  
-		  <td width="10%"> {% if r.primaria %} {{ r.primaria|floatformat:"2" }} % {% endif %}</td>
+		  <td width="10%"> 
+		  {% if r.informantes.estudiante %} {{ r.informantes.estudiante }} % {% else %} - {% endif %} 
+		  </td>
+		  <td width="10%"> 
+		  {% if r.informantes.docente %} {{ r.informantes.docente  }} % {% else %} - {% endif %}
+		  </td>
+		  <td width="10%"> 
+			{% if r.informantes.paracademico %} {{ r.informantes.paracademico }} % {% else %} - {% endif %} 
+		  </td>
+		  <td width="10%"> 
+		  {% if r.informantes.directivo %} {{ r.informantes.directivo }} % {% else %} - {% endif %} 
+		  </td>
+		  <td width="10%"> 
+		  {% if r.primaria %} {{ r.primaria|floatformat:"2" }} % {% else %} - {% endif %}
+		  </td>
 		  <td width="10%"> {{ r.ponderada|floatformat:"2" }} <b>/</b> {{ r.ponderacion_seccion }} </td>
 		  <td width="10%"> {{ r.cualitativa }} </td>
 		</tr>
@@ -97,6 +109,17 @@
 		 <td width="10%"> <b> {{ promedios.ponderada|floatformat:"2" }} / 100 </b> </td>
 		 <td width="10%"> <b> {{ promedios.cualitativa }} </b> </td>
 		 </b>
+		</tr>
+	  </table>
+
+	  <table id="tabla-escala">
+		<tr> 
+		  <td style="text-align: left;"> 
+			<b> D </b> = Destacado |
+			<b> S </b> = Sastisfactorio | 
+			<b> PS </b> = Poco Satistactorio |
+			<b> IS </b> = Insatisfactorio
+		  </td>
 		</tr>
 	  </table>
 

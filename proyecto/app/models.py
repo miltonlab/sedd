@@ -914,7 +914,7 @@ class TabulacionEvaluacion2013:
 
     def _cualificar_valor(self, valor):
         """ Se cualifica con valores enteros """
-        rangos = {'IS':range(0,41), 'PS':range(41,61), 'S': range(61,81), 'MS':range(81,101)}
+        rangos = {'IS':range(0,41), 'PS':range(41,61), 'S': range(61,81), 'D':range(81,101)}
         for k,v in rangos.items():
             if v[0] <= round(valor) <= v[-1]:
                 return k
