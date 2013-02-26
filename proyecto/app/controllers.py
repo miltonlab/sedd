@@ -888,7 +888,6 @@ def mostrar_resultados(request):
             id_docente = request.POST['docentes']
             if id_docente != '':
                 docente = DocentePeriodoAcademico.objects.get(id=int(id_docente))
-                print 'estamos aqui .....'
                 # Referencia a lo que devuelve el metodo especifico invocado sobre la instancia de Tabulacion 
                 resultados = metodo(request.session['area'], request.session['carrera'], int(id_docente))
         elif opcion == 'z':

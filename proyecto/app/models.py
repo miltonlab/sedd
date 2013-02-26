@@ -847,8 +847,8 @@ class TabulacionEvaluacion2013:
             informantes.sort()
             primaria = 0.0
             if informantes == ['directivo', 'paracademico']:
-                primaria = pesos['directivo'] * valores['directivo']
-                primaria += pesos['paracademico'] * valores['paracademico']
+                # (pdir * vdir) + (ppa * vpa)) / (pdir + ppa)
+                primaria = pesos['directivo'] * valores['directivo'] +  pesos['paracademico'] * valores['paracademico']
                 primaria = primaria / (pesos['directivo'] + pesos['paracademico'])
                 
                 aux_directivo.append(valores['directivo'])
@@ -857,18 +857,19 @@ class TabulacionEvaluacion2013:
             elif informantes == ['directivo', 'docente', 'paracademico']:
                 # ((mpne + pdir * vdir) + (mpne + ppa * vpa) + (??? + pd * cd))
                 mitad = pesos['estudiante'] / 2
-                primaria =  mitad / 2 + (pesos['directivo'] * valores['directivo'])
-                primaria += mitad / 2 + (pesos['paracademico'] * valores['paracademico'])
-                primaria += mitad + (pesos['docente'] * valores['docente'])
+                primaria =  (mitad / 2 + pesos['directivo']) * valores['directivo']
+                primaria += (mitad / 2 + pesos['paracademico']) * valores['paracademico']
+                primaria += (mitad + pesos['docente']) * valores['docente']
 
                 aux_directivo.append(valores['directivo'])
                 aux_docente.append(valores['docente'])
                 aux_paracademico.append(valores['paracademico'])
 
-            elif informantes == ['docente', 'estudiante']:                
+            elif informantes == ['docente', 'estudiante']:      
+                # (mpni + pe * ve) + (mpni + pd * vd)
                 mitad = (pesos['directivo'] + pesos['paracademico']) / 2
-                primaria = mitad + (pesos['estudiante'] * valores['estudiante'])
-                primaria += mitad + (pesos['docente'] * valores['docente'])
+                primaria = (mitad + pesos['estudiante']) * valores['estudiante']
+                primaria += (mitad + pesos['docente']) * valores['docente']
 
                 aux_docente.append(valores['docente'])
                 aux_estudiante.append(valores['estudiante'])
@@ -906,7 +907,6 @@ class TabulacionEvaluacion2013:
                     'ponderada' : promedio_ponderada,
                     'cualitativa' : self._cualificar_valor(promedio_primaria)
                     }
-        print resultados_indicadores
         # Se ordena el diccionario por la clave (codigo del indicador)
         resultados_indicadores = OrderedDict(sorted(resultados_indicadores.items(), key=lambda i: i[0]))
         logg.info('Calculado docente: {0} promedios: {1} total: {2}'.format(id_docente, promedios, promedio_ponderada))
