@@ -22,8 +22,6 @@ def ejecutar(id_periodo_evaluacion):
     areas_periodo = periodoEvaluacion.areasSGA.values_list('siglas', flat=True)
     for docente in periodoEvaluacion.periodoAcademico.docentes.all():
         carreras_areas = docente.get_carreras_areas()
-        escritor.writerow(("""CEDULA, APELLIDO 1, APELLIDO 2, NOMBRE 1, NOMBRE2, AUTOEVALUACION, PAR ACADEMICO, 
-                                  DIRECTIVO , HETEROEVALUACION"""))
         for carrera, area in carreras_areas:
             # peque bug
             if 'MED' not in areas_periodo and 'MED' in carrera:
