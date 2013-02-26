@@ -794,6 +794,7 @@ class TabulacionEvaluacion2013:
                     ).values_list('id', flat=True)
             if not contestaciones:
                 logg.warning('No hay evaluaciones de {0} para el docente {1}'.format(tipo,id_docente))
+                contestaciones = []
                 print "No hay contestaciones de " + tipo + '-' + str(id_docente)
                 continue
             # Otencion de promedios por pregunta
@@ -804,6 +805,12 @@ class TabulacionEvaluacion2013:
             cursor.close()
             # Diccionario a partir de lista compresa de tuplas conformadas por ids de pregunta con sus promedio
             promedios_preguntas = dict([(Pregunta.objects.get(id=id_pregunta), promedio) for id_pregunta, promedio in result])
+            ## ############ ARREGLAR CEROS 
+            """
+            if not contestaciones :
+                promedios_preguntas = dict( [(Pregunta.objects.get(id=id_pregunta), 0.0) for id_pregunta in preguntas] )
+                print 'pormedios preguntas ', promedios_preguntas
+            """
             indicadores = {}
             # Sumatorias por pregunta
             for pregunta, promedio in promedios_preguntas.items():
@@ -878,7 +885,7 @@ class TabulacionEvaluacion2013:
             elif informantes == ['directivo', 'docente', 'estudiante', 'paracademico']:
                 # (pe + ve) + ((pdir * vdir) + (ppa * vpa)) + (pd * vd))
                 primaria = pesos['estudiante'] * valores['estudiante']
-                primaria += pesos['directivo'] * valores['directivo']
+                primaria += pesos['docente'] * valores['docente']
                 primaria += pesos['paracademico'] * valores['paracademico']
                 primaria += pesos['directivo'] * valores['directivo']
 

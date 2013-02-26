@@ -22,6 +22,8 @@ def ejecutar(id_periodo_evaluacion):
     areas_periodo = periodoEvaluacion.areasSGA.values_list('siglas', flat=True)
     for docente in periodoEvaluacion.periodoAcademico.docentes.all():
         carreras_areas = docente.get_carreras_areas()
+        escritor.writerow(("""CEDULA, APELLIDO 1, APELLIDO 2, NOMBRE 1, NOMBRE2, AUTOEVALUACION, PAR ACADEMICO, 
+                                  DIRECTIVO , HETEROEVALUACION"""))
         for carrera, area in carreras_areas:
             # peque bug
             if 'MED' not in areas_periodo and 'MED' in carrera:
@@ -30,7 +32,8 @@ def ejecutar(id_periodo_evaluacion):
             total = resultados.get('total',0)
             promedios = resultados.get('promedios', {})
             logg.info('{0} resultados: {1} - {2}'.format(docente, promedios, total))
-            fila = (docente.usuario.cedula, docente.usuario.last_name, docente.usuario.first_name,
+            fila = (docente.usuario.cedula, docente.usuario.last_name.split()[0],docente.usuario.last_name.split()[1] 
+                    docente.usuario.first_name.split()[0], docente.usuario.first_name.split()[1], 
                     str(round(promedios.get('docente', 0), 2)), str(round(promedios.get('paracademico', 0), 2)), 
                     str(round(promedios.get('directivo', 0), 2)), str(round(promedios.get('estudiante', 0), 2)), 
                     )
