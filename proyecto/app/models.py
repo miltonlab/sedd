@@ -766,6 +766,7 @@ class TabulacionEvaluacion2013:
             cuestionario = Cuestionario.objects.get(periodoEvaluacion=self.periodoEvaluacion, informante__tipo=tipo)
             # En caso de tratarse del insituto de idiomas 
             informante = tipo.lower().replace('idiomas','')
+            print "el tipo es: ", tipo.lower().replace('idiomas','')
             # Para los calculos finales
             pesos.update({informante : cuestionario.peso})  
             # Solo ids 
@@ -810,13 +811,13 @@ class TabulacionEvaluacion2013:
                 indicadores[pregunta.seccion] = suma
             # Promedio por seccion (indicador)
             for seccion, suma in indicadores.items():
-                promedio = suma / seccion.preguntas.count()
+                promedio = float(suma) / float(seccion.preguntas.count())
                 indicadores.update({seccion : promedio})
             # Porcentaje por seccion (indicador)
             ESCALA_MAXIMA = 4
             for seccion, promedio in indicadores.items():
                 porcentaje = round((100 * promedio) / ESCALA_MAXIMA)
-                indicadores.update({seccion : porcentaje})
+                indicadores.update({seccion : int(porcentaje)})
             # Genera diccionario de diccionarios
             for seccion, porcentaje in indicadores.items():
                 """ 
@@ -850,30 +851,23 @@ class TabulacionEvaluacion2013:
                 # (pdir * vdir) + (ppa * vpa)) / (pdir + ppa)
                 primaria = pesos['directivo'] * valores['directivo'] +  pesos['paracademico'] * valores['paracademico']
                 primaria = primaria / (pesos['directivo'] + pesos['paracademico'])
-                
-                aux_directivo.append(valores['directivo'])
-                aux_paracademico.append(valores['paracademico'])
-
             elif informantes == ['directivo', 'docente', 'paracademico']:
                 # ((mpne + pdir * vdir) + (mpne + ppa * vpa) + (??? + pd * cd))
                 mitad = pesos['estudiante'] / 2
                 primaria =  (mitad / 2 + pesos['directivo']) * valores['directivo']
                 primaria += (mitad / 2 + pesos['paracademico']) * valores['paracademico']
                 primaria += (mitad + pesos['docente']) * valores['docente']
-
-                aux_directivo.append(valores['directivo'])
-                aux_docente.append(valores['docente'])
-                aux_paracademico.append(valores['paracademico'])
-
+            elif informantes == ['directivo', 'estudiante', 'paracademico']:
+                # ((mpne + pdir * vdir) + (mpne + ppa * vpa) + (??? + pd * cd))
+                mitad = pesos['docente'] / 2
+                primaria =  (mitad / 2 + pesos['directivo']) * valores['directivo']
+                primaria += (mitad / 2 + pesos['paracademico']) * valores['paracademico']
+                primaria += (mitad + pesos['estudiante']) * valores['estudiante']
             elif informantes == ['docente', 'estudiante']:      
                 # (mpni + pe * ve) + (mpni + pd * vd)
                 mitad = (pesos['directivo'] + pesos['paracademico']) / 2
                 primaria = (mitad + pesos['estudiante']) * valores['estudiante']
                 primaria += (mitad + pesos['docente']) * valores['docente']
-
-                aux_docente.append(valores['docente'])
-                aux_estudiante.append(valores['estudiante'])
-                
             elif informantes == ['directivo', 'docente', 'estudiante', 'paracademico']:
                 # (pe + ve) + ((pdir * vdir) + (ppa * vpa)) + (pd * vd))
                 primaria = pesos['estudiante'] * valores['estudiante']
@@ -881,10 +875,11 @@ class TabulacionEvaluacion2013:
                 primaria += pesos['paracademico'] * valores['paracademico']
                 primaria += pesos['directivo'] * valores['directivo']
 
-                aux_estudiante.append(valores['estudiante'])
-                aux_directivo.append(valores['directivo'])
-                aux_docente.append(valores['docente'])
-                aux_paracademico.append(valores['paracademico'])
+            
+            aux_estudiante.append(valores.get('estudiante', -1))
+            aux_directivo.append(valores.get('directivo', -1))
+            aux_docente.append(valores.get('docente', -1))
+            aux_paracademico.append(valores.get('paracademico', -1))
 
             resultado.update({'primaria' : primaria})
             promedio_primaria += primaria
@@ -893,16 +888,31 @@ class TabulacionEvaluacion2013:
             resultado.update({'ponderada' : ponderada})
             resultado.update({'cualitativa' : self._cualificar_valor(primaria)})
 
-        if len(resultados_indicadores) == 0:
+        ###if len(resultados_indicadores) == 0:
             # Se detienen los calculos
-            return {}
+        ###    return {}
+        print 'Este es auxiliares'
+        print 'est', aux_estudiante
+        print 'doc', aux_docente
+        print 'pa', aux_paracademico
+        print 'dir', aux_directivo
+        
+        aux_estudiante = [e for e in aux_estudiante if e >= 0]
+        aux_docente = [e for e in aux_docente if e >= 0]
+        aux_paracademico = [e for e in aux_paracademico if e >= 0]
+        aux_directivo  = [e for e in aux_directivo if e >= 0]
 
-        promedio_primaria = promedio_primaria / len(resultados_indicadores)
+        prom_estudiante = (float(sum(aux_estudiante)) / len(aux_estudiante)) if aux_estudiante else 0
+        prom_docente = (float(sum(aux_docente)) / len(aux_docente)) if aux_docente else 0
+        prom_paracademico = (float(sum(aux_paracademico)) / len(aux_paracademico)) if aux_paracademico else 0
+        prom_directivo = (float(sum(aux_directivo)) / len(aux_directivo)) if aux_directivo else 0
+
+        promedio_primaria = promedio_primaria / len(resultados_indicadores) if resultados_indicadores else 0
         # Solo se suma la ponderacion hasta el final
-        promedios= {'estudiante' : sum(aux_estudiante) / len(aux_estudiante) if aux_estudiante else 0, 
-                    'docente' : sum(aux_docente) / len(aux_docente) if aux_docente else 0,
-                    'paracademico' : sum(aux_paracademico) / len(aux_paracademico) if aux_paracademico else 0,
-                    'directivo' : sum(aux_directivo) / len(aux_directivo) if aux_directivo else 0,
+        promedios= {'estudiante' : prom_estudiante,
+                    'docente' : prom_docente,
+                    'paracademico' : prom_paracademico,
+                    'directivo' : prom_directivo,
                     'primaria' : promedio_primaria,
                     'ponderada' : promedio_ponderada,
                     'cualitativa' : self._cualificar_valor(promedio_primaria)
