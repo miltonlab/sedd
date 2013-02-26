@@ -772,21 +772,21 @@ class TabulacionEvaluacion2013:
             preguntas = [p.id for p in cuestionario.get_preguntas() if p.tipo==TipoPregunta.objects.get(tipo='SeleccionUnica')]
             # Solo ids 
             contestaciones = None
-            if tipo == 'Estudiante':
+            if tipo.lower() == 'estudiante':
                 contestaciones = Contestacion.objects.filter(
                     evaluacion__estudianteAsignaturaDocente__asignaturaDocente__docente__id=id_docente, 
                     pregunta__in=preguntas).values_list('id', flat=True)
-            elif tipo == 'Docente':
+            elif tipo.lower() == 'docente':
                 contestaciones = Contestacion.objects.filter(
                     evaluacion__parAcademico__isnull=True, evaluacion__directorCarrera__isnull=True,
                     evaluacion__docentePeriodoAcademico__id=id_docente, pregunta__in=preguntas
                     ).values_list('id', flat=True)
-            elif tipo == 'ParAcademico':
+            elif tipo.lower() == 'paracademico':
                 contestaciones = Contestacion.objects.filter(
                     evaluacion__parAcademico__isnull=False, evaluacion__directorCarrera__isnull=True,
                     evaluacion__docentePeriodoAcademico__id=id_docente, pregunta__in=preguntas
                     ).values_list('id', flat=True)
-            elif tipo == 'Directivo':
+            elif tipo.lower() == 'directivo':
                 contestaciones = Contestacion.objects.filter(
                     evaluacion__directorCarrera__isnull=False, evaluacion__parAcademico__isnull=True,
                     evaluacion__docentePeriodoAcademico__id=id_docente, pregunta__in=preguntas
@@ -875,7 +875,7 @@ class TabulacionEvaluacion2013:
                 aux_estudiante.append(valores['estudiante'])
                 
             elif informantes == ['directivo', 'docente', 'estudiante', 'paracademico']:
-                # (pe + ve) + ((pdir * vdir) + (ppa + vpa)) + (pd * vd))
+                # (pe + ve) + ((pdir * vdir) + (ppa * vpa)) + (pd * vd))
                 primaria = pesos['estudiante'] * valores['estudiante']
                 primaria += pesos['directivo'] * valores['directivo']
                 primaria += pesos['paracademico'] * valores['paracademico']
