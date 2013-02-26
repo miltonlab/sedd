@@ -19,6 +19,7 @@ Requerimientos
  * python-django 1.3
  * python-psycopg2 2.4.2
  * python-lxml 2.3
+ * ordereddict 1.1
  * ptyhon-django-extensions 0.4.2
  * python-soappy 0.12.0
  * django-piston 0.2.3
