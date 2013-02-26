@@ -847,10 +847,16 @@ class TabulacionEvaluacion2013:
             informantes = valores.keys()
             informantes.sort()
             primaria = 0.0
+            # UN solo informante
             if informantes == ['directivo', 'paracademico']:
                 # (pdir * vdir) + (ppa * vpa)) / (pdir + ppa)
                 primaria = pesos['directivo'] * valores['directivo'] +  pesos['paracademico'] * valores['paracademico']
                 primaria = primaria / (pesos['directivo'] + pesos['paracademico'])
+            elif informantes == ['docente']:
+                primaria = valores['docente'] 
+            elif informantes == ['estudiante']:
+                primaria = valores['estudiante'] 
+            # DOS informantes
             elif informantes == ['directivo', 'docente', 'paracademico']:
                 # ((mpne + pdir * vdir) + (mpne + ppa * vpa) + (??? + pd * cd))
                 mitad = pesos['estudiante'] / 2
@@ -868,6 +874,7 @@ class TabulacionEvaluacion2013:
                 mitad = (pesos['directivo'] + pesos['paracademico']) / 2
                 primaria = (mitad + pesos['estudiante']) * valores['estudiante']
                 primaria += (mitad + pesos['docente']) * valores['docente']
+            # TRES informantes
             elif informantes == ['directivo', 'docente', 'estudiante', 'paracademico']:
                 # (pe + ve) + ((pdir * vdir) + (ppa * vpa)) + (pd * vd))
                 primaria = pesos['estudiante'] * valores['estudiante']
@@ -888,15 +895,6 @@ class TabulacionEvaluacion2013:
             resultado.update({'ponderada' : ponderada})
             resultado.update({'cualitativa' : self._cualificar_valor(primaria)})
 
-        ###if len(resultados_indicadores) == 0:
-            # Se detienen los calculos
-        ###    return {}
-        print 'Este es auxiliares'
-        print 'est', aux_estudiante
-        print 'doc', aux_docente
-        print 'pa', aux_paracademico
-        print 'dir', aux_directivo
-        
         aux_estudiante = [e for e in aux_estudiante if e >= 0]
         aux_docente = [e for e in aux_docente if e >= 0]
         aux_paracademico = [e for e in aux_paracademico if e >= 0]
