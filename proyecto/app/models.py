@@ -752,6 +752,7 @@ class TabulacionEvaluacion2013:
             )
 
     def por_docente(self, siglas_area, nombre_carrera, id_docente):
+        print 'el id de docente es ', id_docente
         resultados_indicadores = {}
         pesos = {}
         if siglas_area == 'ACE':
@@ -766,9 +767,8 @@ class TabulacionEvaluacion2013:
             cuestionario = Cuestionario.objects.get(periodoEvaluacion=self.periodoEvaluacion, informante__tipo=tipo)
             # En caso de tratarse del insituto de idiomas 
             informante = tipo.lower().replace('idiomas','')
-            print "el tipo es: ", tipo.lower().replace('idiomas','')
             # Para los calculos finales
-            pesos.update({informante : cuestionario.peso})  
+            pesos.update({informante : cuestionario.peso}) 
             # Solo ids 
             preguntas = [p.id for p in cuestionario.get_preguntas() if p.tipo==TipoPregunta.objects.get(tipo='SeleccionUnica')]
             # Solo ids 
@@ -792,30 +792,27 @@ class TabulacionEvaluacion2013:
                     evaluacion__directorCarrera__isnull=False, evaluacion__parAcademico__isnull=True,
                     evaluacion__docentePeriodoAcademico__id=id_docente, pregunta__in=preguntas
                     ).values_list('id', flat=True)
-            if not contestaciones:
-                logg.warning('No hay evaluaciones de {0} para el docente {1}'.format(tipo,id_docente))
-                contestaciones = []
-                print "No hay contestaciones de " + tipo + '-' + str(id_docente)
-                continue
-            # Otencion de promedios por pregunta
-            cursor = connection.cursor()
-            cursor.execute("""SELECT pregunta, AVG(respuesta::INT) FROM app_contestacion 
+            if contestaciones:
+                # Otencion de promedios por pregunta
+                cursor = connection.cursor()
+                cursor.execute("""SELECT pregunta, AVG(respuesta::INT) FROM app_contestacion 
                        WHERE id IN %s GROUP BY pregunta""", [tuple(contestaciones)])
-            result = cursor.fetchall()
-            cursor.close()
+                result = cursor.fetchall()
+                cursor.close()
+            else:
+                # El informante no ha contestado el cuestionario correspondiente
+                logg.warning('No hay evaluaciones del informante {0} para el docente {1}'.format(tipo,id_docente))
+                print "No hay contestaciones de " + tipo + '-' + str(id_docente)
+                result = [(id, 0.0) for id in preguntas]
+
             # Diccionario a partir de lista compresa de tuplas conformadas por ids de pregunta con sus promedio
             promedios_preguntas = dict([(Pregunta.objects.get(id=id_pregunta), promedio) for id_pregunta, promedio in result])
-            ## ############ ARREGLAR CEROS 
-            """
-            if not contestaciones :
-                promedios_preguntas = dict( [(Pregunta.objects.get(id=id_pregunta), 0.0) for id_pregunta in preguntas] )
-                print 'pormedios preguntas ', promedios_preguntas
-            """
             indicadores = {}
             # Sumatorias por pregunta
             for pregunta, promedio in promedios_preguntas.items():
                 suma = indicadores.get(pregunta.seccion,0) + promedio
-                indicadores[pregunta.seccion] = suma
+                ###indicadores[pregunta.seccion] = suma
+                indicadores.update({pregunta.seccion: suma})
             # Promedio por seccion (indicador)
             for seccion, suma in indicadores.items():
                 promedio = float(suma) / float(seccion.preguntas.count())
@@ -839,7 +836,7 @@ class TabulacionEvaluacion2013:
                     indicador = {'informantes' : {}, 'ponderacion_seccion' : seccion.ponderacion}
                 indicador['informantes'].update({ informante : porcentaje })
                 resultados_indicadores.update({seccion.codigo : indicador})
-            
+
         # -----------------------------------------------------------------------------------
         # Calculos totales en todos los indicadores de acuerdo al peso de los informantes
         # ------------------------------------------------------------------------------------
@@ -854,15 +851,11 @@ class TabulacionEvaluacion2013:
             informantes = valores.keys()
             informantes.sort()
             primaria = 0.0
-            # UN solo informante
+            # UN solo informante Comision Academica
             if informantes == ['directivo', 'paracademico']:
                 # (pdir * vdir) + (ppa * vpa)) / (pdir + ppa)
                 primaria = pesos['directivo'] * valores['directivo'] +  pesos['paracademico'] * valores['paracademico']
                 primaria = primaria / (pesos['directivo'] + pesos['paracademico'])
-            elif informantes == ['docente']:
-                primaria = valores['docente'] 
-            elif informantes == ['estudiante']:
-                primaria = valores['estudiante'] 
             # DOS informantes
             elif informantes == ['directivo', 'docente', 'paracademico']:
                 # ((mpne + pdir * vdir) + (mpne + ppa * vpa) + (??? + pd * cd))
@@ -888,37 +881,36 @@ class TabulacionEvaluacion2013:
                 primaria += pesos['docente'] * valores['docente']
                 primaria += pesos['paracademico'] * valores['paracademico']
                 primaria += pesos['directivo'] * valores['directivo']
-
             
-            aux_estudiante.append(valores.get('estudiante', -1))
-            aux_directivo.append(valores.get('directivo', -1))
-            aux_docente.append(valores.get('docente', -1))
-            aux_paracademico.append(valores.get('paracademico', -1))
-
+            primaria = round(primaria)
             resultado.update({'primaria' : primaria})
             promedio_primaria += primaria
             ponderada = primaria * resultado['ponderacion_seccion'] / 100
             promedio_ponderada += ponderada
             resultado.update({'ponderada' : ponderada})
             resultado.update({'cualitativa' : self._cualificar_valor(primaria)})
+            aux_estudiante.append(valores.get('estudiante', -1))
+            aux_directivo.append(valores.get('directivo', -1))
+            aux_docente.append(valores.get('docente', -1))
+            aux_paracademico.append(valores.get('paracademico', -1))
 
         aux_estudiante = [e for e in aux_estudiante if e >= 0]
         aux_docente = [e for e in aux_docente if e >= 0]
         aux_paracademico = [e for e in aux_paracademico if e >= 0]
         aux_directivo  = [e for e in aux_directivo if e >= 0]
 
-        prom_estudiante = (float(sum(aux_estudiante)) / len(aux_estudiante)) if aux_estudiante else 0
-        prom_docente = (float(sum(aux_docente)) / len(aux_docente)) if aux_docente else 0
-        prom_paracademico = (float(sum(aux_paracademico)) / len(aux_paracademico)) if aux_paracademico else 0
-        prom_directivo = (float(sum(aux_directivo)) / len(aux_directivo)) if aux_directivo else 0
+        prom_estudiante = (sum(aux_estudiante) / float(len(aux_estudiante))) if aux_estudiante else 0
+        prom_docente = (sum(aux_docente) / float(len(aux_docente))) if aux_docente else 0
+        prom_paracademico = (sum(aux_paracademico) / float(len(aux_paracademico))) if aux_paracademico else 0
+        prom_directivo = (sum(aux_directivo) / float(len(aux_directivo))) if aux_directivo else 0
 
-        promedio_primaria = promedio_primaria / len(resultados_indicadores) if resultados_indicadores else 0
+        promedio_primaria = (promedio_primaria / len(resultados_indicadores)) if resultados_indicadores else 0
         # Solo se suma la ponderacion hasta el final
         promedios= {'estudiante' : prom_estudiante,
                     'docente' : prom_docente,
                     'paracademico' : prom_paracademico,
                     'directivo' : prom_directivo,
-                    'primaria' : promedio_primaria,
+                    'primaria' : round(promedio_primaria,2),
                     'ponderada' : promedio_ponderada,
                     'cualitativa' : self._cualificar_valor(promedio_primaria)
                     }

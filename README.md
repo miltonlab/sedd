@@ -4,7 +4,11 @@ SEDD [Sistema de Evaluacion de Docentes]
 
 Instalación
 ------------------------------------------------------------------
+
  - Renombrar settings.cfg a settings.py y configurar cuentas de acceso
+ - Sincronizar la BD
+ - Aplicar todas las migraciones existentes
+ - Cargar los objetos iniciales Configuracion, TipoInformante y TipoPregunta
  - Modificar y copiar proyecto/apache/sedd.cfg a /etc/apache2/sites-enabled 
  - Reiniciar apache
 

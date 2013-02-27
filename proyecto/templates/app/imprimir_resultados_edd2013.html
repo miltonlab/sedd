@@ -77,19 +77,19 @@
 		<tr>
 		  <td> {{ i }} </td>
 		  <td width="10%"> 
-		  {% if r.informantes.estudiante %} {{ r.informantes.estudiante }} % {% else %} - {% endif %} 
+		  {% if r.informantes.estudiante >= 0 %} {{ r.informantes.estudiante }} % {% else %} - {% endif %} 
 		  </td>
 		  <td width="10%"> 
-		  {% if r.informantes.docente %} {{ r.informantes.docente  }} % {% else %} - {% endif %}
+		  {% if r.informantes.docente >= 0 %} {{ r.informantes.docente  }} % {% else %} - {% endif %}
 		  </td>
 		  <td width="10%"> 
-			{% if r.informantes.paracademico %} {{ r.informantes.paracademico }} % {% else %} - {% endif %} 
+			{% if r.informantes.paracademico >= 0 %} {{ r.informantes.paracademico }} % {% else %} - {% endif %} 
 		  </td>
 		  <td width="10%"> 
-		  {% if r.informantes.directivo %} {{ r.informantes.directivo }} % {% else %} - {% endif %} 
+		  {% if r.informantes.directivo >= 0%} {{ r.informantes.directivo }} % {% else %} - {% endif %} 
 		  </td>
 		  <td width="10%"> 
-		  {% if r.primaria %} {{ r.primaria|floatformat:"2" }} % {% else %} - {% endif %}
+		  {% if r.primaria >= 0 %} {{ r.primaria|floatformat:"0" }} % {% else %} - {% endif %}
 		  </td>
 		  <td width="10%"> {{ r.ponderada|floatformat:"2" }} <b>/</b> {{ r.ponderacion_seccion }} </td>
 		  <td width="10%"> {{ r.cualitativa }} </td>
@@ -105,7 +105,7 @@
 		 <td width="10%"> {{ promedios.docente|floatformat:"2" }} % </td>
 		 <td width="10%"> {{ promedios.paracademico|floatformat:"2" }} % </td>
 		 <td width="10%"> {{ promedios.directivo|floatformat:"2" }} % </td>
-		 <td width="10%"> <b> {{ promedios.primaria|floatformat:"2" }} %  </b> </td>
+		 <td width="10%"> <b> {{ promedios.primaria }} %  </b> </td>
 		 <td width="10%"> <b> {{ promedios.ponderada|floatformat:"2" }} / 100 </b> </td>
 		 <td width="10%"> <b> {{ promedios.cualitativa }} </b> </td>
 		 </b>
