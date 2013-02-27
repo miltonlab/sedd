@@ -256,15 +256,12 @@ class AsignaturaDocente(models.Model):
         return u"{0} >> {1}".format(self.docente, self.asignatura.nombre)
 
 
-# Todas las carreras
-carreras = Asignatura.objects.values_list('carrera', 'carrera').order_by('carrera').distinct()
-
 class DocentePeriodoAcademico(models.Model):
     usuario = models.ForeignKey('Usuario', related_name='docentePeriodosAcademicos')
     periodoAcademico = models.ForeignKey('PeriodoAcademico', related_name='docentes',
                                          verbose_name=u'Periodo Académico', db_column='periodo_academico_id')
     # Atributo agregado por efectos de migracion de docentes sin informacion de asignaturas
-    carrera = models.CharField(max_length='500', choices=carreras, blank=True, null=True)
+    carrera = models.CharField(max_length='500', blank=True, null=True)
     # Pertenece a la Comision Academica de la Carrera?
     parAcademico = models.BooleanField()
     
@@ -304,16 +301,9 @@ class DocentePeriodoAcademico(models.Model):
         return u'{0} {1}'.format(self.usuario.abreviatura, self.usuario.get_full_name())
 
 
-# Todas las carrera que riguen en el Periodo Académico Actual
-carreras_areas = AsignaturaDocente.objects.filter(
-    docente__periodoAcademico=Configuracion.getPeriodoAcademicoActual()).values_list(
-    'asignatura__carrera', 'asignatura__area').order_by(
-    'asignatura__carrera').distinct()
-carreras_areas = [('|'.join(c),'|'.join(c)) for c in  carreras_areas]
-
 class DireccionCarrera(models.Model):
     # Nombre de la Carrera más el Área
-    carrera = models.CharField(max_length=255, choices=carreras_areas, unique=True, 
+    carrera = models.CharField(max_length=255, unique=True, 
                                verbose_name=u'Carrera-Area')
     # Director o Coordinador de Carrera
     director = models.ForeignKey('DocentePeriodoAcademico', verbose_name=u"Coordinador",
@@ -452,8 +442,7 @@ class Evaluacion(models.Model):
     # Evaluaciones de DIRECCIONES DE CARRERA # Docente Director
     directorCarrera = models.ForeignKey('DocentePeriodoAcademico', related_name='evaluaciones_director', null=True)
     # Evaluaciones de DIRECCIONES DE CARRERA # Nombre de la Carrera mas el Area
-    carreraDirector =  models.CharField(max_length=255, choices=carreras_areas, 
-                                        verbose_name=u'Carrera-Area', blank=True, null=True)
+    carreraDirector =  models.CharField(max_length=255, verbose_name=u'Carrera-Area', blank=True, null=True)
 
     def evaluador(self):
         # Evaluacion del Estudiante a sus docentes
