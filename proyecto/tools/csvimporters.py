@@ -3,20 +3,29 @@ from proyecto.app.models  import PeriodoAcademico
 from proyecto.app.models  import DocentePeriodoAcademico
 from proyecto.app.models  import EstudiantePeriodoAcademico
 from proyecto.app.models  import Asignatura
+from proyecto.app.models  import AsignaturaDocente
+from proyecto.app.models  import EstudianteAsignaturaDocente
 from proyecto.app.models  import Usuario
+
 import datetime
 from datetime import datetime 
 import codecs 
 
-def importar_docentes(archivo, paralelo=False):
+def importar_docentes(archivo):
+    """
+    archivo: csv
+    idSGA: asignatura unica
+    """
     f = codecs.open(archivo, mode='rb', encoding='utf-8')
     lineas = f.readlines()
     docentes = []
     for linea in lineas:
         # Con cierta validacion
         cedula, nombres, apellidos, titulo, email, periodoAcademicoId  = linea.split(';')[:6]
+        if len(cedula) == 9:
+            cedula = '0' + cedula
         try:
-            usuario = Usuario.objects.get(cedula=cedula)
+            usuario = Usuario.objects.get(username=cedula)
         except Usuario.DoesNotExist:
             usuario = Usuario()
             usuario.username = cedula
@@ -25,26 +34,34 @@ def importar_docentes(archivo, paralelo=False):
             usuario.last_name = apellidos
             usuario.titulo = titulo
             usuario.email = email
+            # Se graba el usuario
+            usuario.save()
         try:
             periodoAcademicoId = int(periodoAcademicoId)
             periodoAcademico = PeriodoAcademico.objects.get(id=periodoAcademicoId)
         except (PeriodoAcademico.DoesNotExist, ValueError):
             periodoAcademico = None
-        docente = DocentePeriodoAcademico(usuario=usuario, periodoAcademico=periodoAcademico)
+        docente = DocentePeriodoAcademico.objects.get_or_create(usuario=usuario, periodoAcademico=periodoAcademico)
         docentes.append(docente)
     return docentes
 
 
-def importar_estudiantes(archivo=None, paralelo=False):
+def importar_estudiantes(archivo=None, idSGA=False):
+    """
+    archivo: csv
+    idSGA: asignatura/paralelo unica(o)
+    """
     f = codecs.open(archivo, mode='rb', encoding='utf-8')
     lineas = f.readlines()
     estudiantes = []
     for linea in lineas:
-        if paralelo:
-            cedula, nombres, apellidos, titulo, email, periodoAcademicoId, paralelo  = linea.split(';')
+        if idSGA:
+            cedula, nombres, apellidos, email, periodoAcademicoId, idSGA = linea.split(';')
         else:
             # Se toma solo los 6 primeros campos, por validacion
-            cedula, nombres, apellidos, titulo, email, periodoAcademicoId = linea.split(';')[:6]
+            cedula, nombres, apellidos, email, periodoAcademicoId = linea.split(';')[:5]
+        if len(cedula) == 9:
+            cedula = '0' + cedula
         try:
             usuario = Usuario.objects.get(cedula=cedula)
         except Usuario.DoesNotExist:
@@ -53,16 +70,22 @@ def importar_estudiantes(archivo=None, paralelo=False):
             usuario.cedula = cedula
             usuario.first_name = nombres
             usuario.last_name = apellidos
-            usuario.titulo = titulo
             usuario.email = email
+            # Se graba el usuario
+            usuario.save()
         try:
             periodoAcademicoId = int(periodoAcademicoId)
             periodoAcademico = PeriodoAcademico.objects.get(id=periodoAcademicoId)
         except (PeriodoAcademico.DoesNotExist, ValueError):
             periodoAcademico = None
-        estudiante = EstudiantePeriodoAcademico(usuario=usuario, periodoAcademico=periodoAcademico)
-        if paralelo:
-            estudiantes.append(dict(estudiante=estudiante, paralelo=paralelo))
+        (estudiante, nuevo) = EstudiantePeriodoAcademico.objects.get_or_create(
+            usuario=usuario, periodoAcademico=periodoAcademico)
+        if idSGA:
+            idSGA=idSGA.replace(' ','').replace('\n','')
+            asignaturasDocente = AsignaturaDocente.objects.filter(asignatura__idSGA=idSGA).all()
+            for ad in asignaturasDocente:
+                ead = EstudianteAsignaturaDocente.objects.get_or_create(estudiante=estudiante, asignaturaDocente=ad)
+            #estudiantes.append(dict(estudiante=estudiante, idSGA=idSGA.replace(' ','').replace('\n','')))
         else:
             estudiantes.append(estudiante)
     return estudiantes
@@ -88,12 +111,19 @@ def importar_asignaturas(archivo, docente=False):
                 fin=datetime.strptime(lista[11],'%d/%m/%Y').date(), 
                 idSGA=lista[12].replace(' ','').upper(), periodoAcademico=periodoAcademico
                 )
+            asignatura.save()
             if docente:
-                cedula = lista[13]
-                docente = DocentePeriodoAcademico.objects.get(
-                    usuario__cedula=cedula, periodoAcademico=periodoAcademico
-                    )
-                asignaturas.append(dict(asignatura=asignatura, docente=docente))
+                cedula = linea.split(';')[14].replace('\n','')
+                try:
+                    docente = DocentePeriodoAcademico.objects.get(
+                        usuario__cedula=cedula, periodoAcademico=periodoAcademico
+                        )
+                    # Se crea asignaturaDocente
+                    (asignatura, nuevo) = AsignaturaDocente.objects.get_or_create(asignatura=asignatura, docente=docente)
+                except DocentePeriodoAcademico.DoesNotExist:
+                    print "Error no existe el docente {0}".format(cedula)
+                    docente = None
+                #asignaturas.append(dict(asignatura=asignatura, docente=cedula))
             else:
                 asignaturas.append(asignatura)
         except ValueError, err:

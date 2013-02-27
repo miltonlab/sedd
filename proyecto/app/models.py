@@ -617,7 +617,8 @@ class PeriodoEvaluacion(models.Model):
     inicio = models.DateTimeField()
     fin = models.DateTimeField()
     periodoAcademico = models.ForeignKey('PeriodoAcademico', related_name='periodosEvaluacion', verbose_name="Periodo Académico")
-    areasSGA = models.ManyToManyField(AreaSGA, related_name='periodosEvaluacion', verbose_name=u'Areas Académicas SGA')
+    areasSGA = models.ManyToManyField(AreaSGA, related_name='periodosEvaluacion', 
+                                      verbose_name=u'Areas Académicas SGA', null=True, blank=True)
     
     class Meta:
         ordering = ['inicio', 'fin']
