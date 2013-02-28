@@ -225,10 +225,10 @@ def estudiante_asignaturas_docentes(request, num_carrera):
             else:
                 cuestionarios = [c for c in periodoEvaluacion.cuestionarios.all() 
                                  if c.informante.tipo == 'Estudiante']
-
             estudianteAsignaturaDocente = estudiante.asignaturasDocentesEstudiante.get(
                 asignaturaDocente__asignatura=a, asignaturaDocente__docente=d
                 )
+            print "estudianteAsignaturaDocente", estudianteAsignaturaDocente
             # Si ya ha contestado todos los cuestionario disponibles para el docente 'd'
             num_evaluaciones = estudianteAsignaturaDocente.evaluaciones.count()
             if num_evaluaciones > 0 and num_evaluaciones == len(cuestionarios):
@@ -366,15 +366,6 @@ def encuestas(request, id_docente, id_asignatura=0, id_tinformante=0, id_cuestio
             elif asignaturaDocente.asignatura.area == "ACE":
                 cuestionarios = [c for c in periodoEvaluacionActual.cuestionarios.all() 
                                  if c.informante.tipo == 'EstudianteIdiomas']
-            # Estudiante del Primer Semestre
-            elif asignaturaDocente.asignatura.semestre == u"1":
-                cuestionarios = [c for c in periodoEvaluacionActual.cuestionarios.all() 
-                                 if c.informante.tipo == 'EstudianteNovel']
-                # Si los cuestionarios son los mismos para todos los semestres
-                #TODO: ?
-                #if len(cuestionarios) == 0:
-                #    cuestionarios = [c for c in periodoEvaluacionActual.cuestionarios.all() 
-                #                 if c.informante.tipo == 'Estudiante']
             # Estudiante del segundo semestre en adelante
             else:
                 cuestionarios = [c for c in periodoEvaluacionActual.cuestionarios.all() 
