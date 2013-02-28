@@ -11,7 +11,7 @@
 <!-- Estudiante -->
 {% if request.session.estudiante %}
 {% if request.session.carreras_estudiante|length > 0 %}
-<h1> Carreras del Estudiante </h1>
+<h1> Campos del Conocimiento  del Estudiante </h1>
 <ul style="margin-top: 20px;">
   {% for carrera in request.session.carreras_estudiante %}
   <h1> 

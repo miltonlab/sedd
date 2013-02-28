@@ -222,15 +222,6 @@ def estudiante_asignaturas_docentes(request, num_carrera):
             elif a.area == 'ACE':
                 cuestionarios = [c for c in periodoEvaluacion.cuestionarios.all() 
                                  if c.informante.tipo == 'EstudianteIdiomas']
-            # Modalidad Prescencial
-            elif a.semestre == u"1":
-                cuestionarios = [c for c in periodoEvaluacion.cuestionarios.all() 
-                                 if c.informante.tipo == 'EstudianteNovel']
-                # Si tienen los mismos cuestionarios que el resto de semestres
-                # TODO: ?
-                #if len(cuestionarios) == 0:
-                #    cuestionarios = [c for c in periodoEvaluacion.cuestionarios.all() 
-                #                 if c.informante.tipo == 'Estudiante']
             else:
                 cuestionarios = [c for c in periodoEvaluacion.cuestionarios.all() 
                                  if c.informante.tipo == 'Estudiante']
