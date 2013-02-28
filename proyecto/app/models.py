@@ -66,6 +66,7 @@ class PeriodoAcademico(models.Model):
     periodoLectivo = models.CharField(max_length=100,db_column='periodo_lectivo')
     ofertasAcademicasSGA = models.ManyToManyField('OfertaAcademicaSGA', related_name='peridosAcademicos', blank=True, null=True, verbose_name='Ofertas SGA')
 
+    """
     def cargarOfertasSGA(self):
         proxy = SGA(settings.SGAWS_USER, settings.SGAWS_PASS)
         ofertas_dict = proxy.ofertas_academicas(self.inicio, self.fin)
@@ -79,12 +80,12 @@ class PeriodoAcademico(models.Model):
                 oa.save()
 
     def save(self, *args, **kwargs):
-        """
-           Cada vez que se crea un nuevo Periodo Académico se consultan las ofertas academicas del SGA para adherirlas.
-           Luego se pueden eliminar desde la aplicación de administración.
-           @author: Milton Labanda
-           @date: 04-05-2012
-        """
+        
+        #   Cada vez que se crea un nuevo Periodo Académico se consultan las ofertas academicas del SGA para adherirlas.
+        #   Luego se pueden eliminar desde la aplicación de administración.
+        #   @author: Milton Labanda
+        #   @date: 04-05-2012
+
         nuevo = False
         if not self.pk:
             nuevo = True
@@ -94,6 +95,7 @@ class PeriodoAcademico(models.Model):
                 self.cargarOfertasSGA()
             except Exception, ex: 
                 logg.error("Error al cargar ofertas academicas del SGA: {0}".format(ex))
+    """
 
     class Meta:
         ordering = ['inicio']
