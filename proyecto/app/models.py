@@ -52,8 +52,8 @@ class OfertaAcademicaSGA(models.Model):
     descripcion = models.CharField(max_length='100', verbose_name='Descripción')
 
     class Meta:
-        verbose_name = 'Oferta Académica'
-        verbose_name_plural = 'Ofertas Académicas'
+        verbose_name = u'Oferta Académica'
+        verbose_name_plural = u'Ofertas Académicas'
     
     def __unicode__(self):
         return self.descripcion

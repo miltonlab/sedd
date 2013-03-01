@@ -737,7 +737,7 @@ def menu_academico_ajax(request):
 def resultados_carrera(request, num_carrera):
     datos = dict()
     try:
-        # Carreras cuya dirección está a cargo del docente
+        # Carreras cuya direccion esta a cargo del docente
         # Almacenadas en la vista previa 'index'
         carreras_director = request.session['carreras_director']
         for cd in carreras_director:
@@ -752,7 +752,7 @@ def resultados_carrera(request, num_carrera):
         # Objeto AreaSGA 
         area = AreaSGA.objects.get(siglas=area_siglas)
         periodoAcademico = Configuracion.getPeriodoAcademicoActual()
-        # Periodos de Evaluación del Periodo Académico Actual 
+        # Periodos de Evaluación del Periodo Academico Actual 
         periodosEvaluacion = area.periodosEvaluacion.filter(periodoAcademico=periodoAcademico)
         form = forms.Form()
         # Selecciona solo los peridos de evaluacion en los que se encuentra el area del docente director
@@ -768,8 +768,8 @@ def resultados_carrera(request, num_carrera):
 
 def menu_resultados_carrera(request, id_periodo_evaluacion):
     """
-    Genera el menú de opciones para reportes de acuerdo al periodo de evaluacion
-    y su tipo de tabulación especificamente. Llamado con Ajax.
+    Genera el menu de opciones para reportes de acuerdo al periodo de evaluacion
+    y su tipo de tabulacion especificamente. Llamado con Ajax.
     """
     try:
         periodoEvaluacion=PeriodoEvaluacion.objects.get(id=id_periodo_evaluacion)
@@ -793,7 +793,7 @@ def menu_resultados_carrera(request, id_periodo_evaluacion):
             formulario_formateado = render_to_string("admin/app/formulario_eaad2012.html", dict(form=form))
         elif tabulacion.tipo == 'EDD2013':
             tabulacion = TabulacionEvaluacion2013(periodoEvaluacion)
-            form = ResultadosEDD2013Form(tabulacion, area, carrera)   
+            form = ResultadosEDD2013Form(tabulacion, area, carrera)
             formulario_formateado = render_to_string("admin/app/formulario_edd2013.html", dict(form=form))
         return HttpResponse(formulario_formateado)
     except PeriodoEvaluacion.DoesNotExist:
@@ -813,6 +813,7 @@ def mostrar_resultados(request):
     tabulacion = periodoEvaluacion.tabulacion
 
     # Encuesta de Satisfaccion Estudiantil 2012
+    # ------------------------------------------------------------------------
     if tabulacion.tipo == 'ESE2012':
         tabulacion = TabulacionSatisfaccion2012(periodoEvaluacion)
         metodo =  [c[2] for c in tabulacion.calculos if c[0] == opcion][0]
@@ -848,14 +849,15 @@ def mostrar_resultados(request):
         if resultados:
             resultados['titulo'] = titulo
         plantilla = 'app/imprimir_resultados_ese2012.html'
+
     # Evaluacion de Actividades Adiconales a la Docencia 2011 - 2012
+    # -----------------------------------------------------------------------
     if tabulacion.tipo == 'EAAD2012':
         # Nombre completo del Area para su presentacion en el reporte
         area = AreaSGA.objects.get(siglas=request.session['area']).nombre
         carrera = request.session['carrera']
         tabulacion = TabulacionAdicionales2012(periodoEvaluacion)
         metodo =  [c[2] for c in tabulacion.calculos if c[0] == opcion][0]
-       
         # Por docente
         resultados = {}
         if opcion == 'a':
@@ -874,10 +876,13 @@ def mostrar_resultados(request):
             resultados['carrera'] = carrera
             resultados['area'] = area
         plantilla = 'app/imprimir_resultados_eaad2012.html'
-   # Evaluacion del Desempeño Docente 2012 - 2013
+
+    # Evaluacion del Desempenio Docente 2012 - 2013
+    # ----------------------------------------------------------------------------
     if tabulacion.tipo == 'EDD2013':
         # Nombre completo del Area para su presentacion en el reporte
         area = AreaSGA.objects.get(siglas=request.session['area']).nombre
+        area_siglas = request.session['area']
         carrera = request.session['carrera']
         tabulacion = TabulacionEvaluacion2013(periodoEvaluacion)
         metodo =  [c[2] for c in tabulacion.calculos if c[0] == opcion][0]
@@ -889,7 +894,7 @@ def mostrar_resultados(request):
                 docente = DocentePeriodoAcademico.objects.get(id=int(id_docente))
                 # Referencia a lo que devuelve el metodo especifico invocado sobre la instancia de Tabulacion 
                 resultados = metodo(request.session['area'], request.session['carrera'], int(id_docente))
-        elif opcion == 'z':
+        elif opcion == 'b':
             pass
         # Para el resto de casos
         else:
