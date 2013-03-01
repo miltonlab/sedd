@@ -861,7 +861,6 @@ def mostrar_resultados(request):
         if opcion == 'a':
             id_docente = request.POST['docentes']
             if id_docente != '':
-                ###titulo += u': <b>{0}</b>'.format(DocentePeriodoAcademico.objects.get(id=int(id_docente)))
                 docente = DocentePeriodoAcademico.objects.get(id=int(id_docente))
                 # Referencia a lo que devuelve el metodo especifico invocado sobre la instancia de Tabulacion 
                 resultados = metodo(request.session['area'], request.session['carrera'], int(id_docente))
@@ -900,7 +899,6 @@ def mostrar_resultados(request):
             resultados['carrera'] = carrera
             resultados['area'] = area
         plantilla = 'app/imprimir_resultados_edd2013.html'
-        ###plantilla = 'app/en_construccion.html'
  
     return render_to_response(plantilla, resultados, context_instance=RequestContext(request));
 

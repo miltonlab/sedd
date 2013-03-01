@@ -695,7 +695,7 @@ class PeriodoEvaluacion(models.Model):
 
     def contabilizar_evaluadores(self):
         """ 
-        Cuenta los estudiantes, pares academicos y directores que hayan evaluado
+        Cuenta los estudiantes, pares academicos y directores que HAYAN EVALUADO
         a por lo menos un docente. No se controla haber evaluado a todos los docentes.
         """
         estudiantes = Evaluacion.objects.filter(
@@ -711,6 +711,24 @@ class PeriodoEvaluacion(models.Model):
             cuestionario__periodoEvaluacion=self, directorCarrera__isnull=False).values(
             'directorCarrera').distinct().count()            
         return dict(estudiantes=estudiantes, docentes=docentes, pares=pares, directores=directores)
+
+    def contabilizar_evaluados(self):
+        """ 
+        Cuenta los estudiantes, pares academicos y directores que HAN SIDO EVALUADOS
+        """
+        porEstudiantes = Evaluacion.objects.filter(
+            cuestionario__periodoEvaluacion=self, estudianteAsignaturaDocente__isnull=False).values_list(
+            'estudianteAsignaturaDocente__asignaturaDocente__docente').distinct().count()
+        porDocentes = Evaluacion.objects.filter(
+            cuestionario__periodoEvaluacion=self, docentePeriodoAcademico__isnull=False, 
+            directorCarrera__isnull=True, parAcademico__isnull=True).count()
+        porPares = Evaluacion.objects.filter(
+            cuestionario__periodoEvaluacion=self, parAcademico__isnull=False).values(
+            'docentePeriodoAcademico').distinct().count()
+        porDirectores = Evaluacion.objects.filter(
+            cuestionario__periodoEvaluacion=self, directorCarrera__isnull=False).values(
+            'docentePeriodoAcademico').distinct().count()            
+        return dict(porEstudiantes=porEstudiantes, porDocentes=porDocentes, porPares=porPares, porDirectores=porDirectores)
             
     def __unicode__(self):
         return self.nombre
@@ -752,7 +770,6 @@ class TabulacionEvaluacion2013:
             )
 
     def por_docente(self, siglas_area, nombre_carrera, id_docente):
-        print 'el id de docente es ', id_docente
         resultados_indicadores = {}
         pesos = {}
         if siglas_area == 'ACE':
@@ -765,7 +782,8 @@ class TabulacionEvaluacion2013:
         # -----------------------------------------------------------------------------------
         for tipo in tipos:
             cuestionario = Cuestionario.objects.get(periodoEvaluacion=self.periodoEvaluacion, informante__tipo=tipo)
-            # En caso de tratarse del insituto de idiomas 
+            # En caso de tratarse del insituto de idiomas se generaliza el informante
+            # Anecdota: Un error que me llevo mas de dos dias
             informante = tipo.lower().replace('idiomas','')
             # Para los calculos finales
             pesos.update({informante : cuestionario.peso}) 
@@ -773,20 +791,24 @@ class TabulacionEvaluacion2013:
             preguntas = [p.id for p in cuestionario.get_preguntas() if p.tipo==TipoPregunta.objects.get(tipo='SeleccionUnica')]
             # Solo ids 
             contestaciones = None
+            ###if informante == 'estudiante':
             if tipo.lower() == 'estudiante':
                 contestaciones = Contestacion.objects.filter(
                     evaluacion__estudianteAsignaturaDocente__asignaturaDocente__docente__id=id_docente, 
                     pregunta__in=preguntas).values_list('id', flat=True)
+            ###elif informante == 'docente':
             elif tipo.lower() == 'docente':
                 contestaciones = Contestacion.objects.filter(
                     evaluacion__parAcademico__isnull=True, evaluacion__directorCarrera__isnull=True,
                     evaluacion__docentePeriodoAcademico__id=id_docente, pregunta__in=preguntas
                     ).values_list('id', flat=True)
+            ##elif informante == 'paracademico':
             elif tipo.lower() == 'paracademico':
                 contestaciones = Contestacion.objects.filter(
                     evaluacion__parAcademico__isnull=False, evaluacion__directorCarrera__isnull=True,
                     evaluacion__docentePeriodoAcademico__id=id_docente, pregunta__in=preguntas
                     ).values_list('id', flat=True)
+            ###elif informante == 'directivo':
             elif tipo.lower() == 'directivo':
                 contestaciones = Contestacion.objects.filter(
                     evaluacion__directorCarrera__isnull=False, evaluacion__parAcademico__isnull=True,
