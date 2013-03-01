@@ -791,25 +791,21 @@ class TabulacionEvaluacion2013:
             preguntas = [p.id for p in cuestionario.get_preguntas() if p.tipo==TipoPregunta.objects.get(tipo='SeleccionUnica')]
             # Solo ids 
             contestaciones = None
-            ###if informante == 'estudiante':
-            if tipo.lower() == 'estudiante':
+            if informante == 'estudiante':
                 contestaciones = Contestacion.objects.filter(
                     evaluacion__estudianteAsignaturaDocente__asignaturaDocente__docente__id=id_docente, 
                     pregunta__in=preguntas).values_list('id', flat=True)
-            ###elif informante == 'docente':
-            elif tipo.lower() == 'docente':
+            elif informante == 'docente':
                 contestaciones = Contestacion.objects.filter(
                     evaluacion__parAcademico__isnull=True, evaluacion__directorCarrera__isnull=True,
                     evaluacion__docentePeriodoAcademico__id=id_docente, pregunta__in=preguntas
                     ).values_list('id', flat=True)
-            ##elif informante == 'paracademico':
-            elif tipo.lower() == 'paracademico':
+            elif informante == 'paracademico':
                 contestaciones = Contestacion.objects.filter(
                     evaluacion__parAcademico__isnull=False, evaluacion__directorCarrera__isnull=True,
                     evaluacion__docentePeriodoAcademico__id=id_docente, pregunta__in=preguntas
                     ).values_list('id', flat=True)
-            ###elif informante == 'directivo':
-            elif tipo.lower() == 'directivo':
+            elif informante == 'directivo':
                 contestaciones = Contestacion.objects.filter(
                     evaluacion__directorCarrera__isnull=False, evaluacion__parAcademico__isnull=True,
                     evaluacion__docentePeriodoAcademico__id=id_docente, pregunta__in=preguntas
