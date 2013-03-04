@@ -56,14 +56,21 @@
 		  <td width="10%"><b>DOCENTE</b></td> <td style="text-align: left;" width="90%">{{ docente }}</td>
 		</tr>
 		{% endif %}
-		<!-- Si se filtra por Componente -->
-		{% if seccion %}
+	  </table>
+	  <!-- Si se filtra por Componente -->
+	  {% if seccion_componente  %}
+	  <table>
 		<tr>
-		  <td width="10%"><b>COMPONENTE</b></td> <td style="text-align: left;" width="90%">{{ seccion.titulo }}</td>
+		  <td style="text-align: left;" width="40%">
+			<h2> {{ seccion_componente.titulo }}:</h2> 
+		  </td>
+		  <td style="text-align: left;">
+			<h3> {{ seccion_componente.descripcion }} </h3>
+		  </td>
 		</tr>
-		{% endif %}
       </table>
-	  
+	  {% endif %}	  
+
       <!-- Tabla Central -->
 
       <table id="tabla-resultados" width="100%" cellspacing="0" >

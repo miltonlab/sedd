@@ -881,7 +881,7 @@ def mostrar_resultados(request):
     # Evaluacion del Desempenio Docente 2012 - 2013
     # ----------------------------------------------------------------------------
     if tabulacion.tipo == 'EDD2013':
-        codigos_filtro = {'a' : 'Todos', 'b' : 'CPF', 'c' : 'CPG', 'd' : 'PV'}
+        codigos_filtro = {'a' : '', 'b' : 'CPF', 'c' : 'CPG', 'd' : 'PV'}
         # Nombre completo del Area para su presentacion en el reporte
         area = AreaSGA.objects.get(siglas=request.session['area']).nombre
         area_siglas = request.session['area']

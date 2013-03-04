@@ -817,7 +817,11 @@ class TabulacionEvaluacion2013:
             tipos = ('EstudianteIdiomas', 'DocenteIdiomas', 'ParAcademicoIdiomas', 'DirectivoIdiomas')
         else:
             tipos = ('Estudiante', 'Docente', 'ParAcademico', 'Directivo')
-
+        if not componente:
+            seccion_componente = None
+        else:
+            # Se pasa de string a objeto seccion para sacar datos en la plantilla
+            seccion_componente = Seccion.objects.filter(cuestionario__periodoEvaluacion=self.periodoEvaluacion, codigo=componente)[0]
         # -----------------------------------------------------------------------------------
         # Promedios de cada indicador
         # -----------------------------------------------------------------------------------
@@ -829,15 +833,12 @@ class TabulacionEvaluacion2013:
             # Para los calculos finales
             pesos.update({informante : cuestionario.peso}) 
             # Solo ids 
-            if componente.lower() == 'todos':
+            if not componente:
                 preguntas = [p.id for p in cuestionario.get_preguntas() if p.tipo==TipoPregunta.objects.get(tipo='SeleccionUnica')]
-                seccion = None
             else:
                 preguntas = [p.id for p in cuestionario.get_preguntas() if 
                              p.tipo==TipoPregunta.objects.get(tipo='SeleccionUnica') and
                              p.seccion.superseccion.codigo==componente ]
-                # Se pasa de string a objeto seccion
-                seccion = cuestionario.secciones.filter(codigo=componente)[0]
             # Solo ids 
             contestaciones = None
             if informante == 'estudiante':
@@ -985,7 +986,7 @@ class TabulacionEvaluacion2013:
         resultados_indicadores = OrderedDict(sorted(resultados_indicadores.items(), key=lambda i: i[0]))
         logg.info('Calculado docente: {0} promedios: {1} total: {2}'.format(ids_docentes, promedios, promedio_ponderada))
         return dict(resultados_indicadores=resultados_indicadores, promedios=promedios, 
-                    total=promedio_ponderada, componente=seccion)
+                    total=promedio_ponderada, seccion_componente=seccion_componente)
 
     def _cualificar_valor(self, valor):
         """ Se cualifica con valores enteros """
