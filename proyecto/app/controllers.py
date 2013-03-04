@@ -881,6 +881,8 @@ def mostrar_resultados(request):
     # Evaluacion del Desempenio Docente 2012 - 2013
     # ----------------------------------------------------------------------------
     if tabulacion.tipo == 'EDD2013':
+        if opcion  == 'c' and not request.user.is_staff:
+            return HttpResponse("<h2> Ud no tiene permisos para revisar este reporte </h2>")
         codigos_filtro = {'a' : '', 'b' : 'CPF', 'c' : 'CPG', 'd' : 'PV'}
         # Nombre completo del Area para su presentacion en el reporte
         area = AreaSGA.objects.get(siglas=request.session['area']).nombre
@@ -913,8 +915,6 @@ def mostrar_resultados(request):
         # Para el resto de casos
         else:
             resultados = metodo(request.session['area'], request.session['carrera'], filtro)
-        if resultados:
-            resultados['area'] = area
         plantilla = 'app/imprimir_resultados_edd2013.html'
  
     return render_to_response(plantilla, resultados, context_instance=RequestContext(request));
