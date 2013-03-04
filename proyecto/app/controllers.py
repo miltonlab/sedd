@@ -655,10 +655,10 @@ def calcular_resumen(request):
     
 def menu_academico_ajax(request):
     """
-    Funcionalidad reutilizada cuando se necesita información académica jerárquica
+    Funcionalidad reutilizada cuando se necesita informacion académica jerárquica
     estructurada en (PeriodoAcademico, PeriodoEvaluacion, AreaSGA, carrera, semestre,
     paralelo). Utilizado generalmente en menus de reportes.
-    TODO: Analizar el parámetro 'siguiente' en más casos para crear un componente más independiente.
+    TODO: Analizar el parametro 'siguiente' en otros casos para crear un componente mas independiente.
     """
     try:
         id_campo = request.GET['id']
@@ -808,6 +808,7 @@ def mostrar_resultados(request):
     id_periodo = request.POST['periodo_evaluacion']
     if id_periodo == '':
         return HttpResponse("<h2> Tiene que elegir el Periodo de Evaluación </h2>")
+    # Se obtiene la opcion generica para cualquier tipo de evaluacion
     opcion = request.POST['opciones']
     periodoEvaluacion=PeriodoEvaluacion.objects.get(id=int(id_periodo))
     tabulacion = periodoEvaluacion.tabulacion
@@ -880,12 +881,15 @@ def mostrar_resultados(request):
     # Evaluacion del Desempenio Docente 2012 - 2013
     # ----------------------------------------------------------------------------
     if tabulacion.tipo == 'EDD2013':
+        codigos_filtro = {'a' : 'Todos', 'b' : 'CPF', 'c' : 'CPG', 'd' : 'PV'}
         # Nombre completo del Area para su presentacion en el reporte
         area = AreaSGA.objects.get(siglas=request.session['area']).nombre
         area_siglas = request.session['area']
         carrera = request.session['carrera']
         tabulacion = TabulacionEvaluacion2013(periodoEvaluacion)
         metodo =  [c[2] for c in tabulacion.calculos if c[0] == opcion][0]
+        filtro = request.POST['filtros']
+        filtro = codigos_filtro[filtro]
         # Por docente
         resultados = {}
         if opcion == 'a':
@@ -893,15 +897,23 @@ def mostrar_resultados(request):
             if id_docente != '':
                 docente = DocentePeriodoAcademico.objects.get(id=int(id_docente))
                 # Referencia a lo que devuelve el metodo especifico invocado sobre la instancia de Tabulacion 
-                resultados = metodo(request.session['area'], request.session['carrera'], int(id_docente))
+                resultados = metodo(request.session['area'], request.session['carrera'], int(id_docente), filtro)
+                resultados['docente'] = docente
+                resultados['carrera'] = carrera
+                resultados['area'] = area
         elif opcion == 'b':
-            pass
+            # Por Carrera
+            resultados = metodo(request.session['area'], request.session['carrera'], filtro)
+            resultados['carrera'] = carrera
+            resultados['area'] = area
+        elif opcion == 'c':
+            # Por Area
+            resultados = metodo(request.session['area'], filtro)
+            resultados['area'] = area
         # Para el resto de casos
         else:
-            resultados = metodo(request.session['area'], request.session['carrera'])
+            resultados = metodo(request.session['area'], request.session['carrera'], filtro)
         if resultados:
-            resultados['docente'] = docente
-            resultados['carrera'] = carrera
             resultados['area'] = area
         plantilla = 'app/imprimir_resultados_edd2013.html'
  

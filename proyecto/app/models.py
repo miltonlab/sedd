@@ -2,6 +2,7 @@
 
 from django.db import models
 from django.db import connection
+from django.db.models import Q
 from django.db.models import Count
 from django.db.models import exceptions
 from django.contrib.auth.models import User
@@ -765,11 +766,51 @@ class TabulacionEvaluacion2013:
         self.periodoEvaluacion = periodoEvaluacion
         self.calculos = (
             # codigo, descripcion, metodo, titulo 
-            ('a',u'Resultados de la Evaluación del Desempeño Académico POR DOCENTE',
+            ('a', u'Resultados de la Evaluación del Desempeño Académico POR DOCENTE',
              self.por_docente, u'Evaluación del Desempeño Académico por Docente'),
+            ('b', u'Resultados de la Evaluación del Desempeño Académico POR CARRERA',
+            self.por_carrera, u'Evaluación del Desempeño Académico por Carrera'),
+            ('c', u'Resultados de la Evaluación del Desempeño Académico POR AREA',
+            self.por_area, u'Evaluación del Desempeño Académico por Area'),
             )
 
-    def por_docente(self, siglas_area, nombre_carrera, id_docente):
+    def por_docente(self, siglas_area, nombre_carrera, id_docente, componente=None):
+        # Se pasa un tupla no un solo id
+        return self.calculo_generico(siglas_area, nombre_carrera, (id_docente,), componente)
+
+    def por_carrera(self, siglas_area, nombre_carrera, componente):
+        # Obtenemos los id de los Docentes que dictan Asignaturas en la carrera seleccionada
+        aux_ids = AsignaturaDocente.objects.filter(
+            docente__periodoAcademico=self.periodoEvaluacion.periodoAcademico,
+            asignatura__carrera=nombre_carrera,
+            asignatura__area=siglas_area
+            ).values_list('docente__id', flat=True).distinct()
+        # Se agregan tambien los docentes que no tengan Asignaturas pero que pertenezcan a la Carrera
+        ids_docentes = DocentePeriodoAcademico.objects.filter(
+            Q(periodoAcademico=self.periodoEvaluacion.periodoAcademico) and
+            (Q(id__in=aux_ids) or Q(carrera=nombre_carrera))
+            ).order_by('usuario__last_name', 'usuario__first_name').values_list(
+            'id', flat=True
+            )
+        return self.calculo_generico(siglas_area, nombre_carrera, ids_docentes, componente)
+
+    def por_area(self, siglas_area, componente=None):
+        # Obtenemos los id de los Docentes que dictan Asignaturas en el area seleccionada
+        aux_ids = AsignaturaDocente.objects.filter(
+            docente__periodoAcademico=self.periodoEvaluacion.periodoAcademico,
+            asignatura__area=siglas_area
+            ).values_list('docente__id', flat=True).distinct()
+        # Se agregan tambien los docentes que no tengan Asignaturas pero que pertenezcan a la Carrera
+        ids_docentes = DocentePeriodoAcademico.objects.filter(
+            Q(periodoAcademico=self.periodoEvaluacion.periodoAcademico) and
+            ( Q(id__in=aux_ids) )#TODO: No hay el area en el atributo Carrera de DocentePeriodoAcademico
+            ).order_by('usuario__last_name', 'usuario__first_name').values_list(
+            'id', flat=True
+            )
+        return self.calculo_generico(siglas_area, None , ids_docentes, componente)
+
+
+    def calculo_generico(self, siglas_area, nombre_carrera, ids_docentes, componente=None):
         resultados_indicadores = {}
         pesos = {}
         if siglas_area == 'ACE':
@@ -788,27 +829,35 @@ class TabulacionEvaluacion2013:
             # Para los calculos finales
             pesos.update({informante : cuestionario.peso}) 
             # Solo ids 
-            preguntas = [p.id for p in cuestionario.get_preguntas() if p.tipo==TipoPregunta.objects.get(tipo='SeleccionUnica')]
+            if componente.lower() == 'todos':
+                preguntas = [p.id for p in cuestionario.get_preguntas() if p.tipo==TipoPregunta.objects.get(tipo='SeleccionUnica')]
+                seccion = None
+            else:
+                preguntas = [p.id for p in cuestionario.get_preguntas() if 
+                             p.tipo==TipoPregunta.objects.get(tipo='SeleccionUnica') and
+                             p.seccion.superseccion.codigo==componente ]
+                # Se pasa de string a objeto seccion
+                seccion = cuestionario.secciones.filter(codigo=componente)[0]
             # Solo ids 
             contestaciones = None
             if informante == 'estudiante':
                 contestaciones = Contestacion.objects.filter(
-                    evaluacion__estudianteAsignaturaDocente__asignaturaDocente__docente__id=id_docente, 
+                    evaluacion__estudianteAsignaturaDocente__asignaturaDocente__docente__id__in=ids_docentes, 
                     pregunta__in=preguntas).values_list('id', flat=True)
             elif informante == 'docente':
                 contestaciones = Contestacion.objects.filter(
                     evaluacion__parAcademico__isnull=True, evaluacion__directorCarrera__isnull=True,
-                    evaluacion__docentePeriodoAcademico__id=id_docente, pregunta__in=preguntas
+                    evaluacion__docentePeriodoAcademico__id__in=ids_docentes, pregunta__in=preguntas
                     ).values_list('id', flat=True)
             elif informante == 'paracademico':
                 contestaciones = Contestacion.objects.filter(
                     evaluacion__parAcademico__isnull=False, evaluacion__directorCarrera__isnull=True,
-                    evaluacion__docentePeriodoAcademico__id=id_docente, pregunta__in=preguntas
+                    evaluacion__docentePeriodoAcademico__id__in=ids_docentes, pregunta__in=preguntas
                     ).values_list('id', flat=True)
             elif informante == 'directivo':
                 contestaciones = Contestacion.objects.filter(
                     evaluacion__directorCarrera__isnull=False, evaluacion__parAcademico__isnull=True,
-                    evaluacion__docentePeriodoAcademico__id=id_docente, pregunta__in=preguntas
+                    evaluacion__docentePeriodoAcademico__id__in=ids_docentes, pregunta__in=preguntas
                     ).values_list('id', flat=True)
             if contestaciones:
                 # Otencion de promedios por pregunta
@@ -819,8 +868,8 @@ class TabulacionEvaluacion2013:
                 cursor.close()
             else:
                 # El informante no ha contestado el cuestionario correspondiente
-                logg.warning('No hay evaluaciones del informante {0} para el docente {1}'.format(tipo,id_docente))
-                print "No hay contestaciones de " + tipo + '-' + str(id_docente)
+                logg.warning('No hay evaluaciones del informante {0} para los docentes {1}'.format(tipo,ids_docentes))
+                print "No hay contestaciones de " + tipo + ' para ' + str(ids_docentes)
                 result = [(id, 0.0) for id in preguntas]
 
             # Diccionario a partir de lista compresa de tuplas conformadas por ids de pregunta con sus promedio
@@ -934,8 +983,9 @@ class TabulacionEvaluacion2013:
                     }
         # Se ordena el diccionario por la clave (codigo del indicador)
         resultados_indicadores = OrderedDict(sorted(resultados_indicadores.items(), key=lambda i: i[0]))
-        logg.info('Calculado docente: {0} promedios: {1} total: {2}'.format(id_docente, promedios, promedio_ponderada))
-        return dict(resultados_indicadores=resultados_indicadores, promedios=promedios, total=promedio_ponderada)
+        logg.info('Calculado docente: {0} promedios: {1} total: {2}'.format(ids_docentes, promedios, promedio_ponderada))
+        return dict(resultados_indicadores=resultados_indicadores, promedios=promedios, 
+                    total=promedio_ponderada, componente=seccion)
 
     def _cualificar_valor(self, valor):
         """ Se cualifica con valores enteros """

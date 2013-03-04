@@ -41,15 +41,27 @@
       <!-- Tabla de encabezado -->
 
       <table id="tabla-docente" width="100%" border="0">
+		{% if area %}
 		<tr>
 		  <td width="10%"><b>AREA</b></td> <td style="text-align: left;" width="90%">{{ area }}</td>
 		</tr>
+		{% endif %}
+		{% if carrera %}
 		<tr>
 		  <td width="10%"><b>CARRERA</b></td> <td style="text-align: left;" width="90%">{{ carrera }}</td>
 		</tr>
+		{% endif %}
+		{% if docente %}
 		<tr>
 		  <td width="10%"><b>DOCENTE</b></td> <td style="text-align: left;" width="90%">{{ docente }}</td>
 		</tr>
+		{% endif %}
+		<!-- Si se filtra por Componente -->
+		{% if seccion %}
+		<tr>
+		  <td width="10%"><b>COMPONENTE</b></td> <td style="text-align: left;" width="90%">{{ seccion.titulo }}</td>
+		</tr>
+		{% endif %}
       </table>
 	  
       <!-- Tabla Central -->

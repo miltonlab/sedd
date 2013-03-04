@@ -16,3 +16,7 @@ cuestiones de la evaluacion 2013 en el Instituto de Idiomas... LOADDATA fixtures
  * 1103786883 Docente para calculos de resultados
  * 1103770903 Docente Coordinador Sistemas
  * 1104495070 Estudiante
+
+## DAtos de docentes que hay que agregar la evaluacion de Actividades Adicionales 2012, uno solo
+ * Mg . Rogelio Castillo Bravo o
+ * Servilla Ruque 

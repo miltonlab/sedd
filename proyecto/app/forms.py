@@ -18,7 +18,7 @@ from proyecto.app.models import Pregunta
 class ResultadosEDD2013Form(forms.Form):
     """
     Formulario Unico para los resultados de la Evaluación del 
-    Desempenoi Docente  2012 - 2013
+    Desempenio Docente  2012 - 2013
     """
 
     def __init__(self, tabulacion, area, carrera):
