@@ -752,7 +752,7 @@ def resultados_carrera(request, num_carrera):
         # Objeto AreaSGA 
         area = AreaSGA.objects.get(siglas=area_siglas)
         periodoAcademico = Configuracion.getPeriodoAcademicoActual()
-        # Periodos de Evaluación del Periodo Academico Actual 
+        # Periodos de Evaluacion del Periodo Academico Actual 
         periodosEvaluacion = area.periodosEvaluacion.filter(periodoAcademico=periodoAcademico)
         form = forms.Form()
         # Selecciona solo los peridos de evaluacion en los que se encuentra el area del docente director
@@ -883,7 +883,7 @@ def mostrar_resultados(request):
     if tabulacion.tipo == 'EDD2013':
         if opcion  == 'c' and not request.user.is_staff:
             return HttpResponse("<h2> Ud no tiene permisos para revisar este reporte </h2>")
-        codigos_filtro = {'a' : '', 'b' : 'CPF', 'c' : 'CPG', 'd' : 'PV'}
+        codigos_filtro = {'a' : '', 'b' : 'CPF', 'c' : 'CPG', 'd' : 'PV', 'e' : 'sugerencias'}
         # Nombre completo del Area para su presentacion en el reporte
         area = AreaSGA.objects.get(siglas=request.session['area']).nombre
         area_siglas = request.session['area']
@@ -915,7 +915,12 @@ def mostrar_resultados(request):
         # Para el resto de casos
         else:
             resultados = metodo(request.session['area'], request.session['carrera'], filtro)
-        plantilla = 'app/imprimir_resultados_edd2013.html'
+        print 'el filto es: ', filtro
+        if filtro == 'sugerencias':
+            # Se trata de reporte de sugerencias
+            plantilla = 'app/imprimir_sugerencias_edd2013.html'
+        else:
+            plantilla = 'app/imprimir_resultados_edd2013.html'
  
     return render_to_response(plantilla, resultados, context_instance=RequestContext(request));
 

@@ -776,7 +776,7 @@ class TabulacionEvaluacion2013:
 
     def por_docente(self, siglas_area, nombre_carrera, id_docente, componente=None):
         # Se pasa un tupla no un solo id
-        return self.calculo_generico(siglas_area, nombre_carrera, (id_docente,), componente)
+        return self.calcular(siglas_area, nombre_carrera, (id_docente,), componente)
 
     def por_carrera(self, siglas_area, nombre_carrera, componente):
         # Obtenemos los id de los Docentes que dictan Asignaturas en la carrera seleccionada
@@ -792,7 +792,7 @@ class TabulacionEvaluacion2013:
             ).order_by('usuario__last_name', 'usuario__first_name').values_list(
             'id', flat=True
             )
-        return self.calculo_generico(siglas_area, nombre_carrera, ids_docentes, componente)
+        return self.calcular(siglas_area, nombre_carrera, ids_docentes, componente)
 
     def por_area(self, siglas_area, componente=None):
         # Obtenemos los id de los Docentes que dictan Asignaturas en el area seleccionada
@@ -807,10 +807,17 @@ class TabulacionEvaluacion2013:
             ).order_by('usuario__last_name', 'usuario__first_name').values_list(
             'id', flat=True
             )
-        return self.calculo_generico(siglas_area, None , ids_docentes, componente)
+        return self.calcular(siglas_area, None , ids_docentes, componente)
 
 
-    def calculo_generico(self, siglas_area, nombre_carrera, ids_docentes, componente=None):
+    def calcular(self, siglas_area, nombre_carrera, ids_docentes, componente=None):
+        """ 
+        Metodo generico para calcular los resultados de acuerdo a los diferentes criterios
+        Si se trata del reporte de sugerencias se salta al metodo respectivo
+        """ 
+        if componente == 'sugerencias':
+            return self.extraer_sugerencias(siglas_area, nombre_carrera, ids_docentes)
+
         resultados_indicadores = {}
         pesos = {}
         if siglas_area == 'ACE':
@@ -839,7 +846,7 @@ class TabulacionEvaluacion2013:
                 preguntas = [p.id for p in cuestionario.get_preguntas() if 
                              p.tipo==TipoPregunta.objects.get(tipo='SeleccionUnica') and
                              p.seccion.superseccion.codigo==componente ]
-            # Solo ids 
+            # Solo ids
             contestaciones = None
             if informante == 'estudiante':
                 contestaciones = Contestacion.objects.filter(
@@ -990,11 +997,69 @@ class TabulacionEvaluacion2013:
 
     def _cualificar_valor(self, valor):
         """ Se cualifica con valores enteros """
-        rangos = {'IS':range(0,41), 'PS':range(41,61), 'S': range(61,81), 'D':range(81,101)}
+        rangos = {'IS':range(0,41), 'PS':range(41,61), 'S':range(61,81), 'D':range(81,101)}
         for k,v in rangos.items():
             if v[0] <= round(valor) <= v[-1]:
                 return k
         return ''
+
+    def extraer_sugerencias(self, area, carrera, ids_docentes):
+        sugerencias = {}
+        if area == 'ACE':
+            tipos = ('EstudianteIdiomas', 'DocenteIdiomas', 'ParAcademicoIdiomas', 'DirectivoIdiomas')
+        else:
+            tipos = ('Estudiante', 'Docente', 'ParAcademico', 'Directivo')
+        for id_docente in ids_docentes:
+            resultado = {}
+            # Solo nombres del docente
+            nombre_docente = DocentePeriodoAcademico.objects.get(id=id_docente).__unicode__()
+            for tipo in tipos:
+                informante = tipo.lower().replace('idiomas', '')
+                # Codigo es PV, CPG o CPF
+                preguntas_ensayo = Pregunta.objects.filter(
+                    seccion__cuestionario__periodoEvaluacion=self.periodoEvaluacion,
+                    seccion__cuestionario__informante__tipo=tipo, tipo__tipo='Ensayo'
+                    ).values('id', 'seccion__codigo')
+                resultado[tipo] = []
+                # Contendra 3 items, uno por cada componente
+                aux_contestaciones = {}
+                if informante == 'estudiante':
+                    for pregunta in preguntas_ensayo:
+                        contestaciones = Contestacion.objects.filter(
+                            evaluacion__cuestionario__informante__tipo__icontains='estudiante',
+                            evaluacion__estudianteAsignaturaDocente__asignaturaDocente__docente__id=id_docente, 
+                            pregunta=pregunta['id']).values_list('respuesta', flat=True)
+                        aux_contestaciones[pregunta['seccion__codigo']] = contestaciones
+                elif informante == 'docente':
+                    for pregunta in preguntas_ensayo:
+                        contestaciones = Contestacion.objects.filter(
+                            evaluacion__parAcademico__isnull=True, evaluacion__directorCarrera__isnull=True,
+                            evaluacion__docentePeriodoAcademico__id=id_docente, pregunta=pregunta['id']
+                            ).values_list('respuesta', flat=True)
+                        aux_contestaciones[pregunta['seccion__codigo']] = contestaciones
+                elif informante == 'paracademico':
+                    for pregunta in preguntas_ensayo:
+                        contestaciones = Contestacion.objects.filter(
+                            evaluacion__parAcademico__isnull=False, evaluacion__directorCarrera__isnull=True,
+                            evaluacion__docentePeriodoAcademico__id=id_docente, pregunta=pregunta['id']
+                            ).values_list('respuesta', flat=True)
+                        aux_contestaciones[pregunta['seccion__codigo']] = contestaciones
+                elif informante == 'directivo':
+                    for pregunta in preguntas_ensayo:
+                        contestaciones = Contestacion.objects.filter(
+                            evaluacion__directorCarrera__isnull=False, evaluacion__parAcademico__isnull=True,
+                            evaluacion__docentePeriodoAcademico__id=id_docente, pregunta=pregunta['id']
+                            ).values_list('respuesta', flat=True)
+                        aux_contestaciones[pregunta['seccion__codigo']] = contestaciones
+                # Se supone que en los tres componentes hay la misma cantidad de respuestas CPF, CPG y PV
+                num_contestaciones = len(aux_contestaciones.values()[0])
+                for i in range(num_contestaciones):
+                    aux_dict = {'CPF' : aux_contestaciones['CPF'][i], 
+                                'CPG' : aux_contestaciones['CPG'][i], 
+                                'PV' : aux_contestaciones['PV'][i]}
+                    resultado[tipo].append(aux_dict)
+            sugerencias[nombre_docente] = resultado
+        return dict(sugerencias=sugerencias)
 
 
 class TabulacionAdicionales2012:
@@ -1005,7 +1070,7 @@ class TabulacionAdicionales2012:
         self.periodoEvaluacion = periodoEvaluacion
         self.calculos = (
             # codigo, descripcion, metodo, titulo 
-            ('a',u'Resultados de la Evaluación de Actividades Adicionales a la Docencia POR DOCENTE',
+            ('a',u'Resultados de la Evaluacion de Actividades Adicionales a la Docencia POR DOCENTE',
             self.por_docente, u'Evaluación Actividades Adicionales por Docente'),
             ('b',u'Resultados de la Evaluación de Actividades Adicionales a la Docencia POR CARRERA',
              self.por_carrera, u'Evaluación Actividades Adicionales por Carrera'),
