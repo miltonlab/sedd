@@ -1,0 +1,103 @@
+<html>
+  <head>  
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8"/>
+    <title> Resultados Evaluación del Desempeño Académico 2012 - 2013 </title>
+    <style type="text/css">
+    body {
+	font-family: Helvetica, Arial, Sans;
+    }
+    table {
+	margin-top: 10px;
+	margin-bottom: 10px;
+	width: 75%;
+	borderspacing: 0;
+    }
+    th {
+	text-align: center;
+	border: 1px solid gray;
+        font-size: 13px;
+    }
+    td {
+	text-align: left;
+	border: 1px solid gray;
+        font-size: 13px;
+    }
+    textarea {
+	font-size: 10px;
+	overflow: hidden;
+    }
+
+    </style>
+  </head>
+  <body>
+    <center>
+      <img width="75px" height="75px" src="/static/images/unl_logo.png"/>
+      <h4> 
+      {{ "Unversidad Nacional de Loja"|upper }}  <br/>
+      Comisión de Evaluación Interna <br/>
+      EVALUACIÓN DEL DESEMPEÑO ACADÉMICO <p/>
+      {{ "Resultados de la Evaluación del Desempeño Académico 2012-2013"|upper }}
+
+      <!-- Tabla de encabezado -->
+
+      <table id="tabla-docente" width="100%" border="0">
+		{% if area %}
+		<tr>
+		  <td width="10%"><b>AREA</b></td> <td style="text-align: left;" width="90%">{{ area }}</td>
+		</tr>
+		{% endif %}
+		{% if carrera %}
+		<tr>
+		  <td width="10%"><b>CARRERA</b></td> <td style="text-align: left;" width="90%">{{ carrera }}</td>
+		</tr>
+		{% endif %}
+	  </table>
+
+      <!-- Tabla Central -->
+
+      <table id="tabla-resultados" width="100%" cellspacing="0" >
+		{% for docente, informantes in sugerencias.items %}
+		<tr>
+		  <td colspan="3"> <h2> {{ docente }} </h2></td>
+		</tr>
+		{% for informante, resultados in informantes.items %}
+		<tr> 
+		  <td colspan="3"> <h3> <center> INFORMANTE {{ informante|upper }}  </center> <h3> </td>
+		</tr>
+		<tr>
+		  <h3> 
+			<td width="33%"> <b> CAPACIDAD PROFESIONAL </b> </td>
+			<td width="33%"> <b> CAPACIDAD PEDAGÓGICA </b> </td>
+			<td width="33%"> <b> PRÁCTICA DE VALORES </b> </td>
+		  </h3> 
+		</tr>
+		{% for r in resultados %}
+		<tr>		
+		  <td width="33%"> {{ r.CPF }} </td>
+		  <td width="33%"> {{ r.CPG }} </td>
+		  <td width="33%"> {{ r.PV }} </td>
+		</tr>
+		{% endfor %}
+
+		<!--
+		{% for r in resultados %}
+		<tr> 
+		  <td> {{ r }} </td>
+		</tr>
+		{% endfor %}
+-->
+		{% endfor %}
+		{% endfor %}
+	  </table>
+
+	  <div id="pie" style="font-size: 9px; color: #666666">
+		<hr style="margin-bottom: 6px;"/>
+		Unidad de Telecomunicaciones e Infomacion - Departamento de Desarrollo de Software <br>
+		Correo Sistema de Evaluacion: 
+		<a href="mailto:evaluacion.docente@unl.edu.ec"> <u>evaluacion.docente@unl.edu.ec</u> </a> <br/>
+		Loja - Ecuador
+      </div>
+
+    </center>
+  </body>
+</html>
