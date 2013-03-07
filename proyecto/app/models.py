@@ -739,76 +739,137 @@ class TabulacionEvaluacion2013:
         self.periodoEvaluacion = periodoEvaluacion
         self.calculos = (
             # codigo, descripcion, metodo, titulo 
-            ('a',u'Resultados de la Evaluación del Desempeño Académico POR DOCENTE',
+            ('a', u'Resultados de la Evaluación del Desempeño Académico POR DOCENTE',
              self.por_docente, u'Evaluación del Desempeño Académico por Docente'),
+            ('b', u'Resultados de la Evaluación del Desempeño Académico POR CARRERA',
+            self.por_carrera, u'Evaluación del Desempeño Académico por Carrera'),
+            ('c', u'Resultados de la Evaluación del Desempeño Académico POR AREA',
+            self.por_area, u'Evaluación del Desempeño Académico por Area'),
             )
 
-    def por_docente(self, siglas_area, nombre_carrera, id_docente):
+    def por_docente(self, siglas_area, nombre_carrera, id_docente, componente=None):
+        # Se pasa un tupla no un solo id
+        return self.calcular(siglas_area, nombre_carrera, (id_docente,), componente)
+
+    def por_carrera(self, siglas_area, nombre_carrera, componente):
+        # Obtenemos los id de los Docentes que dictan Asignaturas en la carrera seleccionada
+        aux_ids = AsignaturaDocente.objects.filter(
+            docente__periodoAcademico=self.periodoEvaluacion.periodoAcademico,
+            asignatura__carrera=nombre_carrera,
+            asignatura__area=siglas_area
+            ).values_list('docente__id', flat=True).distinct()
+        # Se agregan tambien los docentes que no tengan Asignaturas pero que pertenezcan a la Carrera
+        ids_docentes = DocentePeriodoAcademico.objects.filter(
+            Q(periodoAcademico=self.periodoEvaluacion.periodoAcademico) and
+            (Q(id__in=aux_ids) or Q(carrera=nombre_carrera))
+            ).order_by('usuario__last_name', 'usuario__first_name').values_list(
+            'id', flat=True
+            )
+        return self.calcular(siglas_area, nombre_carrera, ids_docentes, componente)
+
+    def por_area(self, siglas_area, componente=None):
+        # Obtenemos los id de los Docentes que dictan Asignaturas en el area seleccionada
+        aux_ids = AsignaturaDocente.objects.filter(
+            docente__periodoAcademico=self.periodoEvaluacion.periodoAcademico,
+            asignatura__area=siglas_area
+            ).values_list('docente__id', flat=True).distinct()
+        # Se agregan tambien los docentes que no tengan Asignaturas pero que pertenezcan a la Carrera
+        ids_docentes = DocentePeriodoAcademico.objects.filter(
+            Q(periodoAcademico=self.periodoEvaluacion.periodoAcademico) and
+            ( Q(id__in=aux_ids) )#TODO: No hay el area en el atributo Carrera de DocentePeriodoAcademico
+            ).order_by('usuario__last_name', 'usuario__first_name').values_list(
+            'id', flat=True
+            )
+        return self.calcular(siglas_area, None , ids_docentes, componente)
+
+
+    def calcular(self, siglas_area, nombre_carrera, ids_docentes, componente=None):
+        """ 
+        Metodo generico para calcular los resultados de acuerdo a los diferentes criterios
+        Si se trata del reporte de sugerencias se salta al metodo respectivo
+        """ 
+        if componente == 'sugerencias':
+            return self.extraer_sugerencias(siglas_area, nombre_carrera, ids_docentes)
+
         resultados_indicadores = {}
         pesos = {}
         if siglas_area == 'ACE':
             tipos = ('EstudianteIdiomas', 'DocenteIdiomas', 'ParAcademicoIdiomas', 'DirectivoIdiomas')
         else:
             tipos = ('Estudiante', 'Docente', 'ParAcademico', 'Directivo')
-
+        if not componente:
+            seccion_componente = None
+        else:
+            # Se pasa de string a objeto seccion para sacar datos en la plantilla
+            seccion_componente = Seccion.objects.filter(cuestionario__periodoEvaluacion=self.periodoEvaluacion, codigo=componente)[0]
         # -----------------------------------------------------------------------------------
         # Promedios de cada indicador
         # -----------------------------------------------------------------------------------
         for tipo in tipos:
             cuestionario = Cuestionario.objects.get(periodoEvaluacion=self.periodoEvaluacion, informante__tipo=tipo)
-            # En caso de tratarse del insituto de idiomas 
+            # En caso de tratarse del insituto de idiomas se generaliza el informante
+            # Anecdota: Un error que me llevo mas de dos dias
             informante = tipo.lower().replace('idiomas','')
             # Para los calculos finales
-            pesos.update({informante : cuestionario.peso})  
+            pesos.update({informante : cuestionario.peso}) 
             # Solo ids 
-            preguntas = [p.id for p in cuestionario.get_preguntas() if p.tipo==TipoPregunta.objects.get(tipo='SeleccionUnica')]
-            # Solo ids 
+            if not componente:
+                preguntas = [p.id for p in cuestionario.get_preguntas() if p.tipo==TipoPregunta.objects.get(tipo='SeleccionUnica')]
+            else:
+                preguntas = [p.id for p in cuestionario.get_preguntas() if 
+                             p.tipo==TipoPregunta.objects.get(tipo='SeleccionUnica') and
+                             p.seccion.superseccion.codigo==componente ]
+            # Solo ids
             contestaciones = None
-            if tipo == 'Estudiante':
+            if informante == 'estudiante':
                 contestaciones = Contestacion.objects.filter(
-                    evaluacion__estudianteAsignaturaDocente__asignaturaDocente__docente__id=id_docente, 
+                    evaluacion__estudianteAsignaturaDocente__asignaturaDocente__docente__id__in=ids_docentes, 
                     pregunta__in=preguntas).values_list('id', flat=True)
-            elif tipo == 'Docente':
+            elif informante == 'docente':
                 contestaciones = Contestacion.objects.filter(
                     evaluacion__parAcademico__isnull=True, evaluacion__directorCarrera__isnull=True,
-                    evaluacion__docentePeriodoAcademico__id=id_docente, pregunta__in=preguntas
+                    evaluacion__docentePeriodoAcademico__id__in=ids_docentes, pregunta__in=preguntas
                     ).values_list('id', flat=True)
-            elif tipo == 'ParAcademico':
+            elif informante == 'paracademico':
                 contestaciones = Contestacion.objects.filter(
                     evaluacion__parAcademico__isnull=False, evaluacion__directorCarrera__isnull=True,
-                    evaluacion__docentePeriodoAcademico__id=id_docente, pregunta__in=preguntas
+                    evaluacion__docentePeriodoAcademico__id__in=ids_docentes, pregunta__in=preguntas
                     ).values_list('id', flat=True)
-            elif tipo == 'Directivo':
+            elif informante == 'directivo':
                 contestaciones = Contestacion.objects.filter(
                     evaluacion__directorCarrera__isnull=False, evaluacion__parAcademico__isnull=True,
-                    evaluacion__docentePeriodoAcademico__id=id_docente, pregunta__in=preguntas
+                    evaluacion__docentePeriodoAcademico__id__in=ids_docentes, pregunta__in=preguntas
                     ).values_list('id', flat=True)
-            if not contestaciones:
-                logg.warning('No hay evaluaciones de {0} para el docente {1}'.format(tipo,id_docente))
-                print "No hay contestaciones de " + tipo + '-' + str(id_docente)
-                continue
-            # Otencion de promedios por pregunta
-            cursor = connection.cursor()
-            cursor.execute("""SELECT pregunta, AVG(respuesta::INT) FROM app_contestacion 
+            if contestaciones:
+                # Otencion de promedios por pregunta
+                cursor = connection.cursor()
+                cursor.execute("""SELECT pregunta, AVG(respuesta::INT) FROM app_contestacion 
                        WHERE id IN %s GROUP BY pregunta""", [tuple(contestaciones)])
-            result = cursor.fetchall()
-            cursor.close()
+                result = cursor.fetchall()
+                cursor.close()
+            else:
+                # El informante no ha contestado el cuestionario correspondiente
+                logg.warning('No hay evaluaciones del informante {0} para los docentes {1}'.format(tipo,ids_docentes))
+                print "No hay contestaciones de " + tipo + ' para ' + str(ids_docentes)
+                result = [(id, 0.0) for id in preguntas]
+
             # Diccionario a partir de lista compresa de tuplas conformadas por ids de pregunta con sus promedio
             promedios_preguntas = dict([(Pregunta.objects.get(id=id_pregunta), promedio) for id_pregunta, promedio in result])
             indicadores = {}
             # Sumatorias por pregunta
             for pregunta, promedio in promedios_preguntas.items():
                 suma = indicadores.get(pregunta.seccion,0) + promedio
-                indicadores[pregunta.seccion] = suma
+                ###indicadores[pregunta.seccion] = suma
+                indicadores.update({pregunta.seccion: suma})
             # Promedio por seccion (indicador)
             for seccion, suma in indicadores.items():
-                promedio = suma / seccion.preguntas.count()
+                promedio = float(suma) / float(seccion.preguntas.count())
                 indicadores.update({seccion : promedio})
             # Porcentaje por seccion (indicador)
             ESCALA_MAXIMA = 4
             for seccion, promedio in indicadores.items():
                 porcentaje = round((100 * promedio) / ESCALA_MAXIMA)
-                indicadores.update({seccion : porcentaje})
+                indicadores.update({seccion : int(porcentaje)})
             # Genera diccionario de diccionarios
             for seccion, porcentaje in indicadores.items():
                 """ 
@@ -823,7 +884,7 @@ class TabulacionEvaluacion2013:
                     indicador = {'informantes' : {}, 'ponderacion_seccion' : seccion.ponderacion}
                 indicador['informantes'].update({ informante : porcentaje })
                 resultados_indicadores.update({seccion.codigo : indicador})
-            
+
         # -----------------------------------------------------------------------------------
         # Calculos totales en todos los indicadores de acuerdo al peso de los informantes
         # ------------------------------------------------------------------------------------
@@ -838,79 +899,140 @@ class TabulacionEvaluacion2013:
             informantes = valores.keys()
             informantes.sort()
             primaria = 0.0
+            # UN solo informante Comision Academica
             if informantes == ['directivo', 'paracademico']:
                 # (pdir * vdir) + (ppa * vpa)) / (pdir + ppa)
                 primaria = pesos['directivo'] * valores['directivo'] +  pesos['paracademico'] * valores['paracademico']
                 primaria = primaria / (pesos['directivo'] + pesos['paracademico'])
-                
-                aux_directivo.append(valores['directivo'])
-                aux_paracademico.append(valores['paracademico'])
-
+            # DOS informantes
             elif informantes == ['directivo', 'docente', 'paracademico']:
                 # ((mpne + pdir * vdir) + (mpne + ppa * vpa) + (??? + pd * cd))
                 mitad = pesos['estudiante'] / 2
                 primaria =  (mitad / 2 + pesos['directivo']) * valores['directivo']
                 primaria += (mitad / 2 + pesos['paracademico']) * valores['paracademico']
                 primaria += (mitad + pesos['docente']) * valores['docente']
-
-                aux_directivo.append(valores['directivo'])
-                aux_docente.append(valores['docente'])
-                aux_paracademico.append(valores['paracademico'])
-
+            elif informantes == ['directivo', 'estudiante', 'paracademico']:
+                # ((mpne + pdir * vdir) + (mpne + ppa * vpa) + (??? + pd * cd))
+                mitad = pesos['docente'] / 2
+                primaria =  (mitad / 2 + pesos['directivo']) * valores['directivo']
+                primaria += (mitad / 2 + pesos['paracademico']) * valores['paracademico']
+                primaria += (mitad + pesos['estudiante']) * valores['estudiante']
             elif informantes == ['docente', 'estudiante']:      
                 # (mpni + pe * ve) + (mpni + pd * vd)
                 mitad = (pesos['directivo'] + pesos['paracademico']) / 2
                 primaria = (mitad + pesos['estudiante']) * valores['estudiante']
                 primaria += (mitad + pesos['docente']) * valores['docente']
-
-                aux_docente.append(valores['docente'])
-                aux_estudiante.append(valores['estudiante'])
-                
+            # TRES informantes
             elif informantes == ['directivo', 'docente', 'estudiante', 'paracademico']:
-                # (pe + ve) + ((pdir * vdir) + (ppa + vpa)) + (pd * vd))
+                # (pe + ve) + ((pdir * vdir) + (ppa * vpa)) + (pd * vd))
                 primaria = pesos['estudiante'] * valores['estudiante']
-                primaria += pesos['directivo'] * valores['directivo']
+                primaria += pesos['docente'] * valores['docente']
                 primaria += pesos['paracademico'] * valores['paracademico']
                 primaria += pesos['directivo'] * valores['directivo']
-
-                aux_estudiante.append(valores['estudiante'])
-                aux_directivo.append(valores['directivo'])
-                aux_docente.append(valores['docente'])
-                aux_paracademico.append(valores['paracademico'])
-
+            
+            primaria = round(primaria)
             resultado.update({'primaria' : primaria})
             promedio_primaria += primaria
             ponderada = primaria * resultado['ponderacion_seccion'] / 100
             promedio_ponderada += ponderada
             resultado.update({'ponderada' : ponderada})
             resultado.update({'cualitativa' : self._cualificar_valor(primaria)})
+            aux_estudiante.append(valores.get('estudiante', -1))
+            aux_directivo.append(valores.get('directivo', -1))
+            aux_docente.append(valores.get('docente', -1))
+            aux_paracademico.append(valores.get('paracademico', -1))
 
-        if len(resultados_indicadores) == 0:
-            # Se detienen los calculos
-            return {}
+        aux_estudiante = [e for e in aux_estudiante if e >= 0]
+        aux_docente = [e for e in aux_docente if e >= 0]
+        aux_paracademico = [e for e in aux_paracademico if e >= 0]
+        aux_directivo  = [e for e in aux_directivo if e >= 0]
 
-        promedio_primaria = promedio_primaria / len(resultados_indicadores)
+        prom_estudiante = (sum(aux_estudiante) / float(len(aux_estudiante))) if aux_estudiante else 0
+        prom_docente = (sum(aux_docente) / float(len(aux_docente))) if aux_docente else 0
+        prom_paracademico = (sum(aux_paracademico) / float(len(aux_paracademico))) if aux_paracademico else 0
+        prom_directivo = (sum(aux_directivo) / float(len(aux_directivo))) if aux_directivo else 0
+
+        promedio_primaria = (promedio_primaria / len(resultados_indicadores)) if resultados_indicadores else 0
         # Solo se suma la ponderacion hasta el final
-        promedios= {'estudiante' : sum(aux_estudiante) / len(aux_estudiante) if aux_estudiante else 0, 
-                    'docente' : sum(aux_docente) / len(aux_docente) if aux_docente else 0,
-                    'paracademico' : sum(aux_paracademico) / len(aux_paracademico) if aux_paracademico else 0,
-                    'directivo' : sum(aux_directivo) / len(aux_directivo) if aux_directivo else 0,
-                    'primaria' : promedio_primaria,
+        promedios= {'estudiante' : prom_estudiante,
+                    'docente' : prom_docente,
+                    'paracademico' : prom_paracademico,
+                    'directivo' : prom_directivo,
+                    'primaria' : round(promedio_primaria,2),
                     'ponderada' : promedio_ponderada,
                     'cualitativa' : self._cualificar_valor(promedio_primaria)
                     }
         # Se ordena el diccionario por la clave (codigo del indicador)
         resultados_indicadores = OrderedDict(sorted(resultados_indicadores.items(), key=lambda i: i[0]))
-        logg.info('Calculado docente: {0} promedios: {1} total: {2}'.format(id_docente, promedios, promedio_ponderada))
-        return dict(resultados_indicadores=resultados_indicadores, promedios=promedios, total=promedio_ponderada)
+        logg.info('Calculado docente: {0} promedios: {1} total: {2}'.format(ids_docentes, promedios, promedio_ponderada))
+        return dict(resultados_indicadores=resultados_indicadores, promedios=promedios, 
+                    total=promedio_ponderada, seccion_componente=seccion_componente)
 
     def _cualificar_valor(self, valor):
         """ Se cualifica con valores enteros """
-        rangos = {'IS':range(0,41), 'PS':range(41,61), 'S': range(61,81), 'MS':range(81,101)}
+        rangos = {'IS':range(0,41), 'PS':range(41,61), 'S':range(61,81), 'D':range(81,101)}
         for k,v in rangos.items():
             if v[0] <= round(valor) <= v[-1]:
                 return k
         return ''
+
+    def extraer_sugerencias(self, area, carrera, ids_docentes):
+        sugerencias = {}
+        if area == 'ACE':
+            tipos = ('EstudianteIdiomas', 'DocenteIdiomas', 'ParAcademicoIdiomas', 'DirectivoIdiomas')
+        else:
+            tipos = ('Estudiante', 'Docente', 'ParAcademico', 'Directivo')
+        for id_docente in ids_docentes:
+            resultado = {}
+            # Solo nombres del docente
+            nombre_docente = DocentePeriodoAcademico.objects.get(id=id_docente).__unicode__()
+            for tipo in tipos:
+                informante = tipo.lower().replace('idiomas', '')
+                # Codigo es PV, CPG o CPF
+                preguntas_ensayo = Pregunta.objects.filter(
+                    seccion__cuestionario__periodoEvaluacion=self.periodoEvaluacion,
+                    seccion__cuestionario__informante__tipo=tipo, tipo__tipo='Ensayo'
+                    ).values('id', 'seccion__codigo')
+                resultado[tipo] = []
+                # Contendra 3 items, uno por cada componente
+                aux_contestaciones = {}
+                if informante == 'estudiante':
+                    for pregunta in preguntas_ensayo:
+                        contestaciones = Contestacion.objects.filter(
+                            evaluacion__cuestionario__informante__tipo__icontains='estudiante',
+                            evaluacion__estudianteAsignaturaDocente__asignaturaDocente__docente__id=id_docente, 
+                            pregunta=pregunta['id']).values_list('respuesta', flat=True)
+                        aux_contestaciones[pregunta['seccion__codigo']] = contestaciones
+                elif informante == 'docente':
+                    for pregunta in preguntas_ensayo:
+                        contestaciones = Contestacion.objects.filter(
+                            evaluacion__parAcademico__isnull=True, evaluacion__directorCarrera__isnull=True,
+                            evaluacion__docentePeriodoAcademico__id=id_docente, pregunta=pregunta['id']
+                            ).values_list('respuesta', flat=True)
+                        aux_contestaciones[pregunta['seccion__codigo']] = contestaciones
+                elif informante == 'paracademico':
+                    for pregunta in preguntas_ensayo:
+                        contestaciones = Contestacion.objects.filter(
+                            evaluacion__parAcademico__isnull=False, evaluacion__directorCarrera__isnull=True,
+                            evaluacion__docentePeriodoAcademico__id=id_docente, pregunta=pregunta['id']
+                            ).values_list('respuesta', flat=True)
+                        aux_contestaciones[pregunta['seccion__codigo']] = contestaciones
+                elif informante == 'directivo':
+                    for pregunta in preguntas_ensayo:
+                        contestaciones = Contestacion.objects.filter(
+                            evaluacion__directorCarrera__isnull=False, evaluacion__parAcademico__isnull=True,
+                            evaluacion__docentePeriodoAcademico__id=id_docente, pregunta=pregunta['id']
+                            ).values_list('respuesta', flat=True)
+                        aux_contestaciones[pregunta['seccion__codigo']] = contestaciones
+                # Se supone que en los tres componentes hay la misma cantidad de respuestas CPF, CPG y PV
+                num_contestaciones = len(aux_contestaciones.values()[0])
+                for i in range(num_contestaciones):
+                    aux_dict = {'CPF' : aux_contestaciones['CPF'][i], 
+                                'CPG' : aux_contestaciones['CPG'][i], 
+                                'PV' : aux_contestaciones['PV'][i]}
+                    resultado[tipo].append(aux_dict)
+            sugerencias[nombre_docente] = resultado
+        return dict(sugerencias=sugerencias)
 
 
 class TabulacionAdicionales2012:

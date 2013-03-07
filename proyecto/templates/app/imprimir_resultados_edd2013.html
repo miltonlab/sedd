@@ -41,44 +41,75 @@
       <!-- Tabla de encabezado -->
 
       <table id="tabla-docente" width="100%" border="0">
+		{% if area %}
 		<tr>
 		  <td width="10%"><b>AREA</b></td> <td style="text-align: left;" width="90%">{{ area }}</td>
 		</tr>
+		{% endif %}
+		{% if carrera %}
 		<tr>
 		  <td width="10%"><b>CARRERA</b></td> <td style="text-align: left;" width="90%">{{ carrera }}</td>
 		</tr>
+		{% endif %}
+		{% if docente %}
 		<tr>
 		  <td width="10%"><b>DOCENTE</b></td> <td style="text-align: left;" width="90%">{{ docente }}</td>
 		</tr>
+		{% endif %}
+	  </table>
+	  <!-- Si se filtra por Componente -->
+	  {% if seccion_componente  %}
+	  <table>
+		<tr>
+		  <td style="text-align: left;" width="40%">
+			<h2> {{ seccion_componente.titulo }}:</h2> 
+		  </td>
+		  <td style="text-align: left;">
+			<h3> {{ seccion_componente.descripcion }} </h3>
+		  </td>
+		</tr>
       </table>
-	  
+	  {% endif %}	  
+
       <!-- Tabla Central -->
 
       <table id="tabla-resultados" width="100%" cellspacing="0" >
 		<tr>
-		  <th rowspan="2">  DESCRIPCION </th>
+		  <th rowspan="3">  DESCRIPCIÓN </th>
 		  <th colspan="4">  INFORMANTES </th>
-		  <th colspan="3">  EVALUACION </th>
+		  <th colspan="3">  EVALUACIÓN </th>
 		</tr>
 		<tr>
-		  <th> ESTUD. </th>
-		  <th> DOC. </th>
-		  <th> PAR AC. </th>
-		  <th> DIREC. </th>
-		  <th> PRIMARIA </th>
-		  <th> PONDERADA </th>
-		  <th> CUALIT. </th>
+		  <th rowspan="2"> ESTUDIANTE </th>
+		  <th rowspan="2"> DOCENTE </th>
+		  <th colspan="2"> COMISIÓN ACADÉMICA </th>
+		  <th rowspan="2"> PRIMARIA </th>
+		  <th rowspan="2">  PONDERAD. </th>
+		  <th rowspan="2"> CUALITAT. </th>
+		</tr>
+		<tr> 
+		  <th> PAR ACAD. </th>
+		  <th> DIRECTIVO </th>
 		</tr>
 		<!-- indicador, resultado -->
 		{% for i, r in resultados_indicadores.items %}
 		<tr>
 		  <td> {{ i }} </td>
-		  <td width="10%"> {% if r.informantes.estudiante %} {{ r.informantes.estudiante }} % {% endif %} </td>
-		  <td width="10%"> {% if r.informantes.docente %} {{ r.informantes.docente  }} %  {% endif %}</td>
-		  <td width="10%"> {% if r.informantes.paracademico %} {{ r.informantes.paracademico }} % {% endif %} </td>
-		  <td width="10%"> {% if r.informantes.directivo %} {{ r.informantes.directivo }} % {% endif %} </td>
-		  
-		  <td width="10%"> {% if r.primaria %} {{ r.primaria|floatformat:"2" }} % {% endif %}</td>
+		  <td width="10%"> 
+		  {% if r.informantes.estudiante >= 0 %} {{ r.informantes.estudiante }} % {% else %} - {% endif %} 
+		  </td>
+		  <td width="10%"> 
+		  {% if r.informantes.docente >= 0 %} {{ r.informantes.docente  }} % {% else %} - {% endif %}
+		  </td>
+		  <td width="10%"> 
+			{% if r.informantes.paracademico >= 0 %} {{ r.informantes.paracademico }} % {% else %} - {% endif %} 
+		  </td>
+		  <td width="10%"> 
+		  {% if r.informantes.directivo >= 0%} {{ r.informantes.directivo }} % {% else %} - {% endif %} 
+		  </td>
+		  <td width="10%"> 
+		  {% if r.primaria >= 0 %} {{ r.primaria|floatformat:"0" }} % {% else %} - {% endif %}
+		  </td>
 		  <td width="10%"> {{ r.ponderada|floatformat:"2" }} <b>/</b> {{ r.ponderacion_seccion }} </td>
 		  <td width="10%"> {{ r.cualitativa }} </td>
 		</tr>
@@ -93,13 +124,26 @@
 		 <td width="10%"> {{ promedios.docente|floatformat:"2" }} % </td>
 		 <td width="10%"> {{ promedios.paracademico|floatformat:"2" }} % </td>
 		 <td width="10%"> {{ promedios.directivo|floatformat:"2" }} % </td>
-		 <td width="10%"> <b> {{ promedios.primaria|floatformat:"2" }} %  </b> </td>
+		 <td width="10%"> <b> {{ promedios.primaria }} %  </b> </td>
 		 <td width="10%"> <b> {{ promedios.ponderada|floatformat:"2" }} / 100 </b> </td>
 		 <td width="10%"> <b> {{ promedios.cualitativa }} </b> </td>
 		 </b>
 		</tr>
 	  </table>
 
+	  <table id="tabla-escala">
+		<tr> 
+		  <td style="text-align: left;"> 
+			<b> D </b> = Destacado |
+			<b> S </b> = Sastisfactorio | 
+			<b> PS </b> = Poco Satistactorio |
+			<b> IS </b> = Insatisfactorio
+		  </td>
+		</tr>
+	  </table>
+	  <a href='javascript:window.print();'> 
+		<img src="http://capacinet.gob.mx/Cursos/Aprendamos%20Juntos/finanzaspersonales/imagenes/icono_imprimir.jpg"/> 
+	  </a>
       <div id="pie" style="font-size: 9px; color: #666666">
 		<hr style="margin-bottom: 6px;"/>
 		Unidad de Telecomunicaciones e Infomacion - Departamento de Desarrollo de Software <br>

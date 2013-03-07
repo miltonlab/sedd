@@ -15,24 +15,83 @@ fieldset{
 </style>
 <fieldset>
   <legend> Opciones de Resultados </legend>
-  <ol type="a">
-    <li>
-      <label for="id_opciones_0">
-	<input type="radio" id="id_opciones_0" value="a" name="opciones" />  
-	Resultados Evaluación Desempeño Docente por Docente 
-      </label>
-    </li>
-    <ul>
-      <li> {{ form.docentes }} </li>
-    </ul>
-  
-    <!--li>
-      <label for="id_opciones_1">
-	<input type="radio" id="id_opciones_1" value="b" name="opciones" />  
-	Resultados Evaluación Actividades Adicionales por Carrera 
-      </label>
-    </li-->
-  </ol>
+
+  <table>
+	<tr>
+	  <!-- Columna 1 --> 
+	  <td style="border-right: 1px solid;">
+		<b>Seleccione el tipo de Reporte:</b>
+		<ol type="a">
+		  <li>
+			<label for="id_opciones_0">
+			  <input type="radio" id="id_opciones_0" value="a" name="opciones" checked="checked"/>  
+			  Resultados POR DOCENTE 
+			</label>
+		  </li>
+		  <ul>
+			<li> {{ form.docentes }} </li>
+		  </ul>
+		  
+		  <li>
+			<label for="id_opciones_1">
+			  <input type="radio" id="id_opciones_1" value="b" name="opciones" />  
+			  Resultados POR CARRERA
+			</label>
+		  </li>
+
+		  <li>
+			<label for="id_opciones_2">
+			  <input type="radio" id="id_opciones_2" value="c" name="opciones" />  
+			  Resultados POR AREA
+			</label>
+		  </li>
+
+		</ol>
+	  </td>
+
+	  <!-- Columna 2 -->
+	  <td>
+		<b> Seleccione el Campo Específico: </b>
+		<ol type="a">
+		  <li>
+			<label for="id_filtros_0">
+			  <input type="radio" id="id_filtros_0" value="a" name="filtros" checked="checked"/> 
+			  Todos los COMPONENTES
+			</label>
+		  </li>
+
+		  <li>
+			<label for="id_filtros_1">
+			  <input type="radio" id="id_filtros_1" value="b" name="filtros" /> 
+			  Componente CAPACIDAD PROFESIONAL (CPF)
+			</label>
+		  </li>
+
+		  <li>
+			<label for="id_filtros_2">
+			  <input type="radio" id="id_filtros_2" value="c" name="filtros" /> 
+			  Componente CAPACIDAD PEDAGÓGICA (CPG)
+			</label>
+		  </li>
+
+		  <li>
+			<label for="id_filtros_3">
+			  <input type="radio" id="id_filtros_3" value="d" name="filtros" /> 
+			  Componente PRÁCTICA DE VALORES (PV)
+			</label>
+		  </li>
+
+		  <li>
+			<label for="id_filtros_4">
+			  <input type="radio" id="id_filtros_3" value="e" name="filtros" /> 
+			  Reporte de SUGERENCIAS
+			</label>
+		  </li>
+
+		</ol>
+	  </td>
+	</tr>
+  </table>
 </fieldset>
 
 

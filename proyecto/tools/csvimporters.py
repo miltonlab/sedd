@@ -123,9 +123,7 @@ def importar_asignaturas(archivo, docente=False):
                 except DocentePeriodoAcademico.DoesNotExist:
                     print "Error no existe el docente {0}".format(cedula)
                     docente = None
-                #asignaturas.append(dict(asignatura=asignatura, docente=cedula))
-            else:
-                asignaturas.append(asignatura)
+	    asignaturas.append(asignatura)
         except ValueError, err:
             print "Error al convertir datos para Asignaturas: ",err
 
