@@ -915,7 +915,6 @@ def mostrar_resultados(request):
         # Para el resto de casos
         else:
             resultados = metodo(request.session['area'], request.session['carrera'], filtro)
-        print 'el filto es: ', filtro
         if filtro == 'sugerencias':
             # Se trata de reporte de sugerencias
             plantilla = 'app/imprimir_sugerencias_edd2013.html'
