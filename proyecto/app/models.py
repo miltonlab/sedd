@@ -835,7 +835,7 @@ class TabulacionEvaluacion2013:
                     ).values_list('id', flat=True)
             elif informante == 'directivo':
                 contestaciones = Contestacion.objects.filter(
-                    evaluacion__parAcademico__isnull=False, evaluacion__directorCarrera__isnull=True,
+                    evaluacion__directorCarrera__isnull=False, evaluacion__parAcademico__isnull=True,
                     evaluacion__docentePeriodoAcademico__id__in=ids_docentes, pregunta__in=preguntas
                     ).values_list('id', flat=True)
             if contestaciones:
@@ -909,7 +909,7 @@ class TabulacionEvaluacion2013:
             elif informantes == ['directivo', 'estudiante']:
                 # 
                 mitad = pesos['docente'] / 2
-                primaria += (mitad + pesos['directivo']) * valores['directivo']
+                primaria = (mitad + pesos['directivo']) * valores['directivo']
                 primaria += (mitad + pesos['estudiante']) * valores['estudiante']
             elif informantes == ['docente', 'estudiante']:      
                 # 
@@ -917,7 +917,7 @@ class TabulacionEvaluacion2013:
                 primaria = (mitad + pesos['estudiante']) * valores['estudiante']
                 primaria += (mitad + pesos['docente']) * valores['docente']
             # TRES informantes
-            elif informantes == ['docente', 'directivo', 'estudiante']:
+            elif informantes == ['directivo', 'docente', 'estudiante']:
                 # 
                 primaria = pesos['estudiante'] * valores['estudiante']
                 primaria += pesos['docente'] * valores['docente']
