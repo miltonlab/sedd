@@ -896,10 +896,13 @@ class TabulacionEvaluacion2013:
             informantes = valores.keys()
             informantes.sort()
             primaria = 0.0
-            # UN solo informante Comision Academica
-            if informantes == ['directivo']:
-                # Para el valor
-                primaria = valores['directivo']
+            # UN solo informante 
+            """ if informantes == ['directivo']:
+                # Pasa el valor
+                primaria = valores['directivo'] """
+            if informantes == ['docente']:
+                # Pasa el valor
+                primaria = valores['docente']                
             # DOS informantes
             elif informantes == ['directivo', 'docente']:
                 # 
