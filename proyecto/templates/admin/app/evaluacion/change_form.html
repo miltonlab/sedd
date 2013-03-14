@@ -1,0 +1,38 @@
+{% extends "admin/change_form.html" %}
+{% load i18n %}
+
+{% block extrahead %}
+{{ block.super }}
+<style type="text/css">
+
+</style>
+{% endblock %}
+
+{% block content_title %}
+<!-- Se anula el tituto por defecto de la pagina -->
+{% endblock %}
+
+{% block field_sets %}
+{{ original.cuestionario.informante }}: <b>{{ original.evaluador }}
+</b> Docente evaluado: <b>{{ original.evaluado }}</b>
+<p/>
+{{ block.super }}
+{{ formsets }}
+
+<table> 
+  {% for contestacion in original.contestaciones.all %}
+  <tr>
+	<td rowspan="2" > {{ contestacion.get_pregunta.get_codigo }} </td> 
+	<td> {{ contestacion.get_pregunta }} </td> 
+  </tr>
+  <tr>
+	<td style="border-bottom: 1px dashed;"> Respuesta: <b> {{ contestacion.respuesta }} </b> </td>
+  </tr>
+  {% endfor %}
+</table>
+
+{% endblock %}
+
+{% block submit_buttons_bottom %}
+<!-- Se elimina los botones de grabacion (submit) -->
+{% endblock %}

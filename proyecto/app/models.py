@@ -339,7 +339,7 @@ class DireccionCarrera(models.Model):
 
 
 #===================================================================================================
-#   Información de Encuestas y Evaluación 
+#   Informacion de Encuestas y Evaluacion 
 #===================================================================================================
 
 
@@ -425,7 +425,12 @@ class Contestacion(models.Model):
     observaciones = models.TextField(null=True, blank=True)
     evaluacion = models.ForeignKey('Evaluacion', related_name='contestaciones')
 
+    def get_pregunta(self):
+        """ Devuelve el objeto 'pregunta' a partir del atributo id_pregunta """
+        return Pregunta.objects.get(id=self.pregunta)
+
     class Meta:
+        ordering = ['pregunta']
         verbose_name = 'Respuesta'
         verbose_name_plural = 'Respuestas'
         
@@ -586,13 +591,19 @@ class Pregunta(models.Model):
     tipo = models.ForeignKey(TipoPregunta)
     seccion = models.ForeignKey(Seccion, related_name='preguntas')
 
+    def get_codigo(self):
+        """ Devuelve el codigo de la seccion mas el de la pregunta """
+        codigo_seccion = self.seccion.codigo or str(self.seccion.orden)
+        codigo_pregunta = self.codigo or str(self.orden)
+        return '{0}.{1}'.format(codigo_seccion, codigo_pregunta)
+
     def __unicode__(self):
         html = lxml.html.document_fromstring(self.texto)
-        texto_pregunta = html.text_content()
-        return u'{0}'.format(texto_pregunta)
+        texto = u'{0}'.format(html.text_content())
+        return texto
 
     class Meta:
-        ordering = ['seccion__orden','orden']
+        ordering = ['seccion__orden', 'orden']
 
 
 class ItemPregunta(models.Model):
