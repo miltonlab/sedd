@@ -26,7 +26,10 @@
 	font-size: 10px;
 	overflow: hidden;
     }
-
+	.promedio_componente td {
+	text-decoration: overline;
+	/*font-size: 0%; */
+	}
     </style>
   </head>
   <body>
@@ -139,20 +142,92 @@
 		<!-- Totales por Componente -->
 		{# Total CPF #}
 		{% ifequal forloop.counter 10 %}
-		<tr> 
-		  <td colspan="2"> 
-			TOTAL {{ r.objeto_seccion.superseccion.titulo }}  
+		<tr class="promedio_componente"> 
+		  <td colspan="2" style="text-align: left;"> 
+			TOTAL {{ r.objeto_seccion.superseccion.titulo }}
 		  </td>  
-		  
+		  <td> 
+			{{ promedios_componentes.CPF.estudiante }} %
+		  </td>
+		  <td> 
+			{{ promedios_componentes.CPF.docente }} %
+		  </td>
+		  <td> 
+			{{ promedios_componentes.CPF.paracademico }} %
+		  </td>
+		  <td> 
+			{{ promedios_componentes.CPF.directivo }} %
+		  </td>
+		  <td> 
+			{{ promedios_componentes.CPF.primaria }} %
+		  </td>
+		  <td> 
+			{{ promedios_componentes.CPF.ponderada|floatformat:"2" }} / {{ r.objeto_seccion.superseccion.ponderacion }}
+		  </td>
+		  <td> 
+			{{ promedios_componentes.CPF.cualitativa }} 
+		  </td>
 		</tr>
  		{% endifequal %}
+
 		{# Total CPG #}
 		{% ifequal forloop.counter 27 %}
-		<tr> <td colspan="9"> TOTAL {{ r.objeto_seccion.superseccion.titulo }} </td>  </tr>
+		<tr class="promedio_componente"> 
+		  <td colspan="2" style="text-align: left;"> 
+			TOTAL {{ r.objeto_seccion.superseccion.titulo }}
+		  </td>  
+		  <td> 
+			{{ promedios_componentes.CPG.estudiante }} %
+		  </td>
+		  <td> 
+			{{ promedios_componentes.CPG.docente }} %
+		  </td>
+		  <td> 
+			{{ promedios_componentes.CPG.paracademico }} %
+		  </td>
+		  <td> 
+			{{ promedios_componentes.CPG.directivo }} %
+		  </td>
+		  <td> 
+			{{ promedios_componentes.CPG.primaria }} %
+		  </td>
+		  <td> 
+			{{ promedios_componentes.CPG.ponderada|floatformat:"2" }} / {{ r.objeto_seccion.superseccion.ponderacion }}
+		  </td>
+		  <td> 
+			{{ promedios_componentes.CPG.cualitativa }} 
+		  </td>
+		</tr>
  		{% endifequal %}
+
 		{# Total PV #}
 		{% ifequal forloop.counter 33 %}
-		<tr> <td colspan="9"> hola PV</td>  </tr>
+		<tr class="promedio_componente"> 
+		  <td colspan="2" style="text-align: left;"> 
+			TOTAL {{ r.objeto_seccion.superseccion.titulo }}
+		  </td>  
+		  <td> 
+			{{ promedios_componentes.PV.estudiante }} %
+		  </td>
+		  <td> 
+			{{ promedios_componentes.PV.docente }} %
+		  </td>
+		  <td> 
+			{{ promedios_componentes.PV.paracademico }} %
+		  </td>
+		  <td> 
+			{{ promedios_componentes.PV.directivo }} %
+		  </td>
+		  <td> 
+			{{ promedios_componentes.PV.primaria }} %
+		  </td>
+		  <td> 
+			{{ promedios_componentes.PV.ponderada|floatformat:"2" }} / {{ r.objeto_seccion.superseccion.ponderacion }}
+		  </td>
+		  <td> 
+			{{ promedios_componentes.PV.cualitativa }} 
+		  </td>
+		</tr>
  		{% endifequal %}
 
 		{% endfor %}

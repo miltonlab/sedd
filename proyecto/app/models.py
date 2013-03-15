@@ -986,11 +986,12 @@ class TabulacionEvaluacion2013:
             resultado.update({'ponderada' : ponderada})
             resultado.update({'cualitativa' : self._cualificar_valor(primaria)})
             aux_estudiante.append(valores.get('estudiante', -1))
-            #aux_estudiante.append({'seccion' : seccion, 'valor' : valores.get('estudiante', -1)})
-            ####
             aux_directivo.append(valores.get('directivo', -1))
             aux_docente.append(valores.get('docente', -1))
             aux_paracademico.append(valores.get('paracademico', -1))
+
+        # Se envia a calcular los promedios por cada componente 
+        promedios_componentes = self._calcular_componentes(resultados_indicadores)
 
         aux_estudiante = [e for e in aux_estudiante if e >= 0]
         aux_docente = [e for e in aux_docente if e >= 0]
@@ -1015,8 +1016,37 @@ class TabulacionEvaluacion2013:
         # Se ordena el diccionario por la clave (codigo del indicador)
         resultados_indicadores = OrderedDict(sorted(resultados_indicadores.items(), key=lambda i: i[0]))
         logg.info('Calculado docente: {0} promedios: {1} total: {2}'.format(ids_docentes, promedios, promedio_ponderada))
-        return dict(resultados_indicadores=resultados_indicadores, promedios=promedios, 
-                    total=promedio_ponderada, seccion_componente=seccion_componente)
+        return dict(resultados_indicadores=resultados_indicadores, promedios_componentes=promedios_componentes,
+                    promedios=promedios, total=promedio_ponderada, seccion_componente=seccion_componente)
+
+    def _calcular_componentes(self, resultados_indicadores):
+        promedios_componentes = {'CPF' : {'estudiante':[], 'docente':[], 'paracademico':[], 'directivo':[],
+                                          'primaria' : [], 'ponderada':[], 'cualitativa':''},
+                                 'CPG' : {'estudiante':[], 'docente':[], 'paracademico':[], 'directivo':[],
+                                          'primaria' : [], 'ponderada':[], 'cualitativa':''}, 
+                                 'PV' : {'estudiante':[], 'docente':[], 'paracademico':[], 'directivo':[],
+                                          'primaria' : [], 'ponderada':[], 'cualitativa':''},
+                                 }
+        for codigo_seccion, resultado in resultados_indicadores.items():
+            componente = resultado['objeto_seccion'].superseccion.codigo
+            promedios_componentes[componente]['estudiante'].append(resultado['informantes'].get('estudiante',-1))
+            promedios_componentes[componente]['docente'].append(resultado['informantes'].get('docente',-1))
+            promedios_componentes[componente]['paracademico'].append(resultado['informantes'].get('paracademico', -1))
+            promedios_componentes[componente]['directivo'].append(resultado['informantes'].get('directivo',-1))
+            promedios_componentes[componente]['primaria'].append(resultado.get('primaria', -1))
+            promedios_componentes[componente]['ponderada'].append(resultado.get('ponderada', -1))
+        for componente in ('CPF', 'CPG', 'PV'):
+            for tipo_promedio in ('estudiante', 'docente', 'paracademico', 'directivo', 'primaria', 'ponderada'):
+                lista = [n for n in promedios_componentes[componente][tipo_promedio] if n >= 0] 
+                if tipo_promedio == 'ponderada':
+                    promedio = sum(lista)
+                else:
+                    promedio = sum(lista)/len(lista)
+                # En este momento se cambia el contenido tipo lista por un numero 
+                promedios_componentes[componente][tipo_promedio] = promedio
+            promedios_componentes[componente]['cualitativa'] = self._cualificar_valor(
+                promedios_componentes[componente]['primaria'])
+        return promedios_componentes
 
     def _cualificar_valor(self, valor):
         """ Se cualifica con valores enteros """
