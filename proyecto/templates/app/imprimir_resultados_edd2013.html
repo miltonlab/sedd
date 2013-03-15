@@ -75,7 +75,7 @@
 
       <table id="tabla-resultados" width="100%" cellspacing="0" >
 		<tr>
-		  <th rowspan="3">  DESCRIPCIÓN </th>
+		  <th rowspan="3" colspan="2">  DESCRIPCIÓN </th>
 		  <th colspan="4">  INFORMANTES </th>
 		  <th colspan="3">  EVALUACIÓN </th>
 		</tr>
@@ -93,8 +93,30 @@
 		</tr>
 		<!-- indicador, resultado -->
 		{% for i, r in resultados_indicadores.items %}
+
+		<!-- Titulos de los componentes -->
+		{# Titulos de los diferentes componentes o secciones #}
+		{% ifchanged r.objeto_seccion.superseccion.codigo %}
+		{# Para acortar el nombre del objeto #}
+		{% with superseccion=r.objeto_seccion.superseccion %}
+		<tr> 
+		  <td colspan="9" style="text-align: left;">
+			<b>
+			  COMPONENTE {{ superseccion.orden }}: {{ superseccion.titulo|upper }} ({{ superseccion.descripcion }})
+			</b>
+		  </td> 
+		</tr>
+		{% endwith %}
+		{% endifchanged %}
+
+		<!-- Cada uno de los indicadores -->
 		<tr>
-		  <td> {{ i }} </td>
+		  <td style="text-align: left;"> 
+			{{ r.objeto_seccion.descripcion }} 
+		  </td>
+		  <td>
+			{{ i }} 
+		  </td>
 		  <td width="10%"> 
 		  {% if r.informantes.estudiante >= 0 %} {{ r.informantes.estudiante }} % {% else %} - {% endif %} 
 		  </td>
@@ -113,6 +135,26 @@
 		  <td width="10%"> {{ r.ponderada|floatformat:"2" }} <b>/</b> {{ r.ponderacion_seccion }} </td>
 		  <td width="10%"> {{ r.cualitativa }} </td>
 		</tr>
+
+		<!-- Totales por Componente -->
+		{# Total CPF #}
+		{% ifequal forloop.counter 10 %}
+		<tr> 
+		  <td colspan="2"> 
+			TOTAL {{ r.objeto_seccion.superseccion.titulo }}  
+		  </td>  
+		  
+		</tr>
+ 		{% endifequal %}
+		{# Total CPG #}
+		{% ifequal forloop.counter 27 %}
+		<tr> <td colspan="9"> TOTAL {{ r.objeto_seccion.superseccion.titulo }} </td>  </tr>
+ 		{% endifequal %}
+		{# Total PV #}
+		{% ifequal forloop.counter 33 %}
+		<tr> <td colspan="9"> hola PV</td>  </tr>
+ 		{% endifequal %}
+
 		{% endfor %}
 	  </table>
 

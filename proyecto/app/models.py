@@ -923,6 +923,14 @@ class TabulacionEvaluacion2013:
                 indicador['informantes'].update({ informante : porcentaje })
                 resultados_indicadores.update({seccion.codigo : indicador})
 
+        # Se inserta ademas el objeto Seccion el indicador para disponer de informacion extra en el template
+        for codigo_seccion, indicador in resultados_indicadores.items():
+            secciones = Seccion.objects.filter(superseccion__cuestionario__periodoEvaluacion=self.periodoEvaluacion,
+                                               codigo=codigo_seccion)
+            if secciones:
+                indicador.update({'objeto_seccion' : secciones[0]})
+
+        print resultados_indicadores
 
         # -----------------------------------------------------------------------------------
         # Calculos totales en todos los indicadores de acuerdo al peso de los informantes
@@ -978,6 +986,8 @@ class TabulacionEvaluacion2013:
             resultado.update({'ponderada' : ponderada})
             resultado.update({'cualitativa' : self._cualificar_valor(primaria)})
             aux_estudiante.append(valores.get('estudiante', -1))
+            #aux_estudiante.append({'seccion' : seccion, 'valor' : valores.get('estudiante', -1)})
+            ####
             aux_directivo.append(valores.get('directivo', -1))
             aux_docente.append(valores.get('docente', -1))
             aux_paracademico.append(valores.get('paracademico', -1))
