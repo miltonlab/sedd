@@ -540,7 +540,7 @@ class Seccion(models.Model):
     # Nombre corto para identificacion de objeto
     nombre = models.CharField(max_length='150', default=u'Sección de Cuestionario Sin Nombre')
     titulo = models.CharField(max_length='200')
-    descripcion  = models.CharField(max_length='100', blank=True, null=True)
+    descripcion  = models.TextField(blank=True, null=True)
     orden = models.IntegerField()
     codigo = models.CharField(max_length='20', null=True, blank=True)
     ponderacion = models.FloatField(null=True, blank=True)
@@ -923,6 +923,7 @@ class TabulacionEvaluacion2013:
                 indicador['informantes'].update({ informante : porcentaje })
                 resultados_indicadores.update({seccion.codigo : indicador})
 
+
         # -----------------------------------------------------------------------------------
         # Calculos totales en todos los indicadores de acuerdo al peso de los informantes
         # ------------------------------------------------------------------------------------
@@ -932,6 +933,7 @@ class TabulacionEvaluacion2013:
         aux_directivo = []
         promedio_primaria = 0
         promedio_ponderada = 0
+        # Solo el codigo de la seccion
         for seccion, resultado in resultados_indicadores.items():
             valores = resultado['informantes']
             informantes = valores.keys()
