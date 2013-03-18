@@ -884,8 +884,9 @@ def mostrar_resultados(request):
         if opcion  == 'c' and not request.user.is_staff:
             return HttpResponse("<h2> Ud no tiene permisos para revisar este reporte </h2>")
         codigos_filtro = {'a' : '', 'b' : 'CPF', 'c' : 'CPG', 'd' : 'PV', 'e' : 'sugerencias'}
+        objeto_area = AreaSGA.objects.get(siglas=request.session['area'])
         # Nombre completo del Area para su presentacion en el reporte
-        area = AreaSGA.objects.get(siglas=request.session['area']).nombre
+        area = objeto_area.nombre
         area_siglas = request.session['area']
         carrera = request.session['carrera']
         tabulacion = TabulacionEvaluacion2013(periodoEvaluacion)
@@ -915,6 +916,19 @@ def mostrar_resultados(request):
         # Para el resto de casos
         else:
             resultados = metodo(request.session['area'], request.session['carrera'], filtro)
+
+        # Posicion para ubicar el promedio por componente en la plantilla
+        if resultados.get('promedios_componentes', None) and objeto_area.id == 6:
+            # Si se trata del Instituto de Idiomas
+            resultados['promedios_componentes']['CPF'].update({'fila' : 8})
+            resultados['promedios_componentes']['CPG'].update({'fila' : 23})
+            resultados['promedios_componentes']['PV'].update({'fila' : 29})
+        elif resultados.get('promedios_componentes', None):
+            # Para el resto de Areas
+            resultados['promedios_componentes']['CPF'].update({'fila' : 10})
+            resultados['promedios_componentes']['CPG'].update({'fila' : 27})
+            resultados['promedios_componentes']['PV'].update({'fila' : 33})
+
         if filtro == 'sugerencias':
             # Se trata de reporte de sugerencias
             plantilla = 'app/imprimir_sugerencias_edd2013.html'

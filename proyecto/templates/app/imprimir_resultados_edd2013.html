@@ -39,7 +39,7 @@
       {{ "Unversidad Nacional de Loja"|upper }}  <br/>
       Comisión de Evaluación Interna <br/>
       EVALUACIÓN DEL DESEMPEÑO ACADÉMICO <p/>
-      {{ "Resultados de la Evaluación del Desempeño Académico 2012-2013"|upper }}
+      {{ "Resultados de la Evaluación del Desempeño Docente 2012"|upper }}
 
       <!-- Tabla de encabezado -->
 
@@ -78,13 +78,13 @@
 
       <table id="tabla-resultados" width="100%" cellspacing="0" >
 		<tr>
-		  <th rowspan="3" colspan="2">  DESCRIPCIÓN </th>
+		  <th rowspan="3" colspan="2">  DESCRIPCIÓN DE LOS INDICADORES DE CALIDAD </th>
 		  <th colspan="4">  INFORMANTES </th>
 		  <th colspan="3">  EVALUACIÓN </th>
 		</tr>
 		<tr>
-		  <th rowspan="2"> ESTUDIANTE </th>
-		  <th rowspan="2"> DOCENTE </th>
+		  <th rowspan="2"> ESTUDIANTES </th>
+		  <th rowspan="2"> DOCENTES </th>
 		  <th colspan="2"> COMISIÓN ACADÉMICA </th>
 		  <th rowspan="2"> PRIMARIA </th>
 		  <th rowspan="2">  PONDERAD. </th>
@@ -140,8 +140,9 @@
 		</tr>
 
 		<!-- Totales por Componente -->
+		{% if promedios_componentes %} <!-- if promedios_componentes -->
 		{# Total CPF #}
-		{% ifequal forloop.counter 10 %}
+		{% ifequal forloop.counter promedios_componentes.CPF.fila %}
 		<tr class="promedio_componente"> 
 		  <td colspan="2" style="text-align: left;"> 
 			TOTAL {{ r.objeto_seccion.superseccion.titulo }}
@@ -159,7 +160,7 @@
 			{{ promedios_componentes.CPF.directivo }} %
 		  </td>
 		  <td> 
-			{{ promedios_componentes.CPF.primaria }} %
+			{{ promedios_componentes.CPF.primaria|floatformat:"0" }} %
 		  </td>
 		  <td> 
 			{{ promedios_componentes.CPF.ponderada|floatformat:"2" }} / {{ r.objeto_seccion.superseccion.ponderacion }}
@@ -171,7 +172,7 @@
  		{% endifequal %}
 
 		{# Total CPG #}
-		{% ifequal forloop.counter 27 %}
+		{% ifequal forloop.counter promedios_componentes.CPG.fila %}
 		<tr class="promedio_componente"> 
 		  <td colspan="2" style="text-align: left;"> 
 			TOTAL {{ r.objeto_seccion.superseccion.titulo }}
@@ -189,7 +190,7 @@
 			{{ promedios_componentes.CPG.directivo }} %
 		  </td>
 		  <td> 
-			{{ promedios_componentes.CPG.primaria }} %
+			{{ promedios_componentes.CPG.primaria|floatformat:"0" }} %
 		  </td>
 		  <td> 
 			{{ promedios_componentes.CPG.ponderada|floatformat:"2" }} / {{ r.objeto_seccion.superseccion.ponderacion }}
@@ -201,7 +202,7 @@
  		{% endifequal %}
 
 		{# Total PV #}
-		{% ifequal forloop.counter 33 %}
+		{% ifequal forloop.counter promedios_componentes.PV.fila %}
 		<tr class="promedio_componente"> 
 		  <td colspan="2" style="text-align: left;"> 
 			TOTAL {{ r.objeto_seccion.superseccion.titulo }}
@@ -219,7 +220,7 @@
 			{{ promedios_componentes.PV.directivo }} %
 		  </td>
 		  <td> 
-			{{ promedios_componentes.PV.primaria }} %
+			{{ promedios_componentes.PV.primaria|floatformat:"0" }} %
 		  </td>
 		  <td> 
 			{{ promedios_componentes.PV.ponderada|floatformat:"2" }} / {{ r.objeto_seccion.superseccion.ponderacion }}
@@ -229,6 +230,7 @@
 		  </td>
 		</tr>
  		{% endifequal %}
+		{% endif %} <!-- end if promedios_componentes -->
 
 		{% endfor %}
 	  </table>
