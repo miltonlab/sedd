@@ -9,7 +9,7 @@
     table {
 	margin-top: 10px;
 	margin-bottom: 10px;
-	width: 75%;
+	width: 85%;
 	borderspacing: 0;
     }
     th {
@@ -43,7 +43,7 @@
 
       <!-- Tabla de encabezado -->
 
-      <table id="tabla-docente" width="100%" border="0">
+      <table id="tabla-docente"  border="0">
 		{% if area %}
 		<tr>
 		  <td width="10%"><b>AREA</b></td> <td style="text-align: left;" width="90%">{{ area }}</td>
@@ -113,8 +113,9 @@
 		{% endifchanged %}
 
 		<!-- Cada uno de los indicadores -->
+
 		<tr>
-		  <td style="text-align: left;"> 
+		  <td style="text-align: left; font-size: 9px;"> 
 			{{ r.objeto_seccion.descripcion }} 
 		  </td>
 		  <td>
@@ -236,9 +237,9 @@
 	  </table>
 
       <!-- Tabla de Resultados -->
-      <table width="100%">
+      <table>
 		<tr>
-		 <td> <b> VALOR TOTAL OBTENIDO: </b> </td>
+		 <td colspan="2"> <b> VALOR TOTAL OBTENIDO: </b> </td>
 		 <td width="10%"> {{ promedios.estudiante|floatformat:"2" }} % </td>
 		 <td width="10%"> {{ promedios.docente|floatformat:"2" }} % </td>
 		 <td width="10%"> {{ promedios.paracademico|floatformat:"2" }} % </td>
