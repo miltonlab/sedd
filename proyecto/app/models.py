@@ -3,6 +3,7 @@
 from django.db import models
 from django.db import connection
 from django.db.models import Count
+from django.db.models import Q
 from django.db.models import exceptions
 from django.contrib.auth.models import User
 from datetime import datetime
