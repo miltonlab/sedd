@@ -783,8 +783,6 @@ class TabulacionEvaluacion2013:
             self.por_carrera, u'Evaluación del Desempeño Académico por Carrera'),
             ('c', u'Resultados de la Evaluación del Desempeño Académico POR AREA',
             self.por_area, u'Evaluación del Desempeño Académico por Area'),
-            ('d', u'Resultados de la Evaluación del Desempeño Académico Consolidado POR CARRERA',
-            self.consolidado_por_carrera, u'Evaluación del Desempeño Académico Consolidado por Carrera'),
             )
 
     def por_docente(self, siglas_area, nombre_carrera, id_docente, componente=None):
@@ -821,9 +819,6 @@ class TabulacionEvaluacion2013:
             'id', flat=True
             )
         return self.calcular(siglas_area, None , ids_docentes, componente)
-
-    def consolidado_por_carrera(self, siglas_area, nombre_carrera, componente=None):
-        pass
 
     def calcular(self, siglas_area, nombre_carrera, ids_docentes, componente=None):
         """ 

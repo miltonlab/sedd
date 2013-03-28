@@ -3,6 +3,7 @@
 from django.http import HttpResponse
 from django.core.context_processors import csrf
 from django.shortcuts import render_to_response
+from django.template.loader import render_to_string
 from django.shortcuts import redirect
 from django.template import RequestContext
 from django.template.loader import render_to_string
@@ -39,7 +40,9 @@ from proyecto.tools.sgaws.cliente import SGA
 from proyecto.settings import SGAWS_USER, SGAWS_PASS
 
 from datetime import datetime
-import logging
+from ho import pisa
+import os, logging, StringIO
+
 logg = logging.getLogger('logapp')
 
 def portada(request):
@@ -881,7 +884,7 @@ def mostrar_resultados(request):
     # Evaluacion del Desempenio Docente 2012 - 2013
     # ----------------------------------------------------------------------------
     if tabulacion.tipo == 'EDD2013':
-        if opcion  == 'c' and not request.user.is_staff:
+        if opcion in ('c', 'd') and not request.user.is_staff:
             return HttpResponse("<h2> Ud no tiene permisos para revisar este reporte </h2>")
         codigos_filtro = {'a' : '', 'b' : 'CPF', 'c' : 'CPG', 'd' : 'PV', 'e' : 'sugerencias'}
         objeto_area = AreaSGA.objects.get(siglas=request.session['area'])
@@ -890,7 +893,8 @@ def mostrar_resultados(request):
         area_siglas = request.session['area']
         carrera = request.session['carrera']
         tabulacion = TabulacionEvaluacion2013(periodoEvaluacion)
-        metodo =  [c[2] for c in tabulacion.calculos if c[0] == opcion][0]
+        if opcion !=  'd':
+            metodo =  [c[2] for c in tabulacion.calculos if c[0] == opcion][0] 
         filtro = request.POST['filtros']
         filtro = codigos_filtro[filtro]
         # Por docente
@@ -915,14 +919,17 @@ def mostrar_resultados(request):
             resultados['area'] = area
         elif opcion == 'd':
             # Consolidado de Docentes por carrera
-            resultados = metodo(request.session['area'], request.session['carrera'], filtro)
-            resultados['carrera'] = carrera
-            resultados['area'] = area
-
+            area = request.session['area']
+            carrera = request.session['carrera']
+            contenido = generar_consolidado_edd2013(area, carrera, filtro, tabulacion)
+            archivo_pdf = generar_pdf(contenido)
+            response = HttpResponse(archivo_pdf, mimetype='application/pdf')
+            filename = "Consolidado_{0}".format("Carrera")
+            response['Content-Disposition'] = 'attachment; filename={0}'.format(filename)
+            return response
         # Para el resto de casos
         else:
             resultados = metodo(request.session['area'], request.session['carrera'], filtro)
-
         # Posicion para ubicar el promedio por componente en la plantilla
         if resultados.get('promedios_componentes', None) and objeto_area.id == 6:
             # Si se trata del Instituto de Idiomas
@@ -934,15 +941,83 @@ def mostrar_resultados(request):
             resultados['promedios_componentes']['CPF'].update({'fila' : 10})
             resultados['promedios_componentes']['CPG'].update({'fila' : 27})
             resultados['promedios_componentes']['PV'].update({'fila' : 33})
-
         if filtro == 'sugerencias':
             # Se trata de reporte de sugerencias
             plantilla = 'app/imprimir_sugerencias_edd2013.html'
         else:
             plantilla = 'app/imprimir_resultados_edd2013.html'
- 
-    return render_to_response(plantilla, resultados, context_instance=RequestContext(request));
 
+    formato = request.POST['formato']
+    if formato == 'HTML':
+        return render_to_response(plantilla, resultados, context_instance=RequestContext(request));
+    elif formato == 'PDF':
+        contenido = render_to_string(plantilla, resultados)
+        archivo_pdf = generar_pdf(contenido)
+        response = HttpResponse(archivo_pdf, mimetype='application/pdf')
+        filename = "Reporte"
+        response['Content-Disposition'] = 'attachment; filename={0}'.format(filename)
+        return response 
+
+
+def generar_consolidado_edd2013(siglas_area, nombre_carrera, filtro, tabulacion):
+    if siglas_area and nombre_carrera:
+        objeto_area = AreaSGA.objects.get(siglas=siglas_area)
+        aux_ids = AsignaturaDocente.objects.filter(
+            docente__periodoAcademico=tabulacion.periodoEvaluacion.periodoAcademico,
+            asignatura__carrera=nombre_carrera,
+            asignatura__area=siglas_area
+            ).values_list('docente__id', flat=True).distinct()
+        # Se agregan tambien los docentes que no tengan Asignaturas pero que pertenezcan a la Carrera
+        ids_docentes = DocentePeriodoAcademico.objects.filter(
+            Q(periodoAcademico=tabulacion.periodoEvaluacion.periodoAcademico) and
+            (Q(id__in=aux_ids) or Q(carrera=nombre_carrera))
+            ).order_by('usuario__last_name', 'usuario__first_name').values_list(
+            'id', flat=True
+            )
+        contenido = ''
+        if filtro == 'sugerencias':
+            # Se trata de reporte de sugerencias
+            plantilla = 'app/imprimir_sugerencias_edd2013.html'
+        else:
+            plantilla = 'app/imprimir_resultados_edd2013.html'
+        for id_docente in ids_docentes:
+            docente = DocentePeriodoAcademico.objects.get(id=int(id_docente))
+            # Referencia a lo que devuelve el metodo 'por_docente'  invocado sobre la instancia de Tabulacion 
+            resultados = tabulacion.calculos[0][2](siglas_area, nombre_carrera, int(id_docente), filtro)
+            resultados['docente'] = docente
+            resultados['carrera'] = nombre_carrera
+            resultados['area'] = siglas_area
+            # Posicion para ubicar el promedio por componente en la plantilla
+            if resultados.get('promedios_componentes', None) and objeto_area.id == 6:
+                # Si se trata del Instituto de Idiomas
+                resultados['promedios_componentes']['CPF'].update({'fila' : 8})
+                resultados['promedios_componentes']['CPG'].update({'fila' : 23})
+                resultados['promedios_componentes']['PV'].update({'fila' : 29})
+            elif resultados.get('promedios_componentes', None):
+                # Para el resto de Areas
+                resultados['promedios_componentes']['CPF'].update({'fila' : 10})
+                resultados['promedios_componentes']['CPG'].update({'fila' : 27})
+                resultados['promedios_componentes']['PV'].update({'fila' : 33})
+            #aux = render_to_response(plantilla, {"resultados" : resultados})
+            aux = render_to_string(plantilla, resultados)
+            contenido += aux
+    return contenido
+    
+def generar_pdf(contenido):
+    """ 
+    Toma como parametro un contenido string, lo transforma a PDF 
+    y devuelve el resultado en un archivo.
+    """
+    #stringIO = StringIO(contenido.encode('UTF-8'))
+    tmpdir = os.path.abspath(os.path.dirname(__file__) + '../../tmp/')
+    print 'tmpdir es: ', tmpdir
+    #archivo = open('%s%s' % (tmpdir, nombre_pdf), 'wb')
+    archivo = StringIO.StringIO()
+    pisa.CreatePDF(contenido.encode('UTF-8'), archivo)
+    archivo.seek(0)
+    #pdf = pisaDocument(stringIO, archivo)
+    #archivo.close()
+    return archivo
 
 def resultados(request):
     """

@@ -4,7 +4,10 @@
     <title> Resultados Evaluación del Desempeño Académico 2012 - 2013 </title>
     <style type="text/css" media="screen, print">
 	
-	@page { size: landscape; }  
+	@page { 
+	size: a4 landscape; 
+	margin: 1cm 1cm 1cm 1cm;
+	}  
 	
     body {
 		font-family: Helvetica, Arial, Sans;
@@ -17,18 +20,23 @@
     }
     th {
 		text-align: center;
+	    vertical-align: middle;
 		border: 1px solid gray;
     }
     td {
 		text-align: center;
 		border: 1px solid gray;
 		font-size: 13px;
+	    vertical-align: middle;
     }
+	#tabla-informacion tr td{
+	    vertical-align: middle
+	}
     textarea {
 		font-size: 10px;
 		overflow: hidden;
     }
-	.promedio_componente td {
+	.promedio_componente td{
 		text-decoration: overline;
 	/*font-size: 0%; */
 	}
@@ -48,7 +56,8 @@
 
   <body>
     <center>
-      <img width="70px" height="70px" src="/static/images/unl_logo.png"/>
+      <img width="70px" height="70px" src="http://t0.gstatic.com/images?q=tbn:ANd9GcSdhr9rEDXwrM4Hd_Xz_k_RaYGhy-1qd9xTbMVCejjfcIMTV9EE"/>
+	  <!-- http://www.unl.edu.ec/images/unl/web/unl_logo.png-->
       <h4> 
       {{ "Unversidad Nacional de Loja"|upper }}  <br/>
       Comisión de Evaluación Interna <br/>
@@ -60,7 +69,7 @@
       <table id="tabla-informacion"  border="0">
 		{% if area %}
 		<tr>
-		  <td width="10%"><b>AREA</b></td> <td style="text-align: left;" width="90%">{{ area }}</td>
+		  <td width="10%"><b>AREA</b></td> <td style="text-align: left; vertical-align: middle;" width="90%">{{ area }}</td>
 		</tr>
 		{% endif %}
 		{% if carrera %}
@@ -282,7 +291,7 @@
 		  </td>
 		</tr>
 	  </table>
-	  <p style="font-size: 12px;">
+	  <p>
 		Las evidencias con las que se evaluó el desempeño del docente se encuentran en su carpeta profesional y 
 		forman parte del expediente general del informe de cada carrera.
 	  </p>
@@ -297,6 +306,7 @@
 		Loja - Ecuador
       </div>
 
+	  <!-- Para resultados consolidados de varios docentes o varias carreras -->
 	  <div class="salto-pagina">
 		<span class="vacio">&nbsp;</span>
 	  </div>
