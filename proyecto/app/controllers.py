@@ -913,6 +913,12 @@ def mostrar_resultados(request):
             # Por Area
             resultados = metodo(request.session['area'], filtro)
             resultados['area'] = area
+        elif opcion == 'd':
+            # Consolidado de Docentes por carrera
+            resultados = metodo(request.session['area'], request.session['carrera'], filtro)
+            resultados['carrera'] = carrera
+            resultados['area'] = area
+
         # Para el resto de casos
         else:
             resultados = metodo(request.session['area'], request.session['carrera'], filtro)
