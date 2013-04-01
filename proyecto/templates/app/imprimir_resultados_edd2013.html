@@ -30,7 +30,7 @@
 	    vertical-align: middle;
     }
 	#tabla-informacion tr td{
-	    vertical-align: middle
+	    vertical-align: middle;
 	}
     textarea {
 		font-size: 10px;
@@ -274,12 +274,11 @@
 		  <td> {{ promedios.paracademico|floatformat:"2" }} % </td>
 		  <td> {{ promedios.directivo|floatformat:"2" }} % </td>
 		  <td> <b> {{ promedios.primaria }} %  </b> </td>
-		  <td> <b> {{ promedios.ponderada|floatformat:"2" }} / 100 </b> </td>
+		  <td> <b> {{ promedios.ponderada|floatformat:"2" }} / 
+			  {% if seccion_componente %} {{ seccion_componente.ponderacion }} {% else %} 100 {% endif %}</b> </td>
 		  <td> <b> {{ promedios.cualitativa }} </b> </td>
 		</tr>
-
 	  </table>
-
 
 	  <table id="tabla-escala" cellspacing="0">
 		<tr> 
