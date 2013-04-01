@@ -909,16 +909,16 @@ def mostrar_resultados(request):
                 resultados = metodo(request.session['area'], request.session['carrera'], int(id_docente), filtro)
                 resultados['docente'] = docente
                 resultados['carrera'] = carrera
-                resultados['area'] = area
+                resultados['area'] = objeto_area.nombre
         elif opcion == 'b':
             # Por Carrera
             resultados = metodo(request.session['area'], request.session['carrera'], filtro)
             resultados['carrera'] = carrera
-            resultados['area'] = area
+            resultados['area'] = objeto_area.nombre
         elif opcion == 'c':
             # Por Area
             resultados = metodo(request.session['area'], filtro)
-            resultados['area'] = area
+            resultados['area'] = objeto_area.nombre
         elif opcion == 'd':
             # Consolidado de Docentes por carrera
             area = request.session['area']
@@ -990,7 +990,7 @@ def generar_consolidado_edd2013(siglas_area, nombre_carrera, filtro, tabulacion)
             resultados = tabulacion.calculos[0][2](siglas_area, nombre_carrera, int(id_docente), filtro)
             resultados['docente'] = docente
             resultados['carrera'] = nombre_carrera
-            resultados['area'] = siglas_area
+            resultados['area'] = objeto_area.nombre
             # Posicion para ubicar el promedio por componente en la plantilla
             if resultados.get('promedios_componentes', None) and objeto_area.id == 6:
                 # Si se trata del Instituto de Idiomas
@@ -1002,7 +1002,6 @@ def generar_consolidado_edd2013(siglas_area, nombre_carrera, filtro, tabulacion)
                 resultados['promedios_componentes']['CPF'].update({'fila' : 10})
                 resultados['promedios_componentes']['CPG'].update({'fila' : 27})
                 resultados['promedios_componentes']['PV'].update({'fila' : 33})
-            #aux = render_to_response(plantilla, {"resultados" : resultados})
             aux = render_to_string(plantilla, resultados)
             contenido += aux
     return contenido
