@@ -813,6 +813,8 @@ def mostrar_resultados(request):
         return HttpResponse("<h2> Tiene que elegir el Periodo de Evaluación </h2>")
     # Se obtiene la opcion generica para cualquier tipo de evaluacion
     opcion = request.POST['opciones']
+    # Formato de presentacion de resultados
+    formato = request.POST['formato']
     periodoEvaluacion=PeriodoEvaluacion.objects.get(id=int(id_periodo))
     tabulacion = periodoEvaluacion.tabulacion
 
@@ -922,11 +924,14 @@ def mostrar_resultados(request):
             area = request.session['area']
             carrera = request.session['carrera']
             contenido = generar_consolidado_edd2013(area, carrera, filtro, tabulacion)
-            archivo_pdf = generar_pdf(contenido)
-            response = HttpResponse(archivo_pdf, mimetype='application/pdf')
-            filename = "Consolidado_{0}".format("Carrera")
-            response['Content-Disposition'] = 'attachment; filename={0}'.format(filename)
-            return response
+            if formato == 'HTML':
+                return HttpResponse(contenido)
+            elif formato == 'PDF':
+                archivo_pdf = generar_pdf(contenido)
+                response = HttpResponse(archivo_pdf, mimetype='application/pdf')
+                filename = "Consolidado_{0}".format("Carrera")
+                response['Content-Disposition'] = 'attachment; filename={0}'.format(filename)
+                return response
         # Para el resto de casos
         else:
             resultados = metodo(request.session['area'], request.session['carrera'], filtro)
@@ -947,7 +952,6 @@ def mostrar_resultados(request):
         else:
             plantilla = 'app/imprimir_resultados_edd2013.html'
 
-    formato = request.POST['formato']
     if formato == 'HTML':
         return render_to_response(plantilla, resultados, context_instance=RequestContext(request));
     elif formato == 'PDF':
