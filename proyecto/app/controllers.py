@@ -1013,7 +1013,6 @@ def generar_pdf(contenido):
     """
     #stringIO = StringIO(contenido.encode('UTF-8'))
     tmpdir = os.path.abspath(os.path.dirname(__file__) + '../../tmp/')
-    print 'tmpdir es: ', tmpdir
     #archivo = open('%s%s' % (tmpdir, nombre_pdf), 'wb')
     archivo = StringIO.StringIO()
     pisa.CreatePDF(contenido.encode('UTF-8'), archivo)

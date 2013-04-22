@@ -1107,6 +1107,7 @@ class TabulacionEvaluacion2013:
                     aux_dict = {'CPF' : aux_contestaciones['CPF'][i], 
                                 'CPG' : aux_contestaciones['CPG'][i], 
                                 'PV' : aux_contestaciones['PV'][i]}
+                    # Un resultado de un docente
                     resultado[tipo].append(aux_dict)
             sugerencias[nombre_docente] = resultado
         return dict(sugerencias=sugerencias)
