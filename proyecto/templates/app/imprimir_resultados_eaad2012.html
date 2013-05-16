@@ -76,10 +76,10 @@
 	<tr>
 	  <td width="4%"> {{ r.codigo }} </td>
 	  <td width="70%" style=""> {{ r.texto }}  </td>
-	  <td style="text-align: center;"> {{ r.valor_comision }} </td>
-	  <td style="text-align: center;"> {%if r.porcentaje_comision%} {{ r.porcentaje_comision }}% {%endif%}</td>
-	  <td style="text-align: center;"> {{ r.valor_docente }} </td>
-	  <td style="text-align: center;"> {%if r.porcentaje_docente%} {{ r.porcentaje_docente }}% {%endif%}</td>
+	  <td style="text-align: center;"> {%if r.valor_comision %} {{ r.valor_comision }} {% else %} - {% endif %}</td>
+	  <td style="text-align: center;"> {%if r.porcentaje_comision%} {{ r.porcentaje_comision }}% {% else %} - {% endif %} </td>
+	  <td style="text-align: center;"> {%if r.valor_docente %} {{ r.valor_docente }} {% else %} - {%endif%}</td>
+	  <td style="text-align: center;"> {%if r.porcentaje_docente%} {{ r.porcentaje_docente }}% {% else %} - {% endif %}</td>
 	  <td> 
 	    <textarea readonly="readonly" rows="4">COMISION: {{ r.observaciones_comision }} DOCENTE: {{ r.observaciones_docente }}  </textarea>
 	  </td>
@@ -97,8 +97,10 @@
 	</tr>
 	<tr> 
 	  <td rowspan="2"> <h3> Valoración Global Actividades Adicionales: </h3></td>
-	  <td style="text-align: center;"> <h3> Comision: {{ porcentaje1|floatformat:"2" }}% </h3> </td>
-	  <td style="text-align: center;"> <h3> Docente: {{ porcentaje2|floatformat:"2" }}% </h3> </td>
+	  <!-- Comision -->
+	  <td style="text-align: center;"> <h3> Comision: {{ porcentaje2|floatformat:"2" }}% </h3> </td>
+	  <!-- Docente -->
+	  <td style="text-align: center;"> <h3> Docente: {{ porcentaje1|floatformat:"2" }}% </h3> </td>
 	</tr>
 	<tr>
 	  <td colspan="2" style="text-align: center; vertical-align: center;"> <h1> {{ total|floatformat:"2" }}% </h1> </td>	  

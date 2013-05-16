@@ -1176,7 +1176,7 @@ class TabulacionAdicionales2012:
         # Se coloca en Contestacion un objeto Pregunta en vez del id_pregunta entero
         for c in contestaciones2:
             c.pregunta = Pregunta.objects.get(id=c.pregunta)     
-        # Valor Total obtenido con  ponderacion: Comision Academica 80% - Docente 20% 
+        # Valor Total obtenido con  ponderacion: Docente 20%  - Comision Academica 80%
         total = (porcentaje1 * 20 / 100) + (porcentaje2 * 80 / 100) 
         contestaciones = {}
         contestaciones['secciones'] = []
