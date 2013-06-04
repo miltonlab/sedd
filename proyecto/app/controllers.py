@@ -666,7 +666,7 @@ def menu_academico_ajax(request):
     try:
         id_campo = request.GET['id']
         valor_campo = request.GET['valor']
-        campo_siguiente = request.GET['siguiente']
+        campo_siguiente = request.GET.get('siguiente',None) 
         if valor_campo == '':
             return HttpResponse('{"id": "", "valores": []}', mimetype="JSON")
         id = ""
@@ -759,8 +759,13 @@ def resultados_carrera(request, num_carrera):
         periodosEvaluacion = area.periodosEvaluacion.filter(periodoAcademico=periodoAcademico)
         form = forms.Form()
         # Selecciona solo los peridos de evaluacion en los que se encuentra el area del docente director
+        form.fields['periodo_academico'] = forms.ModelChoiceField(
+            queryset=PeriodoAcademico.objects.all()
+            )
+        form.fields['periodo_academico'].label = u'Periodo Académico'
+        # ...queryset=area.periodosEvaluacion.filter(periodoAcademico=periodoAcademico)
         form.fields['periodo_evaluacion'] = forms.ModelChoiceField(
-            queryset=area.periodosEvaluacion.filter(periodoAcademico=periodoAcademico)
+            queryset=PeriodoEvaluacion.objects.none()
             )
         form.fields['periodo_evaluacion'].label = 'Periodo de Evaluación'
         datos = dict(form=form, title='>> Coordinador Carrera ' + carrera )
