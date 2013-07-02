@@ -763,7 +763,6 @@ def resultados_carrera(request, num_carrera):
             queryset=PeriodoAcademico.objects.all()
             )
         form.fields['periodo_academico'].label = u'Periodo Académico'
-        # ...queryset=area.periodosEvaluacion.filter(periodoAcademico=periodoAcademico)
         form.fields['periodo_evaluacion'] = forms.ModelChoiceField(
             queryset=PeriodoEvaluacion.objects.none()
             )
@@ -937,9 +936,21 @@ def mostrar_resultados(request):
                 filename = "Consolidado_{0}".format("Carrera")
                 response['Content-Disposition'] = 'attachment; filename={0}'.format(filename)
                 return response
+        elif opcion == 'e':
+            # Listado de Docentes con calificaciones
+            # key: listado_calificaciones
+            resultados = metodo(request.session['area'], request.session['carrera'])
+            resultados['carrera'] = carrera
+            resultados['area'] = objeto_area.nombre
+            carrera_senescyt = AsignaturaDocente.objects.filter(
+                docente__periodoAcademico=tabulacion.periodoEvaluacion.periodoAcademico,
+                asignatura__area=area_siglas, asignatura__carrera=carrera
+                ).distinct().values_list('asignatura__carrera_senescyt', flat=True)[0]
+            resultados['carrera_senescyt'] = carrera_senescyt
         # Para el resto de casos
         else:
             resultados = metodo(request.session['area'], request.session['carrera'], filtro)
+
         # Posicion para ubicar el promedio por componente en la plantilla
         if resultados.get('promedios_componentes', None) and objeto_area.id == 6:
             # Si se trata del Instituto de Idiomas
@@ -952,10 +963,14 @@ def mostrar_resultados(request):
             resultados['promedios_componentes']['CPG'].update({'fila' : 27})
             resultados['promedios_componentes']['PV'].update({'fila' : 33})
         if filtro == 'sugerencias':
-            # Se trata de reporte de sugerencias
+            # Reporte de sugerencias
             plantilla = 'app/imprimir_sugerencias_edd2013.html'
         else:
-            plantilla = 'app/imprimir_resultados_edd2013.html'
+            if opcion == 'e':
+                # Listado de Docentes con calificaciones para la SENESCYT
+                plantilla = 'app/imprimir_calificaciones_edd2013.html'
+            else:
+                plantilla = 'app/imprimir_resultados_edd2013.html'
 
     if formato == 'HTML':
         return render_to_response(plantilla, resultados, context_instance=RequestContext(request));

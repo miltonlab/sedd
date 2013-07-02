@@ -111,6 +111,8 @@ class PeriodoAcademico(models.Model):
 class Asignatura(models.Model):
     area = models.CharField(max_length='20')
     carrera = models.CharField(max_length='100')
+    # Codigo de la carrera establecido por la SENESCYT
+    carrera_senescyt = models.CharField(max_length='10', default='0000')
     semestre = models.CharField(max_length='10', verbose_name=u'módulo')
     paralelo = models.CharField(max_length='50')
     seccion = models.CharField(max_length='10')
@@ -363,7 +365,7 @@ class Cuestionario(models.Model):
     fin=models.DateTimeField(u'Finalización de la Encuesta')
     # Obligatoriedad de todas las preguntas del cuestionario
     preguntas_obligatorias = models.BooleanField(default=True)
-    informante = models.ForeignKey(TipoInformante)
+    informante = models.ForeignKey(TipoInformante, null=True)
     # Generalmente de acuerdo al Tipo de Informante
     peso = models.FloatField(default=1.0)
     periodoEvaluacion = models.ForeignKey('PeriodoEvaluacion', blank=True, null=True, 
@@ -384,7 +386,8 @@ class Cuestionario(models.Model):
         """
         numero = Cuestionario.objects.count()
         nuevo = Cuestionario()
-        nuevo.titulo = u'{0} (Clonado {1})'.format(self.titulo, str(numero+1))
+        nuevo.nombre = u'(Clonado {1}) {0}'.format(self.nombre, str(numero+1))
+        nuevo.titulo = u'(Clonado {1}) {0}'.format(self.titulo, str(numero+1))
         nuevo.encabezado = self.encabezado
         nuevo.inicio = self.inicio
         nuevo.fin = self.fin
@@ -394,6 +397,7 @@ class Cuestionario(models.Model):
         nuevo.save()
         for seccion in self.secciones.all():
             nuevaSeccion = Seccion()
+            nuevaSeccion.nombre = '(Seccion Clonada) ' + seccion.nombre
             nuevaSeccion.titulo = seccion.titulo
             nuevaSeccion.descripcion = seccion.descripcion
             nuevaSeccion.orden = seccion.orden
@@ -402,7 +406,10 @@ class Cuestionario(models.Model):
             nuevaSeccion.save()
             for pregunta in seccion.preguntas.all():
                 nuevaPregunta = Pregunta()
+                nuevaPregunta.codigo = pregunta.codigo
                 nuevaPregunta.texto = pregunta.texto
+                nuevaPregunta.descripcion = pregunta.descripcion
+                nuevaPregunta.observaciones = pregunta.observaciones
                 nuevaPregunta.orden = pregunta.orden
                 nuevaPregunta.tipo = pregunta.tipo
                 nuevaPregunta.seccion = nuevaSeccion
@@ -410,6 +417,7 @@ class Cuestionario(models.Model):
                 for item in pregunta.items.all():
                     nuevoItem = ItemPregunta()
                     nuevoItem.texto = item.texto
+                    nuevoItem.descripcion = item.descripcion
                     nuevoItem.orden = item.orden
                     nuevoItem.pregunta = nuevaPregunta
                     nuevoItem.save()
@@ -783,6 +791,8 @@ class TabulacionEvaluacion2013:
             self.por_carrera, u'Evaluación del Desempeño Académico por Carrera'),
             ('c', u'Resultados de la Evaluación del Desempeño Académico POR AREA',
             self.por_area, u'Evaluación del Desempeño Académico por Area'),
+            ('e', u'Listado de Docentes y Calificaciones',
+            self.listado_calificaciones, u'Listado de Docentes y Calificaciones'),
             )
 
     def por_docente(self, siglas_area, nombre_carrera, id_docente, componente=None):
@@ -819,6 +829,37 @@ class TabulacionEvaluacion2013:
             'id', flat=True
             )
         return self.calcular(siglas_area, None , ids_docentes, componente)
+
+
+    def listado_calificaciones(self, siglas_area, nombre_carrera):
+        # Obtenemos los id de los Docentes que dictan Asignaturas en la carrera seleccionada
+        aux_ids = AsignaturaDocente.objects.filter(
+            docente__periodoAcademico=self.periodoEvaluacion.periodoAcademico,
+            asignatura__carrera=nombre_carrera,
+            asignatura__area=siglas_area
+            ).values_list('docente__id', flat=True).distinct()
+        # Se agregan tambien los docentes que no tengan Asignaturas pero que pertenezcan a la Carrera
+        docentes = DocentePeriodoAcademico.objects.filter(
+            Q(periodoAcademico=self.periodoEvaluacion.periodoAcademico) and
+            (Q(id__in=aux_ids) or Q(carrera=nombre_carrera))
+            ).order_by('usuario__last_name', 'usuario__first_name').all()
+        listado_calificaciones = list()
+        for docente in docentes:
+            # TODO: Requerimiento por definir
+            # carrera_senescyt = docente.asignaturasDocente.filter(
+            #     docente__periodoAcademico=self.periodoEvaluacion.periodoAcademico,
+            #     asignatura__area=siglas_area, asignatura__carrera=nombre_carrera
+            #     ).values_list('asignatura__carrera_senescyt', flat=True)[0]
+            resultados = self.por_docente(siglas_area, nombre_carrera, docente.id)
+            total = resultados.get('total',0)
+            promedios = resultados.get('promedios', {})
+            logg.info('{0} resultados: {1} - {2}'.format(docente, promedios, total))
+            fila = (docente.usuario.cedula, docente.usuario.last_name, docente.usuario.first_name,  
+                    str(round(promedios.get('paracademico', 0), 2)), str(round(promedios.get('directivo', 0), 2)),
+                    str(round(promedios.get('docente', 0), 2)), str(round(promedios.get('estudiante', 0), 2)), 
+                    )
+            listado_calificaciones.append(fila)
+        return dict(listado_calificaciones=listado_calificaciones)
 
     def calcular(self, siglas_area, nombre_carrera, ids_docentes, componente=None):
         """ 
@@ -958,7 +999,7 @@ class TabulacionEvaluacion2013:
                 primaria =  (mitad / 2 + pesos['directivo']) * valores['directivo']
                 primaria += (mitad / 2 + pesos['paracademico']) * valores['paracademico']
                 primaria += (mitad + pesos['estudiante']) * valores['estudiante']
-            elif informantes == ['docente', 'estudiante']:      
+            elif informantes == ['docente', 'estudiante']:
                 # (mpni + pe * ve) + (mpni + pd * vd)
                 mitad = (pesos['directivo'] + pesos['paracademico']) / 2
                 primaria = (mitad + pesos['estudiante']) * valores['estudiante']

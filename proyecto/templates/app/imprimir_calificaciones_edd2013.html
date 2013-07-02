@@ -1,0 +1,128 @@
+<html>
+  <head>  
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8"/>
+    <title> Resultados Evaluación del Desempeño Académico 2012 - 2013 </title>
+    <style type="text/css" media="screen, print">
+	
+	@page { 
+	size: a4 landscape; 
+	margin: 1cm 1cm 1cm 1cm;
+	}  
+	
+    body {
+		font-family: Helvetica, Arial, Sans;
+    }
+    table {
+		margin-top: 10px;
+		margin-bottom: 10px;
+		width: 70%;
+		borderspacing: 0;
+    }
+    th {
+	    font-size: 15px;
+		text-align: center;
+	    vertical-align: middle;
+		border: 1px solid gray;
+    }
+    td {
+		text-align: center;
+		border: 1px solid gray;
+		font-size: 12px;
+	    vertical-align: middle;
+    }
+	#tabla-informacion tr td {
+	    text-align: left;
+     	vertical-align: middle;
+	}
+    textarea {
+		font-size: 10px;
+		overflow: hidden;
+    }
+	.promedio_componente td{
+		text-decoration: overline;
+	/*font-size: 0%; */
+	}
+	.salto-pagina {
+	    display: block;
+	    page-break-after: always;
+	}
+	.vacio{
+	    display: none;
+	}
+    </style>
+  </head>
+
+  <body>
+    <center>
+      <img width="70px" height="70px" src="http://t0.gstatic.com/images?q=tbn:ANd9GcSdhr9rEDXwrM4Hd_Xz_k_RaYGhy-1qd9xTbMVCejjfcIMTV9EE"/>
+	  <!-- http://www.unl.edu.ec/images/unl/web/unl_logo.png-->
+      <h4> 
+      {{ "Unversidad Nacional de Loja"|upper }}  <br/>
+      Comisión de Evaluación Interna <br/>
+      EVALUACIÓN DEL DESEMPEÑO ACADÉMICO <p/>
+      {{ "Listado de Docentes y Calificaciones de Evaluación del Desempeño Docente 2012"|upper }}
+
+      <!-- Tabla de encabezado -->
+
+      <table id="tabla-informacion"  border="0">
+		{% if area %}
+		<tr>
+		  <td width="15%"><b>AREA</b></td> <td width="75%">{{ area }}</td>
+		</tr>
+		{% endif %}
+		{% if carrera %}
+		<tr>
+		  <td width="15%"><b>CARRERA</b></td> <td width="75%">{{ carrera }}</td>
+		</tr>
+		{% endif %}
+		{% if carrera_senescyt %}
+		<tr>
+		  <td width="15%"><b>CODIGO CARRERA </b></td> <td width="75%">{{ carrera_senescyt }}</td>
+		</tr>
+		{% endif %}
+
+	  </table>
+
+      <!-- Tabla Central -->
+
+      <table id="tabla-resultados" cellspacing="0" >
+		<tr>
+		  <th width="10%">  Cedula </th>
+		  <th> Nombres </th>
+		  <th width="10%" >  Pares </th>
+		  <th width="10%"> Directivo </th>
+		  <th width="10%"> Autoevaluacion </th>
+		  <th width="10%"> Estudiantes </th>
+		</tr>
+
+		{% for docente in listado_calificaciones %}
+		<tr>
+		  <td width="10%"> {{ docente.0 }} </td>
+		  <td style="text-align: left;"> {{ docente.1 }} {{ docente.2 }}  </td>
+		  <td width="10%"> {{ docente.3|floatformat:"2" }} </td>
+		  <td width="10%"> {{ docente.4|floatformat:"2"}} </td>
+		  <td width="10%"> {{ docente.5|floatformat:"2" }} </td>
+		  <td width="10%"> {{ docente.6|floatformat:"2" }} </td>
+		</tr>
+		{% endfor %}
+
+		<!-- Fila Resultados -->
+
+	  </table>
+
+      <div id="pie" style="font-size: 9px; color: #666666">
+		<hr style="margin-bottom: 6px;"/>
+		Unidad de Telecomunicaciones e Infomacion - Departamento de Desarrollo de Software <br>
+		Correo Sistema de Evaluacion: 
+		<a href="mailto:evaluacion.docente@unl.edu.ec"> <u>evaluacion.docente@unl.edu.ec</u> </a> <br/>
+		Loja - Ecuador
+      </div>
+
+	  <!-- Para resultados consolidados de varios docentes o varias carreras -->
+	  <div class="salto-pagina">
+		<span class="vacio">&nbsp;</span>
+	  </div>
+
+    </center>
+  </body>
+</html>
