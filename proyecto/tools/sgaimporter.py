@@ -100,17 +100,22 @@ def importar(periodoAcademicoId, periodoEvaluacionId=None):
                             log.info(u'Datos de Unidad a crearse: {0}'.format(dict_unidad))
                             (asignatura, nueva) = Asignatura.objects.get_or_create(idSGA=dict_unidad['idSGA'],
                                                                                    defaults=dict_unidad)
-                            if nueva == True:
+                            if nueva:
                                 log.info(u'Asignatura nueva: {0}'.format(asignatura))
-                            (usuario, nuevo) = Usuario.objects.get_or_create(cedula=cedula, defaults=dict_usuario_docente)
-                            if nuevo == True:
-                                log.info(u'Usuario Docente nuevo: {0}:{1}'.format(usuario, cedula))
+                            (usuario, nuevo_usuario) = Usuario.objects.get_or_create(cedula=cedula, defaults=dict_usuario_docente)
+                            if nuevo_usuario:
+                                log.info(u'Usuario Docente creado: {0}:{1}'.format(usuario, cedula))
+                            else:
+                                # Actualizacion de datos del Usuario Docente SGA-SEDD
+                                if not usuario.contiene(dict_usuario_docente):
+                                    Usuario.objects.filter(username=usuario.username).update(**dict_usuario_docente)
+                                    log.info(u'Usuario Docente editado: {}'.format(usuario))
                             (docentePeriodoAcademico, nuevo) = DocentePeriodoAcademico.objects.get_or_create(
                                 usuario=usuario, periodoAcademico=periodoAcademico)
                             (asignaturaDocente, nuevo) = AsignaturaDocente.objects.get_or_create(
                                 docente=docentePeriodoAcademico, asignatura=asignatura
                                 )
-                            if nuevo == True:
+                            if nuevo:
                                 log.info(u'AsignaturaDocente nuevo: {0}'.format(asignaturaDocente))
                             asignaturas_docentes.append(asignaturaDocente)
 
@@ -125,16 +130,23 @@ def importar(periodoAcademicoId, periodoEvaluacionId=None):
                                 username=cedula, password='', cedula=cedula, first_name=nombres.title(), last_name=apellidos.title(),
                                 email=''
                                 )
-                            (usuario, nuevo) = Usuario.objects.get_or_create(cedula=cedula, defaults=dict_usuario_estudiante)
+                            (usuario, nuevo_usuario) = Usuario.objects.get_or_create(cedula=cedula, defaults=dict_usuario_estudiante)
+                            if not nuevo_usuario:
+                                # Actualizacion de datos del Usuario Docente SGA-SEDD
+                                if not usuario.contiene(dict_usuario_estudiante):
+                                    Usuario.objects.filter(username=usuario.username).update(**dict_usuario_docente)
+                                    log.info(u'Usuario Estudiante editado: {}'.format(usuario))
+                            
                             (estudiantePeriodoAcademico, nuevo) = EstudiantePeriodoAcademico.objects.get_or_create(
                                 usuario=usuario, periodoAcademico=periodoAcademico
                                 )
                             # Retomamos las asignaturas con docente extraidas en el metodo WS unidades_docentes 
                             for asignaturaDocente in asignaturas_docentes:
                                 (estudianteAsignaturaDocente, nuevo) = EstudianteAsignaturaDocente.objects.get_or_create(
-                                    estudiante=estudiantePeriodoAcademico, asignaturaDocente=asignaturaDocente, defaults=dict(matricula=matricula, estado=estado)
+                                    estudiante=estudiantePeriodoAcademico, asignaturaDocente=asignaturaDocente, 
+                                    defaults=dict(matricula=matricula, estado=estado)
                                     )
-                                if nuevo == True:
+                                if nuevo:
                                     log.info(u'EstudianteAsignaturaDocente Nuevo: {0}'.format(estudianteAsignaturaDocente))
 
 if __name__ == '__main__':

@@ -383,6 +383,7 @@ class Cuestionario(models.Model):
         Crea una copia de un cuestionario incluyendo todas sus secciones y todas sus
         preguntas. Teniendo en cuenta que todos los objetos involucrados seran objetos
         nuevos.
+        TODO: Falta clonar recursivamente las Secciones
         """
         numero = Cuestionario.objects.count()
         nuevo = Cuestionario()
@@ -1544,18 +1545,28 @@ class TabulacionSatisfaccion2012:
 
     
     def por_otros_aspectos(self, siglas_area, nombre_carrera, seccion):
-        indicadores=Pregunta.objects.filter(seccion=seccion).filter(tipo__tipo=u'Ensayo').values_list('id', flat=True)
+        indicadores_otros=Pregunta.objects.filter(seccion=seccion).filter(tipo__tipo=u'Ensayo').values_list('id', flat=True)
 
-        conteo=Contestacion.objects.filter(evaluacion__cuestionario__periodoEvaluacion=self.periodoEvaluacion).filter(
+        # Verion anterior con conteo de respuestas comunes
+        #
+        # conteo=Contestacion.objects.filter(evaluacion__cuestionario__periodoEvaluacion=self.periodoEvaluacion).filter(
+        #     evaluacion__cuestionario__periodoEvaluacion__tabulacion__tipo='ESE2012').filter(
+        #     evaluacion__estudianteAsignaturaDocente__asignaturaDocente__asignatura__area=siglas_area).filter(
+        #     evaluacion__estudianteAsignaturaDocente__asignaturaDocente__asignatura__carrera=nombre_carrera).filter(
+        #     pregunta__in=indicadores_otros).values('pregunta','respuesta').annotate(
+        #     frecuencia=Count('respuesta')).order_by('pregunta')
+
+        sugerencias = Contestacion.objects.filter(evaluacion__cuestionario__periodoEvaluacion=self.periodoEvaluacion).filter(
             evaluacion__cuestionario__periodoEvaluacion__tabulacion__tipo='ESE2012').filter(
             evaluacion__estudianteAsignaturaDocente__asignaturaDocente__asignatura__area=siglas_area).filter(
-            evaluacion__estudianteAsignaturaDocente__asignaturaDocente__asignatura__carrera=nombre_carrera).filter(
-            pregunta__in=indicadores).values('pregunta','respuesta').annotate(
-            frecuencia=Count('respuesta')).order_by('pregunta')
-        # Para acceder a los datos del objeto pregunta en el template
-        for c in conteo:
-            c['pregunta'] = Pregunta.objects.get(id=c['pregunta'])
-        return conteo
+                evaluacion__estudianteAsignaturaDocente__asignaturaDocente__asignatura__carrera=nombre_carrera).filter(
+                pregunta__in=indicadores_otros)
+        # Se hace un join manual para obtener el texto de la pregunta desde otra tabla
+        sugerencias = sugerencias.extra(
+            select={'pregunta__texto' : 'select texto from app_pregunta where app_pregunta.id = app_contestacion.pregunta'}
+            ).values('evaluacion__id', 'pregunta__texto','respuesta').order_by('evaluacion__id', 'pregunta__texto')
+
+        return sugerencias
     
     def por_indicador(self,siglas_area, nombre_carrera, id_pregunta ):
         # @param id_pregunta representa el indicador del campo del cuestionario. Pregunta = Indicador
@@ -1813,7 +1824,19 @@ class Usuario(User):
             if p.lower() in equivalencias.keys():
                 return equivalencias[p.lower()]
         return ""
-        
+
+    def contiene(self, diccionario):
+        """ 
+        Determina si los itemas de un diccionario se corresponden integramente con 
+        los atributos del objeto.
+        """
+        if isinstance(diccionario, dict):
+            s1 = set(self.__dict__.items())
+            s2 = set(diccionario.items())
+            return s2.issubset(s1)
+        else:
+            return False
+
     nombres = property(get_nombres, set_nombres)
     apellidos = property(get_apellidos, set_apellidos)
     abreviatura = property(get_abreviatura)

@@ -25,17 +25,27 @@
       <h3 style="margin-bottom: 3px;"> Encuesta de Satisfacción Estudiantil 2012 </h3>
       {{ titulo|safe }}
       <table id="tabla-resultados" width="100%" cellspacing="0">
-	<th width="25%"> Otros Aspectos </th>
-	<th width="70%"> Respuesta  </th>
-	<th width="5%"> Frecuencia </th>
-	{% for r in resultados %}
-	<tr>
-	  <td width="25%">  {{ r.pregunta.texto }} </td>
-	  <td width="70%"> {{ r.respuesta }} </td>
-	  <td width="5%" align="center"> {{ r.frecuencia }} </td>
-	</tr>
-	{% endfor %}
-      </table>
+		<tr>
+		  <th width="30%"> PROCESO DOCENTE </th>
+		  <th width="30%"> LOGROS ALCANZADOS	</th>
+		  <th width="30%"> COMPORTAMIENTO ÉTICO DEL DOCENTE </th>
+		</tr>
+		<tr>
+		  {% for r in resultados %}
+		  {% ifchanged r.evaluacion__id %}
+		</tr>
+		<tr>
+		  {% endifchanged %}
+		  <td width="30%">  {{ r.respuesta }} </td>
+	  <!--td width="5%" align="center"> {{ r.frecuencia }} </td-->
+	  {% endfor %}
+		</tr>
+
+    </table>
+
+	  <!--td width="25%">  {{ r.evaluacion__id}} </td>
+		  <td width="25%">  {{ r.pregunta__texto }} </td>
+	  <td width="70%"> {{ r.respuesta }} </td-->
 
       <div id="pie" style="font-size: 9px; ; color: #666666">
 	<hr style="margin-bottom: 6px;"/>
