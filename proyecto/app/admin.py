@@ -283,7 +283,7 @@ class AsignaturaAdmin(admin.ModelAdmin):
             'fields': ('area', 'carrera', 'semestre', 'paralelo')
             }),
         ('Asignatura', {
-            'fields': ('nombre', 'tipo', 'creditos')
+            'fields': ('nombre', 'carrera_senescyt', 'tipo', 'creditos')
             }),
         ('Duracion', {
             'fields': ('duracion', 'inicio', 'fin', 'periodoAcademico')

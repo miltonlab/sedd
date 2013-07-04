@@ -93,6 +93,7 @@ def importar(periodoAcademicoId, periodoEvaluacionId=None):
                                 semestre=modulo, paralelo=paralelo, seccion=seccion, modalidad=modalidad, nombre=unidad, 
                                 creditos=creditos, duracion=horas, inicio=fecha_inicio, fin=fecha_fin, periodoAcademico=periodoAcademico
                                 )
+                            # TODO: Obtener email del docente, pendiente en SGAWS
                             dict_usuario_docente = dict(
                                 username=cedula, password='', first_name=nombres.title(), last_name=apellidos.title(),
                                 cedula=cedula, titulo=titulo, email=''
@@ -126,9 +127,15 @@ def importar(periodoAcademicoId, periodoEvaluacionId=None):
                         estudiantes_paralelo = js_ep[5]
                         for matricula, apellidos, nombres, cedula, estado in estudiantes_paralelo:
                             estado = estado.replace('EstadoMatricula','')
+                            r_e = sga.wspersonal.sgaws_datos_estudiante(cedula=cedula)
+                            js_e = json.loads(r_e)
+                            if js_e[0] != '_error':
+                                email = js_e[9] 
+                            else: 
+                                email = ''
                             dict_usuario_estudiante = dict(
                                 username=cedula, password='', cedula=cedula, first_name=nombres.title(), last_name=apellidos.title(),
-                                email=''
+                                email=email
                                 )
                             (usuario, nuevo_usuario) = Usuario.objects.get_or_create(cedula=cedula, defaults=dict_usuario_estudiante)
                             if not nuevo_usuario:
