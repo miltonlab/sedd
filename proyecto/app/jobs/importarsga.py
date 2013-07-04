@@ -20,5 +20,5 @@ class Job(BaseJob):
 
     def execute(self):
         periodoAcademico = Configuracion.getPeriodoAcademicoActual()
-        #sgaimporter.importar(periodoAcademico.id)
+        sgaimporter.importar(periodoAcademico.id)
         print periodoAcademico
