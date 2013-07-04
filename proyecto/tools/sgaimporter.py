@@ -50,7 +50,7 @@ def importar(periodoAcademicoId, periodoEvaluacionId=None):
 	    log.error(dict(error=carreras[1]))
 	    continue
         unidades = []
-        for id_carrera, carrera, modalidad, area, codigo_senescyt in carreras:
+        for id_carrera, carrera, modalidad, area, carrera_senescyt in carreras:
             if area in EXCLUSIONES['areas'] or modalidad in EXCLUSIONES['modalidades'] or carrera in EXCLUSIONES['carreras']:
                 continue
             r_p = sga.wsinstitucional.sgaws_paralelos_carrera(id_oferta=oa.idSGA, id_carrera=id_carrera)
@@ -134,7 +134,7 @@ def importar(periodoAcademicoId, periodoEvaluacionId=None):
                             if not nuevo_usuario:
                                 # Actualizacion de datos del Usuario Docente SGA-SEDD
                                 if not usuario.contiene(dict_usuario_estudiante):
-                                    Usuario.objects.filter(username=usuario.username).update(**dict_usuario_docente)
+                                    Usuario.objects.filter(username=usuario.username).update(**dict_usuario_estudiante)
                                     log.info(u'Usuario Estudiante editado: {}'.format(usuario))
                             
                             (estudiantePeriodoAcademico, nuevo) = EstudiantePeriodoAcademico.objects.get_or_create(
@@ -154,5 +154,6 @@ if __name__ == '__main__':
         importar( int(sys.argv[1]) )
     elif len(sys.argv) == 3:
         importar( int(sys.argv[1]), int(sys.argv[2]) )
+    print u"Finalizada la migración de datos del SGA !!!"
     else:
         print "Error: Use sgaimporter id_periodo_academico [id_periodo_evaluacion]"
