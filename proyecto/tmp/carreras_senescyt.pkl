@@ -1,0 +1,267 @@
+(lp0
+(lp1
+S'AARNR'
+p2
+aVIngeniería Agronómica
+p3
+aV2975
+p4
+aa(lp5
+VAARNR
+p6
+aVIngeniería Forestal
+p7
+aV3145
+p8
+aa(lp9
+VAARNR
+p10
+aVIngeniería en Producción Educación y Extensión Agropecuarias
+p11
+aV7136
+p12
+aa(lp13
+VAARNR
+p14
+aVIngeniería en Manejo y Conservación del Medio Ambiente
+p15
+aV627
+p16
+aa(lp17
+VAARNR
+p18
+aVIngeniería Agrícola
+p19
+aV2976
+p20
+aa(lp21
+VAARNR
+p22
+aVIngeniería en Acuicultura
+p23
+aV
+p24
+aa(lp25
+VAARNR
+p26
+aVMedicina Veterinaria y Zootecnia
+p27
+aV3146
+p28
+aa(lp29
+VAEAC
+p30
+aVFísico Matemáticas
+p31
+aV2152
+p32
+aa(lp33
+VAEAC
+p34
+aVCultura Física
+p35
+aV635
+p36
+aa(lp37
+VAEAC
+p38
+aVPsicología Educativa y Orientación
+p39
+aV7193
+p40
+aa(lp41
+VAEAC
+p42
+aVArtes Plásticas
+p43
+aV610
+p44
+aa(lp45
+VAEAC
+p46
+aVPsicorrehabilitación y Educación Especial
+p47
+aV3306
+p48
+aa(lp49
+VAEAC
+p50
+aVQuímico Biológicas
+p51
+aV3757
+p52
+aa(lp53
+VAEAC
+p54
+aVEducación Básica
+p55
+aV3758
+p56
+aa(lp57
+VAEAC
+p58
+aVIdioma Inglés
+p59
+aV633
+p60
+aa(lp61
+VAEAC
+p62
+aS'Dise\xc3\xb1o de Interiores u Decoraci\xc3\xb3n de Ambientes'
+p63
+ag24
+aa(lp64
+VAEAC
+p65
+aVEducación Musical
+p66
+aV6434
+p67
+aa(lp68
+VAEAC
+p69
+aVPsicología Infantil y Educación Parvularia
+p70
+aV3511
+p71
+aa(lp72
+VAEAC
+p73
+aVComunicación Social
+p74
+aV3302
+p75
+aa(lp76
+VAEAC
+p77
+aVInformática Educativa
+p78
+aV3759
+p79
+aa(lp80
+VAEAC
+p81
+aVLengua Castellana y Literatura
+p82
+aV7130
+p83
+aa(lp84
+VAEIRNNR
+p85
+aS'Ingenier\xc3\xada en Geolog\xc3\xada Ambiental y Ordenamiento Territorial'
+p86
+aV5510
+p87
+aa(lp88
+VAEIRNNR
+p89
+aVIngeniería en Sistemas
+p90
+aV3305
+p91
+aa(lp92
+VAEIRNNR
+p93
+aS'Ingenier\xc3\xada en Electromec\xc3\xa1nica'
+p94
+aV614
+p95
+aa(lp96
+VAEIRNNR
+p97
+aS'Ingenier\xc3\xada en Electr\xc3\xb3nica y Telecomunicaciones'
+p98
+aV11581
+p99
+aa(lp100
+VAJSA
+p101
+aVDerecho
+p102
+aV3151
+p103
+aa(lp104
+VAJSA
+p105
+aVTrabajo Social
+p106
+aV3152
+p107
+aa(lp108
+VAJSA
+p109
+aVAdministración Pública
+p110
+aV11569
+p111
+aa(lp112
+VAJSA
+p113
+aVContabilidad y Auditoría
+p114
+aV3150
+p115
+aa(lp116
+VAJSA
+p117
+aVEconomía
+p118
+aV11568
+p119
+aa(lp120
+VAJSA
+p121
+aVAdministración Turística
+p122
+aV6430
+p123
+aa(lp124
+VAJSA
+p125
+aVBanca y Finanzas
+p126
+aV6632
+p127
+aa(lp128
+VAJSA
+p129
+aVAdministración de Empresas
+p130
+aV3149
+p131
+aa(lp132
+VASH
+p133
+aVMedicina Humana
+p134
+aV3228
+p135
+aa(lp136
+VASH
+p137
+aVOdontología
+p138
+aV5082
+p139
+aa(lp140
+VASH
+p141
+aS'Psicolog\xc3\xada Cl\xc3\xadnica'
+p142
+aV7294
+p143
+aa(lp144
+VASH
+p145
+aS'Enfermer\xc3\xada'
+p146
+aV3512
+p147
+aa(lp148
+VASH
+p149
+aVLaboratorio Clínico
+p150
+aV4545
+p151
+aa.

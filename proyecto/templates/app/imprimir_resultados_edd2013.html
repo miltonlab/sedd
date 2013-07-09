@@ -77,6 +77,11 @@
 		  <td width="10%"><b>CARRERA</b></td> <td style="text-align: left;" width="90%">{{ carrera }}</td>
 		</tr>
 		{% endif %}
+		{% if carrera_senescyt %}
+		<tr>
+		  <td width="10%"><b>CODIGO CARRERA</b></td> <td style="text-align: left;" width="90%">{{ carrera_senescyt }}</td>
+		</tr>
+		{% endif %}
 		{% if docente %}
 		<tr>
 		  <td width="10%"><b>DOCENTE</b></td> <td style="text-align: left;" width="90%">{{ docente }}</td>

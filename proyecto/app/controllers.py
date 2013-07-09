@@ -821,6 +821,13 @@ def mostrar_resultados(request):
     formato = request.POST['formato']
     periodoEvaluacion=PeriodoEvaluacion.objects.get(id=int(id_periodo))
     tabulacion = periodoEvaluacion.tabulacion
+    resultados = {}
+    # Codigo de la carrera de acuerdo la SENESCYT
+    carrera_senescyt = AsignaturaDocente.objects.filter(
+        docente__periodoAcademico=tabulacion.periodoEvaluacion.periodoAcademico,
+        asignatura__area=request.session['area'], asignatura__carrera=request.session['carrera']
+        ).distinct().values_list('asignatura__carrera_senescyt', flat=True)[0]
+    print 'carrera_senescyt: ', carrera_senescyt
 
     # Encuesta de Satisfaccion Estudiantil 2012
     # ------------------------------------------------------------------------
@@ -829,7 +836,6 @@ def mostrar_resultados(request):
         metodo =  [c[2] for c in tabulacion.calculos if c[0] == opcion][0]
         titulo = request.session['area'] + '<br/> <b>' + request.session['carrera'] + '</b><br/>'
         titulo += [c[3] for c in tabulacion.calculos if c[0] == opcion][0]
-        resultados = {}
         # Por docente
         if opcion == 'a':
             id_docente = request.POST['docentes']
@@ -868,8 +874,6 @@ def mostrar_resultados(request):
         carrera = request.session['carrera']
         tabulacion = TabulacionAdicionales2012(periodoEvaluacion)
         metodo =  [c[2] for c in tabulacion.calculos if c[0] == opcion][0]
-        # Por docente
-        resultados = {}
         if opcion == 'a':
             id_docente = request.POST['docentes']
             if id_docente != '':
@@ -903,8 +907,6 @@ def mostrar_resultados(request):
             metodo =  [c[2] for c in tabulacion.calculos if c[0] == opcion][0] 
         filtro = request.POST['filtros']
         filtro = codigos_filtro[filtro]
-        # Por docente
-        resultados = {}
         if opcion == 'a':
             id_docente = request.POST['docentes']
             if id_docente != '':
@@ -942,11 +944,12 @@ def mostrar_resultados(request):
             resultados = metodo(request.session['area'], request.session['carrera'])
             resultados['carrera'] = carrera
             resultados['area'] = objeto_area.nombre
-            carrera_senescyt = AsignaturaDocente.objects.filter(
-                docente__periodoAcademico=tabulacion.periodoEvaluacion.periodoAcademico,
-                asignatura__area=area_siglas, asignatura__carrera=carrera
-                ).distinct().values_list('asignatura__carrera_senescyt', flat=True)[0]
-            resultados['carrera_senescyt'] = carrera_senescyt
+            ### tmp
+            # carrera_senescyt = AsignaturaDocente.objects.filter(
+            #     docente__periodoAcademico=tabulacion.periodoEvaluacion.periodoAcademico,
+            #     asignatura__area=area_siglas, asignatura__carrera=carrera
+            #     ).distinct().values_list('asignatura__carrera_senescyt', flat=True)[0]
+            # resultados['carrera_senescyt'] = carrera_senescyt
         # Para el resto de casos
         else:
             resultados = metodo(request.session['area'], request.session['carrera'], filtro)
@@ -971,6 +974,9 @@ def mostrar_resultados(request):
                 plantilla = 'app/imprimir_calificaciones_edd2013.html'
             else:
                 plantilla = 'app/imprimir_resultados_edd2013.html'
+
+    # Obtenido al inicio de la funcion
+    resultados['carrera_senescyt'] = carrera_senescyt
 
     if formato == 'HTML':
         return render_to_response(plantilla, resultados, context_instance=RequestContext(request));

@@ -14,9 +14,10 @@
     }
     td, th {
 	text-align: center;
+	vertical-align: middle;
 	border: 1px solid gray;
-        font-size: 13px;
-        width: 20%;
+    font-size: 13px;
+    /*width: 20%;*/
     }
     </style>
   </head>
@@ -27,52 +28,54 @@
       <h3 style="margin-bottom: 3px;"> Encuesta de Satisfacción Estudiantil 2012 </h3>
       {{ titulo|safe }}
       <table  width="100%" cellspacing="0">
-	<th rowspan="2"> Indicadores </th>
-	<th colspan="4"> Niveles de Satisfacción  </th>
-	<tr>
-	  <th> Muy Satisfecho MS (4) </th>
-	  <th> Satisfecho S (3) </th>
-	  <th> Poco Satisfecho PS (2) </th>
-	  <th> Insatisfecho INS (1) </th>
-	</tr>
-	{% for c in conteos %}
-	<tr>
-	  <td title="{{ c.pregunta.texto }}" width="20%"> 
-	    <b>{{ c.pregunta.seccion.orden }}.{{c.pregunta.orden}} </b>
-	  </td>
-	  <td> {{ c.MS }} </td>
-	  <td> {{ c.S }} </td>
-	  <td> {{ c.PS }} </td>
-	  <td> {{ c.INS }} </td>
-	</tr>
-	{% endfor %}
-      </table>
-
-      {% if totales and porcentajes %}
-      <h3> Resultados </h3>
-      <table cellspacing="0">
-	<tr>
-	  <td> Suman ( {{ totales.total }} ) </td>
-	  <td> {{ totales.MS }} </td>
-	  <td> {{ totales.S }} </td>
-	  <td> {{ totales.PS }} </td>
-	  <td> {{ totales.INS }} </td>
-	</tr>
-	<tr>
-	  <td> % de Estudiantes que declaran su Satisfacción </td>
-	  <td> {{ porcentajes.MS|floatformat:"-2" }}% </td>
-	  <td> {{ porcentajes.S|floatformat:"-2" }}% </td>
-	  <td> {{ porcentajes.PS|floatformat:"-2" }}% </td>
-	  <td> {{ porcentajes.INS|floatformat:"-2" }}% </td>
-	</tr>
-	<tr>
-	  <td> % de Estudiantes que se declaran Satisfechos </td>
-	  <td colspan="2"> {{ porcentajes.MSS|floatformat:"-2" }} % </td>
-	  <!--td colspan="2"> {{ porcentajes.MS|add:porcentajes.S }}% </td-->
-	  <td colspan="2"> </td>
-	</tr>
-      </table>
+		<th rowspan="2" width="40%"> Indicadores </th>
+		<th colspan="4"> Niveles de Satisfacción  </th>
+		<tr>
+		  <th width="15%"> Muy Satisfecho MS (4) </th>
+		  <th width="15%"> Satisfecho S (3) </th>
+		  <th width="15%"> Poco Satisfecho PS (2) </th>
+		  <th width="15%"> Insatisfecho INS (1) </th>
+		</tr>
+		{% for c in conteos %}
+		<tr>
+		  <td style="text-align: justify; font-size: 9px;"> 
+			<b>{{ c.pregunta.seccion.orden }}.{{c.pregunta.orden}}</b>
+			{{ c.pregunta.texto }}
+		  </td>
+		  <td> {{ c.MS }} </td>
+		  <td> {{ c.S }} </td>
+		  <td> {{ c.PS }} </td>
+		  <td> {{ c.INS }} </td>
+		</tr>
+		{% endfor %}
+	  
+		{% if totales and porcentajes %}
+		<tr>
+		  <td colspan="5"><h2> Resultados Totales </h1></td>
+		</tr>
+		<tr>
+		  <td> Suman ( {{ totales.total }} ) </td>
+		  <td> {{ totales.MS }} </td>
+		  <td> {{ totales.S }} </td>
+		  <td> {{ totales.PS }} </td>
+		  <td> {{ totales.INS }} </td>
+		</tr>
+		<tr>
+		  <td> % de Estudiantes que declaran su Satisfacción </td>
+		  <td> {{ porcentajes.MS|floatformat:"-2" }}% </td>
+		  <td> {{ porcentajes.S|floatformat:"-2" }}% </td>
+		  <td> {{ porcentajes.PS|floatformat:"-2" }}% </td>
+		  <td> {{ porcentajes.INS|floatformat:"-2" }}% </td>
+		</tr>
+		<tr>
+		  <td> % de Estudiantes que se declaran Satisfechos </td>
+		  <td colspan="2"> {{ porcentajes.MSS|floatformat:"-2" }} % </td>
+		  <!--td colspan="2"> {{ porcentajes.MS|add:porcentajes.S }}% </td-->
+		  <td colspan="2"> </td>
+		</tr>
       {%endif%}
+      </table> <!-- Fin tabla principal -->
+
       <div id="pie" style="font-size: 9px; ; color: #666666">
 	<hr style="margin-bottom: 6px;"/>
 	Unidad de Telecomunicaciones e Infomacion - Departamento de Desarrollo de Software <br>
