@@ -58,11 +58,13 @@
 
 			</p>
 			<p>
+			  {% if periodoEvaluacionActual %}
 			  {{ periodoEvaluacionActual.descripcion }} <br/>
 			  <b> 
 			    (Del {{ periodoEvaluacionActual.inicio|date:"l"|title }} {{ periodoEvaluacionActual.inicio }}
 				hasta el {{ periodoEvaluacionActual.fin|date:"l"|title }} {{ periodoEvaluacionActual.fin }})
 			  </b>
+			  {% endif %}
 			</p>
 
 		</div>

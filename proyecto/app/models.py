@@ -846,11 +846,6 @@ class TabulacionEvaluacion2013:
             ).order_by('usuario__last_name', 'usuario__first_name').all()
         listado_calificaciones = list()
         for docente in docentes:
-            # TODO: Requerimiento por definir
-            # carrera_senescyt = docente.asignaturasDocente.filter(
-            #     docente__periodoAcademico=self.periodoEvaluacion.periodoAcademico,
-            #     asignatura__area=siglas_area, asignatura__carrera=nombre_carrera
-            #     ).values_list('asignatura__carrera_senescyt', flat=True)[0]
             resultados = self.por_docente(siglas_area, nombre_carrera, docente.id)
             total = resultados.get('total',0)
             promedios = resultados.get('promedios', {})
@@ -1282,6 +1277,8 @@ class TabulacionSatisfaccion2012:
              self.mayor_satisfaccion, u'Indicadores de Mayor Satisfacción'),
             ('f',u'Los 10 indicadores de mayor INSATISFACCIÓN en la Carrera',
              self.mayor_insatisfaccion, u'Indicadores de mayor Insatisfacción'),
+            ('g',u'Listado de docentes de la carrera y Calificaciones',
+             self.listado_calificaciones, u'Listado de Docentes y Calificaciones'),
         )
  
 
@@ -1724,7 +1721,29 @@ class TabulacionSatisfaccion2012:
         conteos.sort(lambda c1, c2: -cmp(c1['INS'], c2['INS']) or -cmp(c1['PS'], c2['PS'] ))
         return dict(conteos=conteos[:10], totales=None, porcentajes=None)
 
-    
+    def listado_calificaciones(self, siglas_area, nombre_carrera):
+        # Obtenemos los id de los Docentes que dictan Asignaturas en la carrera seleccionada
+        aux_ids = AsignaturaDocente.objects.filter(
+            docente__periodoAcademico=self.periodoEvaluacion.periodoAcademico,
+            asignatura__carrera=nombre_carrera,
+            asignatura__area=siglas_area
+            ).values_list('docente__id', flat=True).distinct()
+        # Se agregan tambien los docentes que no tengan Asignaturas pero que pertenezcan a la Carrera
+        docentes = DocentePeriodoAcademico.objects.filter(
+            Q(periodoAcademico=self.periodoEvaluacion.periodoAcademico) and
+            (Q(id__in=aux_ids) or Q(carrera=nombre_carrera))
+            ).order_by('usuario__last_name', 'usuario__first_name').all()
+        listado_calificaciones = list()
+        for docente in docentes:
+            resultados = self.por_docente(siglas_area, nombre_carrera, docente.id)
+            porcentajes = resultados.get('porcentajes',None)
+            # El porcentaje de estudiantes que se declaran MUY SATISFECHOS Y/O SATISFECHOS
+            total = porcentajes.get('MSS', 0)
+            logg.info(u'{0} ESE calificación docente: {1} - {2}'.format(docente, porcentajes, total))
+            fila = (docente.usuario.cedula, docente.usuario.last_name, docente.usuario.first_name, total)
+            listado_calificaciones.append(fila)
+        return dict(listado_calificaciones=listado_calificaciones)
+
     def _contabilizar(self, siglas_area, nombre_carrera, indicadores=[], id_docente=None):
         """
         @param indicadores: lista de ids de pregunta que se involucran en el conteo

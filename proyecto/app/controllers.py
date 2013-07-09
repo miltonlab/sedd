@@ -864,7 +864,11 @@ def mostrar_resultados(request):
             resultados = metodo(request.session['area'], request.session['carrera'])
         if resultados:
             resultados['titulo'] = titulo
-        plantilla = 'app/imprimir_resultados_ese2012.html'
+        if opcion == 'g':
+            # Listado de Docentes con calificaciones 
+            plantilla = 'app/imprimir_calificaciones_ese2013.html'
+        else:
+            plantilla = 'app/imprimir_resultados_ese2012.html'
 
     # Evaluacion de Actividades Adiconales a la Docencia 2011 - 2012
     # -----------------------------------------------------------------------
@@ -940,19 +944,13 @@ def mostrar_resultados(request):
                 return response
         elif opcion == 'e':
             # Listado de Docentes con calificaciones
-            # key: listado_calificaciones
+            # clave: listado_calificaciones
             resultados = metodo(request.session['area'], request.session['carrera'])
             resultados['carrera'] = carrera
             resultados['area'] = objeto_area.nombre
-            ### tmp
-            # carrera_senescyt = AsignaturaDocente.objects.filter(
-            #     docente__periodoAcademico=tabulacion.periodoEvaluacion.periodoAcademico,
-            #     asignatura__area=area_siglas, asignatura__carrera=carrera
-            #     ).distinct().values_list('asignatura__carrera_senescyt', flat=True)[0]
-            # resultados['carrera_senescyt'] = carrera_senescyt
         # Para el resto de casos
-        else:
-            resultados = metodo(request.session['area'], request.session['carrera'], filtro)
+        #else:
+            #resultados = metodo(request.session['area'], request.session['carrera'], filtro)
 
         # Posicion para ubicar el promedio por componente en la plantilla
         if resultados.get('promedios_componentes', None) and objeto_area.id == 6:
@@ -965,6 +963,7 @@ def mostrar_resultados(request):
             resultados['promedios_componentes']['CPF'].update({'fila' : 10})
             resultados['promedios_componentes']['CPG'].update({'fila' : 27})
             resultados['promedios_componentes']['PV'].update({'fila' : 33})
+
         if filtro == 'sugerencias':
             # Reporte de sugerencias
             plantilla = 'app/imprimir_sugerencias_edd2013.html'
