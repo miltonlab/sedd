@@ -60,9 +60,16 @@
 			<p>
 			  {% if periodoEvaluacionActual %}
 			  {{ periodoEvaluacionActual.descripcion }} <br/>
-			  <b> 
-			    (Del {{ periodoEvaluacionActual.inicio|date:"l"|title }} {{ periodoEvaluacionActual.inicio }}
-				hasta el {{ periodoEvaluacionActual.fin|date:"l"|title }} {{ periodoEvaluacionActual.fin }})
+			  
+			  (Desde 
+			  <b>
+				{{ periodoEvaluacionActual.inicio|date:"l"|title }} 
+				{{ periodoEvaluacionActual.inicio }} 
+			  </b>
+			  hasta  
+			  <b>
+				{{ periodoEvaluacionActual.fin|date:"l"|title }} 
+				{{ periodoEvaluacionActual.fin }})
 			  </b>
 			  {% endif %}
 			</p>

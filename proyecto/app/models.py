@@ -1278,7 +1278,7 @@ class TabulacionSatisfaccion2012:
             ('f',u'Los 10 indicadores de mayor INSATISFACCIÓN en la Carrera',
              self.mayor_insatisfaccion, u'Indicadores de mayor Insatisfacción'),
             ('g',u'Listado de docentes de la carrera y Calificaciones',
-             self.listado_calificaciones, u'Listado de Docentes y Calificaciones'),
+             self.listado_calificaciones, u'Listado de Docentes y Calificaciones Encuesta de Satisfaccion Estudiantil'),
         )
  
 
@@ -1734,15 +1734,18 @@ class TabulacionSatisfaccion2012:
             (Q(id__in=aux_ids) or Q(carrera=nombre_carrera))
             ).order_by('usuario__last_name', 'usuario__first_name').all()
         listado_calificaciones = list()
+        total = 0
         for docente in docentes:
             resultados = self.por_docente(siglas_area, nombre_carrera, docente.id)
-            porcentajes = resultados.get('porcentajes',None)
+            porcentajes = resultados.get('porcentajes', None)
             # El porcentaje de estudiantes que se declaran MUY SATISFECHOS Y/O SATISFECHOS
-            total = porcentajes.get('MSS', 0)
-            logg.info(u'{0} ESE calificación docente: {1} - {2}'.format(docente, porcentajes, total))
-            fila = (docente.usuario.cedula, docente.usuario.last_name, docente.usuario.first_name, total)
+            valor = porcentajes.get('MSS', 0)
+            logg.info(u'{0} ESE calificación docente: {1} - {2}'.format(docente, porcentajes, valor))
+            fila = (docente.usuario.cedula, docente.usuario.last_name, docente.usuario.first_name, valor)
             listado_calificaciones.append(fila)
-        return dict(listado_calificaciones=listado_calificaciones)
+            total += valor
+        media = float(total) / len(docentes)
+        return dict(listado_calificaciones=listado_calificaciones, media=media)
 
     def _contabilizar(self, siglas_area, nombre_carrera, indicadores=[], id_docente=None):
         """

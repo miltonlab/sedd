@@ -810,6 +810,10 @@ def menu_resultados_carrera(request, id_periodo_evaluacion):
         
 
 def mostrar_resultados(request):
+    """
+    Controlador que procesa los resultados de los diferentes tipos de Evaluaciones
+    TODO: Generalizar cuando hayan grupos de evaluaciones concenientes a un mismo tipo
+    """
     if not (request.POST.has_key('periodo_evaluacion') and request.POST.has_key('opciones')):
         return HttpResponse("<h2> Tiene que elegir las Opciones de Resultados </h2>")
     id_periodo = request.POST['periodo_evaluacion']
@@ -827,7 +831,6 @@ def mostrar_resultados(request):
         docente__periodoAcademico=tabulacion.periodoEvaluacion.periodoAcademico,
         asignatura__area=request.session['area'], asignatura__carrera=request.session['carrera']
         ).distinct().values_list('asignatura__carrera_senescyt', flat=True)[0]
-    print 'carrera_senescyt: ', carrera_senescyt
 
     # Encuesta de Satisfaccion Estudiantil 2012
     # ------------------------------------------------------------------------

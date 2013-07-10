@@ -16,7 +16,7 @@
     table {
 	margin-top: 10px;
 	margin-bottom: 10px;
-	width: 75%;
+	width: 50%;
 	borderspacing: 0;
     }
     td, th {
@@ -24,8 +24,19 @@
 	vertical-align: middle;
 	border: 1px solid gray;
     font-size: 13px;
-    /*width: 20%;*/
     }
+
+	.bajo{
+	color: red;
+	/* font-weight: bold; */
+	}
+
+	.alto{
+	/* 
+	color: green;
+	font-weight: bold;
+	*/
+	}
 
 	.salto-pagina {
 	    display: block;
@@ -41,8 +52,7 @@
     <center>
       <img width="70px" height="70px" src="http://t0.gstatic.com/images?q=tbn:ANd9GcSdhr9rEDXwrM4Hd_Xz_k_RaYGhy-1qd9xTbMVCejjfcIMTV9EE"/>
 	  <!-- http://www.unl.edu.ec/images/unl/web/unl_logo.png-->
-      <h4> 
-      {{ "Unversidad Nacional de Loja"|upper }}  <br/>
+      <h3> {{ "Unversidad Nacional de Loja"|upper }} </h3> 
       Comisión de Evaluación Interna <br/>
       EVALUACIÓN DEL DESEMPEÑO ACADÉMICO <p/>
 
@@ -81,12 +91,18 @@
 		<tr>
 		  <td width="10%"> {{ docente.0 }} </td>
 		  <td style="text-align: left;"> {{ docente.1 }} {{ docente.2 }}  </td>
-		  <td width="10%"> {{ docente.3|floatformat:"2" }} % </td>
+		  <td width="10%" class= "{% if docente.3 < media %} bajo {% else %} alto {% endif %}"> 
+		  {{ docente.3|floatformat:"2" }} % 
+		  </td>
 		</tr>
 		{% endfor %}
 
 		<!-- Fila Resultados -->
 
+		<tr>
+		  <td colspan="2" style="text-align: right;"> <b> MEDIA: </b> </td>
+		  <td> <b> {{ media|floatformat:"2" }} % </b> </td>
+		</tr>
 	  </table>
 
       <div id="pie" style="font-size: 9px; color: #666666">

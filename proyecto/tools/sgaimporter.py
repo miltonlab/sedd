@@ -85,12 +85,12 @@ def importar(periodoAcademicoId, periodoEvaluacionId=None):
                                         continue
 			    """
                             # Tratamiento de los saltos de línea dentro del nombre de la unidad
-                            ###unidad = unidad.replace('\r\n',' ')[0:-1]
-                            unidad = unidad.replace('\r\n',' ').strip()[0:-1]
+                            ###unidad = unidad.replace('\r\n',' ')[0:-1] ???
+                            nombre_unidad = unidad.replace('\r\n',' ').strip()
                             # El idSGA tiene similitud con del id_horario_semana en el SGA
                             dict_unidad = dict(
                                 idSGA="{0}:{1}".format(id_unidad, id_paralelo), area=area, carrera=carrera, carrera_senescyt=carrera_senescyt,
-                                semestre=modulo, paralelo=paralelo, seccion=seccion, modalidad=modalidad, nombre=unidad, 
+                                semestre=modulo, paralelo=paralelo, seccion=seccion, modalidad=modalidad, nombre=nombre_unidad, 
                                 creditos=creditos, duracion=horas, inicio=fecha_inicio, fin=fecha_fin, periodoAcademico=periodoAcademico
                                 )
                             # TODO: Obtener email del docente, pendiente en SGAWS
@@ -157,10 +157,12 @@ def importar(periodoAcademicoId, periodoEvaluacionId=None):
                                     log.info(u'EstudianteAsignaturaDocente Nuevo: {0}'.format(estudianteAsignaturaDocente))
 
 if __name__ == '__main__':
+    print sys.argv
     if len(sys.argv) == 2:
         importar( int(sys.argv[1]) )
+        print u"Finalizada la migración de datos del SGA !!!"
     elif len(sys.argv) == 3:
         importar( int(sys.argv[1]), int(sys.argv[2]) )
-    print u"Finalizada la migración de datos del SGA !!!"
+        print u"Finalizada la migración de datos del SGA !!!"
     else:
         print "Error: Use sgaimporter id_periodo_academico [id_periodo_evaluacion]"
