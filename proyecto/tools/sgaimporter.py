@@ -130,7 +130,7 @@ def importar(periodoAcademicoId, periodoEvaluacionId=None):
                             r_e = sga.wspersonal.sgaws_datos_estudiante(cedula=cedula)
                             js_e = json.loads(r_e)
                             if js_e[0] != '_error':
-                                email = js_e[9] 
+                                email = js_e[9] or ''
                             else: 
                                 email = ''
                             dict_usuario_estudiante = dict(
@@ -157,7 +157,6 @@ def importar(periodoAcademicoId, periodoEvaluacionId=None):
                                     log.info(u'EstudianteAsignaturaDocente Nuevo: {0}'.format(estudianteAsignaturaDocente))
 
 if __name__ == '__main__':
-    print sys.argv
     if len(sys.argv) == 2:
         importar( int(sys.argv[1]) )
         print u"Finalizada la migración de datos del SGA !!!"
