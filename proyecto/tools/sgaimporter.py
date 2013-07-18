@@ -110,7 +110,7 @@ def importar(periodoAcademicoId, periodoEvaluacionId=None):
                                 # Actualizacion de datos del Usuario Docente SGA-SEDD
                                 if not usuario.contiene(dict_usuario_docente):
                                     Usuario.objects.filter(username=usuario.username).update(**dict_usuario_docente)
-                                    log.info(u'Usuario Docente editado: {}'.format(usuario))
+                                    log.info(u'Usuario Docente editado: {0}'.format(usuario))
                             (docentePeriodoAcademico, nuevo) = DocentePeriodoAcademico.objects.get_or_create(
                                 usuario=usuario, periodoAcademico=periodoAcademico)
                             (asignaturaDocente, nuevo) = AsignaturaDocente.objects.get_or_create(
@@ -142,7 +142,7 @@ def importar(periodoAcademicoId, periodoEvaluacionId=None):
                                 # Actualizacion de datos del Usuario Docente SGA-SEDD
                                 if not usuario.contiene(dict_usuario_estudiante):
                                     Usuario.objects.filter(username=usuario.username).update(**dict_usuario_estudiante)
-                                    log.info(u'Usuario Estudiante editado: {}'.format(usuario))
+                                    log.info(u'Usuario Estudiante editado: {0}'.format(usuario))
                             
                             (estudiantePeriodoAcademico, nuevo) = EstudiantePeriodoAcademico.objects.get_or_create(
                                 usuario=usuario, periodoAcademico=periodoAcademico
