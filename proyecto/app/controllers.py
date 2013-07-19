@@ -832,7 +832,7 @@ def mostrar_resultados(request):
         asignatura__area=request.session['area'], asignatura__carrera=request.session['carrera']
         ).distinct().values_list('asignatura__carrera_senescyt', flat=True)[0]
 
-    # Encuesta de Satisfaccion Estudiantil 2012
+    # Encuesta de Satisfaccion Estudiantil 2012 / 2013
     # ------------------------------------------------------------------------
     if tabulacion.tipo == 'ESE2012':
         tabulacion = TabulacionSatisfaccion2012(periodoEvaluacion)
@@ -978,8 +978,10 @@ def mostrar_resultados(request):
             else:
                 plantilla = 'app/imprimir_resultados_edd2013.html'
 
-    # Obtenido al inicio de la funcion
+    resultados['titulo'] = u"Acta de Resultados de la {0}".format(tabulacion.periodoEvaluacion.titulo)
+    # Obtenido al inicio de la bifurcacion
     resultados['carrera_senescyt'] = carrera_senescyt
+
 
     if formato == 'HTML':
         return render_to_response(plantilla, resultados, context_instance=RequestContext(request));
