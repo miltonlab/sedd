@@ -837,7 +837,8 @@ def mostrar_resultados(request):
     if tabulacion.tipo == 'ESE2012':
         tabulacion = TabulacionSatisfaccion2012(periodoEvaluacion)
         metodo =  [c[2] for c in tabulacion.calculos if c[0] == opcion][0]
-        titulo = request.session['area'] + '<br/> <b>' + request.session['carrera'] + '</b><br/>'
+        titulo = u'<h3 style="margin-bottom: 3px;"> {0} </h3> {1} <br/> <b> {2} </b> <br/>'.format(
+            tabulacion.periodoEvaluacion.titulo, request.session['area'], request.session['carrera'])
         titulo += [c[3] for c in tabulacion.calculos if c[0] == opcion][0]
         # Por docente
         if opcion == 'a':

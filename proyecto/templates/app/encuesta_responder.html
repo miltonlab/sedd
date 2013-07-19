@@ -164,11 +164,12 @@ $(document).ready(function(){
 	  <div id="datos_academicos" style="line-height: 18px;">
 	    Area: <b> {{ asignaturaDocente.asignatura.area }} </b> <br/>
 	    Carrera: <b> {{ asignaturaDocente.asignatura.carrera }} </b> <br/>
-	    Modulo ( {% ifequal asignaturaDocente.asignatura.tipo "modulo" %} <b>X</b> {% endifequal %}  );
-	    Unidad ( {% ifequal asignaturaDocente.asignatura.tipo "unidad" %} <b>X</b> {% endifequal %}  )
-	    Curso ( {% ifequal asignaturaDocente.asignatura.tipo "curso" %} <b>X</b> {% endifequal %}  )
-	    Taller ( {% ifequal asignaturaDocente.asignatura.tipo "taller" %} <b>X</b> {% endifequal %}  )
-	    Otro ( {% ifequal asignaturaDocente.asignatura.tipo "otro" %} <b>X</b> {% endifequal %}  )
+	    Asignatura ( {% ifequal asignaturaDocente.asignatura.getTipo "asignatura" %} <b>X</b> {% endifequal %}  )
+	    Taller ( {% ifequal asignaturaDocente.asignatura.getTipo "taller" %} <b>X</b> {% endifequal %}  )
+	    Modulo ( {% ifequal asignaturaDocente.asignatura.getTipo "modulo" %} <b>X</b> {% endifequal %}  )
+	    Unidad ( {% ifequal asignaturaDocente.asignatura.getTipo "unidad" %} <b>X</b> {% endifequal %}  )
+	    Curso ( {% ifequal asignaturaDocente.asignatura.getTipo "curso" %} <b>X</b> {% endifequal %}  )
+	    Otro ( {% ifequal asignaturaDocente.asignatura.getTipo "otro" %} <b>X</b> {% endifequal %}  )
 	    <br/>
 	    Nombre de el/la Docente Evaluado(a): <b> {{ asignaturaDocente.docente }} </b> <br/>
 	    Fecha de Evaluacion: <b> {{ fecha }} </b> <br/>
@@ -235,9 +236,9 @@ $(document).ready(function(){
 		  <b> 
 			{% if pregunta.codigo %} {{ pregunta.codigo }}. {% else %} {{ pregunta.orden }}. {% endif %} 
 		  </b>
-		  {{ pregunta.texto|safe }}
+		  {{ pregunta }}
 		  <br/>
-		  {{ pregunta.descripcion|safe }} <!-- Puede contener HTML --> 
+		  {{ pregunta.descripcion }} <!-- Puede contener HTML --> 
 		  {% ifequal pregunta.tipo.tipo 'Ensayo' %}
 		  <br/>
 		  <textarea colspan="2" name="pregunta-{{ pregunta.id }}" cols="100" rows="10" style="width: 100%;" ></textarea>
@@ -290,12 +291,12 @@ $(document).ready(function(){
 		  <b>
 			{% if pregunta.codigo %} {{ pregunta.codigo }}. {% else %} 	{{ seccion.orden }}.{{ pregunta.orden }}. {% endif %}
 		  </b> 
-		  {{ pregunta.texto|safe }}
+		  {{ pregunta }}
 		  {% else %}
 		  <b> 
 			{% if pregunta.codigo %} {{ pregunta.codigo }}. {% else %} {{ pregunta.orden }}. {% endif %} 
 		  </b> 
-		  {{ pregunta.texto|safe }}  
+		  {{ pregunta }}  
 		  {% endif %}
 		  <br/>
 		  {% if pregunta.descripcion %}

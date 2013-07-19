@@ -90,7 +90,7 @@ class ResultadosESE2012Form(forms.Form):
         for s in secciones:
             preguntas.extend(s.preguntas.all())
         # Por estética en la presentación del SELECT del form de HTML 
-        indicadores = [ (p.id, u'{0}.{1}. {2}'.format(p.seccion.orden, p.orden, p.texto[:150])) for p in preguntas ]
+        indicadores = [ (p.id, u'{0}.{1}. {2}'.format(p.seccion.orden, p.orden, p.__unicode__()[:150])) for p in preguntas ]
         
         self.fields['campos'] = forms.ChoiceField(choices=campos)
         self.fields['indicadores'] = forms.ChoiceField(choices=indicadores)
