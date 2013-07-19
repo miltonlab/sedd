@@ -138,7 +138,7 @@ class Asignatura(models.Model):
             return False
                 
     def getTipo(self):
-        tipos = {u'asignatura', u'taller', u'curso', u'módulo', u'modulo', u'unidad'}
+        tipos = set([u'asignatura', u'taller', u'curso', u'módulo', u'modulo', u'unidad'])
         nombre = set(self.nombre.lower().split())
         tipo = tipos.intersection(nombre)
         #l = [t for t in tipos if t in self.nombre.lower()]
