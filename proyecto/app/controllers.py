@@ -382,11 +382,11 @@ def encuestas(request, id_docente, id_asignatura=0, id_tinformante=0, id_cuestio
             elif asignaturaDocente.asignatura.semestre == u"1":
                 cuestionarios = [c for c in periodoEvaluacionActual.cuestionarios.all() 
                                  if c.informante.tipo == 'EstudianteNovel']
-                # Si los cuestionarios son los mismos para todos los semestres
-                #TODO: ?
-                #if len(cuestionarios) == 0:
-                #    cuestionarios = [c for c in periodoEvaluacionActual.cuestionarios.all() 
-                #                 if c.informante.tipo == 'Estudiante']
+                # Si no existen cuestionarios especificos para el Primer Semestre. 
+                # Se usan los mismos cuestionarios de los otros semestres
+                if len(cuestionarios) == 0:
+                    cuestionarios = [c for c in periodoEvaluacionActual.cuestionarios.all() 
+                                     if c.informante.tipo == 'Estudiante']
             # Estudiante del segundo semestre en adelante
             else:
                 cuestionarios = [c for c in periodoEvaluacionActual.cuestionarios.all() 
