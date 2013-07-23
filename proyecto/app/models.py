@@ -83,7 +83,6 @@ class PeriodoAcademico(models.Model):
         """
            Cada vez que se crea un nuevo Periodo Académico se consultan las ofertas academicas del SGA para adherirlas.
            Luego se pueden eliminar desde la aplicación de administración.
-           @author: Milton Labanda
            @date: 04-05-2012
         """
         nuevo = False
@@ -93,11 +92,11 @@ class PeriodoAcademico(models.Model):
         if nuevo:
             try:
                 self.cargarOfertasSGA()
-            except Exception, ex: 
+            except Exception, ex:
                 logg.error("Error al cargar ofertas academicas del SGA: {0}".format(ex))
 
     class Meta:
-        ordering = ['inicio']
+        ordering = ['inicio', 'fin']
         verbose_name = u'Periodo Académico'
         verbose_name_plural = u'Periodos Académicos'
 
@@ -275,6 +274,7 @@ class DocentePeriodoAcademico(models.Model):
     parAcademico = models.BooleanField()
     
     class Meta:
+        ordering = ['usuario__first_name', 'usuario__last_name']
         verbose_name = 'Docente'
         unique_together = ('usuario','periodoAcademico')
 
@@ -305,7 +305,10 @@ class DocentePeriodoAcademico(models.Model):
     
     def cedula(self):
         return self.usuario.cedula
-        
+
+    def get_nombres_completos():
+        return u'{0}'.format(self.usuario.get_full_name())
+
     def __unicode__(self):
         return u'{0} {1}'.format(self.usuario.abreviatura, self.usuario.get_full_name())
 
@@ -641,7 +644,7 @@ class AreaSGA(models.Model):
         return self.siglas
 
     class Meta:
-        ordering=['id']
+        ordering=['nombre']
 
 
 class PeriodoEvaluacion(models.Model):
@@ -1460,17 +1463,16 @@ class TabulacionSatisfaccion2012:
         return dict(conteos=conteos, totales=totales, porcentajes=porcentajes)
     
 
-    def por_campos(self, siglas_area, nombre_carrera, id_seccion):
+    def por_campos(self, siglas_area, nombre_carrera, docente, seccion):
         # @param id_seccion representa el campo del cuestionario. Seccion = Campo
-        if id_seccion == None:
+        if not seccion:
             return None
         # La sección especcífica del cuestionario (por Área) que corresponde
         # ya se determina en la vista anterior
-        seccion = Seccion.objects.get(id=id_seccion)
         logg.info("Campo Seccion: " + str(seccion.id) + str(seccion))
         # Se tratan unicamente preguntas abiertas
         if seccion.orden == 4:
-            return self.por_otros_aspectos(siglas_area, nombre_carrera, seccion)
+            return self.por_otros_aspectos(siglas_area, nombre_carrera, docente, seccion)
         # Para asegurar que se tomen unicamente preguntas que representen indicadores además
         # de que pertenezcan únicamente al campo (sección) especificado.
         # Se seleccionan solo ids para poder comparar luego
@@ -1544,9 +1546,8 @@ class TabulacionSatisfaccion2012:
         return dict(conteos=conteos, totales=totales, porcentajes=porcentajes)
 
     
-    def por_otros_aspectos(self, siglas_area, nombre_carrera, seccion):
+    def por_otros_aspectos(self, siglas_area, nombre_carrera, docente, seccion):
         indicadores_otros=Pregunta.objects.filter(seccion=seccion).filter(tipo__tipo=u'Ensayo').values_list('id', flat=True)
-
         # Verion anterior con conteo de respuestas comunes
         #
         # conteo=Contestacion.objects.filter(evaluacion__cuestionario__periodoEvaluacion=self.periodoEvaluacion).filter(
@@ -1555,12 +1556,15 @@ class TabulacionSatisfaccion2012:
         #     evaluacion__estudianteAsignaturaDocente__asignaturaDocente__asignatura__carrera=nombre_carrera).filter(
         #     pregunta__in=indicadores_otros).values('pregunta','respuesta').annotate(
         #     frecuencia=Count('respuesta')).order_by('pregunta')
-
         sugerencias = Contestacion.objects.filter(evaluacion__cuestionario__periodoEvaluacion=self.periodoEvaluacion).filter(
             evaluacion__cuestionario__periodoEvaluacion__tabulacion__tipo='ESE2012').filter(
             evaluacion__estudianteAsignaturaDocente__asignaturaDocente__asignatura__area=siglas_area).filter(
                 evaluacion__estudianteAsignaturaDocente__asignaturaDocente__asignatura__carrera=nombre_carrera).filter(
                 pregunta__in=indicadores_otros)
+        # Si se pide ver sugerencias PARA UN DOCENTE en concreto
+        if docente:
+            sugerencias = sugerencias.filter(
+                evaluacion__estudianteAsignaturaDocente__asignaturaDocente__docente=docente.id)
         # Se hace un join manual para obtener el texto de la pregunta desde otra tabla
         sugerencias = sugerencias.extra(
             select={'pregunta__texto' : 'select texto from app_pregunta where app_pregunta.id = app_contestacion.pregunta'}

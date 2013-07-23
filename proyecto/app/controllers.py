@@ -690,6 +690,7 @@ def menu_academico_ajax(request):
                 estudiante__periodoAcademico=request.session['periodoAcademico']).filter(
                 asignaturaDocente__asignatura__area=valor_campo).values_list(
                 'asignaturaDocente__asignatura__carrera', flat=True).distinct()
+            objetos = sorted(objetos)
             for o in objetos:
                 carrera = o.encode('utf-8') if isinstance(o, unicode) else o
                 valores.append(dict(id=carrera, valor=carrera))
@@ -703,6 +704,7 @@ def menu_academico_ajax(request):
                     asignaturaDocente__asignatura__area=request.session['area']).filter(
                     asignaturaDocente__asignatura__carrera=valor_campo).values_list(
                     'asignaturaDocente__asignatura__semestre', flat=True).distinct()
+                objetos = sorted(objetos)
                 for o in objetos:
                     semestre = o.encode('utf-8') if isinstance(o, unicode) else o
                     valores.append(dict(id=semestre, valor=semestre))
@@ -713,6 +715,7 @@ def menu_academico_ajax(request):
                     asignatura__carrera=valor_campo)
                 docentes = set([o.docente for o in objetos])
                 valores = [dict(id=d.id, valor=d.__unicode__()) for d in docentes]
+                
         elif id_campo == 'id_semestre':
             request.session['semestre'] = valor_campo
             id = 'id_paralelo'
@@ -722,6 +725,7 @@ def menu_academico_ajax(request):
                 asignaturaDocente__asignatura__carrera=request.session['carrera']).filter(
                 asignaturaDocente__asignatura__semestre=valor_campo).values_list(
                 'asignaturaDocente__asignatura__paralelo', flat=True).distinct()
+            objetos = sorted(objetos)
             for o in objetos:
                 paralelo = o.encode('utf-8') if isinstance(o, unicode) else o
                 valores.append(dict(id=paralelo, valor=paralelo))
@@ -849,10 +853,15 @@ def mostrar_resultados(request):
         # Por campos
         elif opcion == 'c':
             id_seccion = request.POST['campos']
-            if id_seccion != '':
+            id_docente = request.POST['docentes']
+            if id_seccion:
                 seccion = Seccion.objects.get(id=int(id_seccion))
                 titulo += u': <b>{0}</b>'.format(seccion.titulo)
-                resultados = metodo(request.session['area'], request.session['carrera'], int(id_seccion))
+                docente = None
+                if id_docente:
+                    docente = DocentePeriodoAcademico.objects.get(id=id_docente)
+                    titulo += u'<br/> <b>{0}</b>'.format(docente)
+                resultados = metodo(request.session['area'], request.session['carrera'], docente, seccion)
                 if seccion.orden == 4:
                     datos = dict(resultados=resultados, titulo=titulo)
                     return render_to_response('app/imprimir_otros_ese2012.html', datos,
