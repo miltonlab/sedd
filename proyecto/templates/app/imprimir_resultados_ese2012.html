@@ -36,6 +36,11 @@
 		  <th width="15%"> Insatisfecho INS (1) </th>
 		</tr>
 		{% for c in conteos %}
+		{% ifchanged c.pregunta.seccion %} 
+		<td colspan="5" style="text-align: left;"> 
+		  <b> COMPONENTE {{ c.pregunta.seccion.orden }}: {{ c.pregunta.seccion.titulo|upper }} </b> 
+		</td> 
+		{% endifchanged %}
 		<tr>
 		  <td style="text-align: justify; font-size: 9px;"> 
 			<b>{{ c.pregunta.seccion.orden }}.{{c.pregunta.orden}}</b>
@@ -69,7 +74,7 @@
 		<tr>
 		  <td> % de Estudiantes que se declaran Satisfechos </td>
 		  <td colspan="2"> {{ porcentajes.MSS|floatformat:"-2" }} % </td>
-		  <!--td colspan="2"> {{ porcentajes.MS|add:porcentajes.S }}% </td-->
+		  <!--td colspan="2"> {#{ porcentajes.MS|add:porcentajes.S }#}% </td-->
 		  <td colspan="2"> </td>
 		</tr>
       {%endif%}

@@ -863,8 +863,9 @@ def mostrar_resultados(request):
                     titulo += u'<br/> <b>{0}</b>'.format(docente)
                 resultados = metodo(request.session['area'], request.session['carrera'], docente, seccion)
                 if seccion.orden == 4:
-                    datos = dict(resultados=resultados, titulo=titulo)
-                    return render_to_response('app/imprimir_otros_ese2012.html', datos,
+                    resultados['titulo'] = titulo
+                    #datos = dict(resultados=resultados, titulo=titulo)
+                    return render_to_response('app/imprimir_otros_ese2012.html', resultados,
                                               context_instance=RequestContext(request));
         # Por indicadores
         elif opcion == 'd':
@@ -987,7 +988,7 @@ def mostrar_resultados(request):
             else:
                 plantilla = 'app/imprimir_resultados_edd2013.html'
 
-    resultados['titulo'] = u"Acta de Resultados de la {0}".format(tabulacion.periodoEvaluacion.titulo)
+    resultados['titulo'] = u"Acta de Resultados de {0}".format(titulo)
     # Obtenido al inicio de la bifurcacion
     resultados['carrera_senescyt'] = carrera_senescyt
 
