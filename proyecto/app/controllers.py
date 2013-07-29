@@ -908,6 +908,7 @@ def mostrar_resultados(request):
             resultados['carrera'] = carrera
             resultados['area'] = area
         plantilla = 'app/imprimir_resultados_eaad2012.html'
+	
 
     # Evaluacion del Desempenio Docente 2012 - 2013
     # ----------------------------------------------------------------------------
@@ -988,9 +989,10 @@ def mostrar_resultados(request):
             else:
                 plantilla = 'app/imprimir_resultados_edd2013.html'
 
-    resultados['titulo'] = u"Acta de Resultados de {0}".format(titulo)
-    # Obtenido al inicio de la bifurcacion
-    resultados['carrera_senescyt'] = carrera_senescyt
+    if resultados:
+    	resultados['titulo'] = u"Acta de Resultados de {0}".format(tabulacion.periodoEvaluacion.titulo)
+    	# Obtenido al inicio de la bifurcacion
+    	resultados['carrera_senescyt'] = carrera_senescyt
 
 
     if formato == 'HTML':
