@@ -274,7 +274,7 @@ class DocentePeriodoAcademico(models.Model):
     parAcademico = models.BooleanField()
     
     class Meta:
-        ordering = ['usuario__first_name', 'usuario__last_name']
+        ordering = ['usuario__last_name', 'usuario__first_name']
         verbose_name = 'Docente'
         unique_together = ('usuario','periodoAcademico')
 
@@ -1935,6 +1935,9 @@ class Usuario(User):
     nombres = property(get_nombres, set_nombres)
     apellidos = property(get_apellidos, set_apellidos)
     abreviatura = property(get_abreviatura)
+
+    def get_full_name(self):
+	return u'{0} {1}'.format(self.last_name, self.first_name)
         
     def __unicode__(self):
         return u'{0} {1}'.format(self.cedula, self.get_full_name());

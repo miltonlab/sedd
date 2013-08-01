@@ -34,7 +34,7 @@ class ResultadosEDD2013Form(forms.Form):
                 queryset=DocentePeriodoAcademico.objects.filter(
                     Q(periodoAcademico=tabulacion.periodoEvaluacion.periodoAcademico) &
                     (Q(id__in=ids_docentes) | Q(carrera=carrera))
-                    ).order_by('usuario__first_name', 'usuario__last_name')
+                    ).order_by('usuario__last_name', 'usuario__first_name')
                 )
         except Exception, ex:
             logg.error("Error en Formulario Resultados EDD2013: {0}".format(ex))
@@ -58,7 +58,7 @@ class ResultadosEAAD2012Form(forms.Form):
             queryset=DocentePeriodoAcademico.objects.filter(
                 Q(periodoAcademico=tabulacion.periodoEvaluacion.periodoAcademico) &
                 (Q(id__in=ids_docentes) | Q(carrera=carrera))
-                ).order_by('usuario__first_name', 'usuario__last_name')
+                ).order_by('usuario__last_name', 'usuario__first_name')
             )
 
 
@@ -78,7 +78,7 @@ class ResultadosESE2012Form(forms.Form):
             )])
         periodoEvaluacion = tabulacion.periodoEvaluacion
         self.fields['docentes'] = forms.ModelChoiceField(queryset=DocentePeriodoAcademico.objects.filter(
-                id__in=ids_docentes).order_by('usuario__first_name', 'usuario__last_name').filter(
+                id__in=ids_docentes).order_by('usuario__last_name', 'usuario__first_name').filter(
                 periodoAcademico=periodoEvaluacion.periodoAcademico))
         if area == u'ACE':
             cuestionario = periodoEvaluacion.cuestionarios.get(informante__tipo=u'InstitutoIdiomas')
