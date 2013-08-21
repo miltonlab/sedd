@@ -20,6 +20,8 @@ Instalación
 Requerimientos
 -------------------------------------------------------------------
  * Sistema Operativo: Debian squeeze backports
+ * Librerias de desarrollo del Sistema:
+   python-dev, postgresql-server-dev, libmysql-dev, libxml2-dev, libxslt1-dev 
  * python-django 1.3
  * python-psycopg2 2.4.2
  * python-lxml 2.3
