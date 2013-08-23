@@ -29,9 +29,6 @@ Requerimientos
  * django-piston 0.2.3
  * libapache2-mod-wsgi 3.3	(modulo para desplegar en apache)
  * south 0.7.3          	(Migraciones)
- * pisa 3.0.33				(libreria para generar PDFs)
- * reportlab 2.6
- * html5lib 0.95
 
 #### Opcionales 
 

@@ -1,4 +1,4 @@
-# -*- coding: utf-8 -*-
+#encoding:utf-8
 
 import os, sys, datetime 
 os.environ['DJANGO_SETTINGS_MODULE']='proyecto.settings'

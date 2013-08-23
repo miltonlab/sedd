@@ -26,7 +26,7 @@
 	  <b>
 	    {# Se envia ids de asignatura y de docente #}
 	    {# Modificado en encuestas de actividades adicionales 2012, revisar???#}
-	    <a href="{% url encuestas id_docente=d.docente.id id_asignatura=ad.asignatura.id id_tinformante=1 id_cuestionario=0 %}"> 
+	    <a href="{% url 'encuestas' id_docente=d.docente.id id_asignatura=ad.asignatura.id id_tinformante=1 id_cuestionario=0 %}"> 
 	      {{ d.docente }} 
 	    </a> 
 	    <br/>
@@ -42,7 +42,7 @@
     <td> 
     </td> 
     <td align="right">
-      <a href="{% url proyecto.app.controllers.index %}"> <u><<< Carreras >>> </u></a>  
+      <a href="{% url 'proyecto.app.controllers.index' %}"> <u><<< Carreras >>> </u></a>  
     </td> 
   </tr>
   </tbody>

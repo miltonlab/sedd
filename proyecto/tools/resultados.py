@@ -1,4 +1,4 @@
-# -*- coding: utf-8 -*-
+#encoding:utf-8
 
 from proyecto.app.models import DocentePeriodoAcademico
 from proyecto.app.models import PeriodoEvaluacion

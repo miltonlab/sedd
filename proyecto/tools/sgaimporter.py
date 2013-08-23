@@ -1,4 +1,4 @@
-# -*- coding: utf-8 -*-
+#encoding:utf-8
 # Para ejecutar el modulo de manerea independiente
 import sys, os
 sys.path.append(os.path.abspath(os.path.dirname(__file__) + '../../'))

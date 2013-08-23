@@ -35,7 +35,7 @@
 			//data: "periodo_academico_id={{ object_id }}",
 			success: function (data){
 			    // Regresamos a la lista de Periodos Académicos
-			    $(window.location).attr('href',"{% url admin:app_periodoacademico_changelist %}")
+			    $(window.location).attr('href',"{% url 'admin:app_periodoacademico_changelist' %}")
 			},
 			error: function(xhr,status,error){
 			    alert("error: " + status + "-" + error);

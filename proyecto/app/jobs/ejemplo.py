@@ -1,4 +1,4 @@
-# -*- coding: utf-8 -*-
+#encoding:utf-8
 
 from django_extensions.management.jobs import BaseJob
 import datetime

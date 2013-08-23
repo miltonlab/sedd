@@ -70,7 +70,7 @@ td {
 
 {% block content_title %}
   <ul class="object-tools">
-    <!li>
+    <li>
       <a href="javascript:void(0)" id="ver-opciones">
         Ver Opciones de Resultados
       </a>
@@ -103,20 +103,7 @@ td {
   <table style="margin-bottom: 20px;">
     {{ form.as_table }} 
   </table>
-
-  <!-- Se rellena a traves de JQuery -->
   <div id="menu-opciones">
-  </div>
-  <div id="formato">
-	<table>
-	  <tr>
-		<td> <b>Formato: </b> </td>
-		<td> <input type="radio" id="formato1" value="HTML" name="formato" checked="checked"/> </td> 
-		<td> HTML </td>
-		<td> <input type="radio" id="formato2" value="PDF" name="formato"/> </td>
-		<td> PDF </td>
-	  </tr>
-	</table>
   </div>
   <div id="acciones">
     <input class="boton" id="borrar" type="reset" value="Borrar"/>

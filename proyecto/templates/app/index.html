@@ -16,7 +16,7 @@
   {% for carrera in request.session.carreras_estudiante %}
   <h1> 
     <li> 
-      <a href="{% url proyecto.app.controllers.estudiante_asignaturas_docentes carrera.num_carrera %}"> 
+      <a href="{% url 'estudiante_asignaturas_docentes' carrera.num_carrera %}"> 
 	{{ carrera.nombre|upper }} 
       </a> 
     </li> 
@@ -46,7 +46,7 @@
 	  {% if da.evaluado %}
 	  {{ da.cuestionario.titulo|upper }}
 	  {% else %}
-	  <a href="{% url encuestas id_docente=request.session.docente.id id_asignatura=0 id_tinformante=5 id_cuestionario=da.cuestionario.id %}">
+	  <a href="{% url 'encuestas' id_docente=request.session.docente.id id_asignatura=0 id_tinformante=5 id_cuestionario=da.cuestionario.id %}">
 	  {{ da.cuestionario.titulo|upper }}
 	  </a>
 	  {% endif %}
@@ -78,7 +78,7 @@
   {% for carrera in request.session.carreras_pares_academicos %}
   <h3> 
     <li>
-      <a href="{% url pares_academicos_docentes carrera.num_carrera %} ">
+      <a href="{% url 'pares_academicos_docentes' carrera.num_carrera %} ">
 	SELECCIONAR DOCENTES DE LA CARRERA {{ carrera.nombre|upper }} [{{ carrera.area|upper }}]
       </a> 
     </li> 
@@ -103,7 +103,7 @@
   {% for carrera in request.session.carreras_director %}
   <h3> 
     <li>
-      <a href="{% url director_docentes carrera.num_carrera %} ">
+      <a href="{% url 'director_docentes' carrera.num_carrera %} ">
 	SELECCIONAR DOCENTES DE LA CARRERA {{ carrera.nombre|upper }} [{{ carrera.area|upper }}]
       </a> 
     </li> 

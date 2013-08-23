@@ -1,4 +1,4 @@
-# -*- coding: utf-8 -*-
+#encoding:utf-8
 
 import sys, os
 if not os.path.isfile("settings.py"):

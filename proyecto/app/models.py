@@ -1,4 +1,4 @@
-# -*- coding: utf-8 -*-
+#encoding:utf-8
 
 from django.db import models
 from django.db import connection
@@ -260,6 +260,8 @@ class AsignaturaDocente(models.Model):
 # Todas las carreras
 carreras = Asignatura.objects.values_list('carrera', 'carrera').order_by('carrera').distinct()
 
+#carreras =(('administracion','Administracion'),('sistemas','Sistemas'))   
+
 class DocentePeriodoAcademico(models.Model):
     usuario = models.ForeignKey('Usuario', related_name='docentePeriodosAcademicos')
     periodoAcademico = models.ForeignKey('PeriodoAcademico', related_name='docentes',
@@ -311,6 +313,7 @@ carreras_areas = AsignaturaDocente.objects.filter(
     'asignatura__carrera', 'asignatura__area').order_by(
     'asignatura__carrera').distinct()
 carreras_areas = [('|'.join(c),'|'.join(c)) for c in  carreras_areas]
+#carreras_areas = (('energia','Energia'),('medicina','Medicina'))        
 
 class DireccionCarrera(models.Model):
     # Nombre de la Carrera más el Área
@@ -590,6 +593,7 @@ class Pregunta(models.Model):
     orden = models.IntegerField()
     tipo = models.ForeignKey(TipoPregunta)
     seccion = models.ForeignKey(Seccion, related_name='preguntas')
+ 
 
     def get_codigo(self):
         """ Devuelve el codigo de la seccion mas el de la pregunta """
@@ -819,6 +823,7 @@ class TabulacionEvaluacion2013:
             'id', flat=True
             )
         return self.calcular(siglas_area, None , ids_docentes, componente)
+
 
     def calcular(self, siglas_area, nombre_carrera, ids_docentes, componente=None):
         """ 
@@ -1107,7 +1112,6 @@ class TabulacionEvaluacion2013:
                     aux_dict = {'CPF' : aux_contestaciones['CPF'][i], 
                                 'CPG' : aux_contestaciones['CPG'][i], 
                                 'PV' : aux_contestaciones['PV'][i]}
-                    # Un resultado de un docente
                     resultado[tipo].append(aux_dict)
             sugerencias[nombre_docente] = resultado
         return dict(sugerencias=sugerencias)
@@ -1176,7 +1180,7 @@ class TabulacionAdicionales2012:
         # Se coloca en Contestacion un objeto Pregunta en vez del id_pregunta entero
         for c in contestaciones2:
             c.pregunta = Pregunta.objects.get(id=c.pregunta)     
-        # Valor Total obtenido con  ponderacion: Docente 20%  - Comision Academica 80%
+        # Valor Total obtenido con  ponderacion: Comision Academica 80% - Docente 20% 
         total = (porcentaje1 * 20 / 100) + (porcentaje2 * 80 / 100) 
         contestaciones = {}
         contestaciones['secciones'] = []

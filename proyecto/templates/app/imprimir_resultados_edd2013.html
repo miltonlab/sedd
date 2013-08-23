@@ -2,74 +2,51 @@
   <head>  
     <meta http-equiv="Content-Type" content="text/html; charset=utf-8"/>
     <title> Resultados Evaluación del Desempeño Académico 2012 - 2013 </title>
-    <style type="text/css" media="screen, print">
-	
-	@page { 
-	size: a4 landscape; 
-	margin: 1cm 1cm 1cm 1cm;
-	}  
-	
+    <style type="text/css">
     body {
-		font-family: Helvetica, Arial, Sans;
+	font-family: Helvetica, Arial, Sans;
     }
     table {
-		margin-top: 10px;
-		margin-bottom: 10px;
-		width: 95%;
-		borderspacing: 0;
+	margin-top: 10px;
+	margin-bottom: 10px;
+	width: 85%;
+	borderspacing: 0;
     }
     th {
-		text-align: center;
-	    vertical-align: middle;
-		border: 1px solid gray;
+	text-align: center;
+	border: 1px solid gray;
+        font-size: 13px;
     }
     td {
-		text-align: center;
-		border: 1px solid gray;
-		font-size: 13px;
-	    vertical-align: middle;
+	text-align: center;
+	border: 1px solid gray;
+        font-size: 13px;
     }
-	#tabla-informacion tr td{
-	    vertical-align: middle;
-	}
     textarea {
-		font-size: 10px;
-		overflow: hidden;
+	font-size: 10px;
+	overflow: hidden;
     }
-	.promedio_componente td{
-		text-decoration: overline;
+	.promedio_componente td {
+	text-decoration: overline;
 	/*font-size: 0%; */
-	}
-	.small-title {
-		font-weight: bold;
-		font-size: 11px;
-	}
-	.salto-pagina {
-	    display: block;
-	    page-break-after: always;
-	}
-	.vacio{
-	    display: none;
 	}
     </style>
   </head>
-
   <body>
     <center>
-      <img width="70px" height="70px" src="http://t0.gstatic.com/images?q=tbn:ANd9GcSdhr9rEDXwrM4Hd_Xz_k_RaYGhy-1qd9xTbMVCejjfcIMTV9EE"/>
-	  <!-- http://www.unl.edu.ec/images/unl/web/unl_logo.png-->
+      <img width="75px" height="75px" src="/static/images/unl_logo.png"/>
       <h4> 
       {{ "Unversidad Nacional de Loja"|upper }}  <br/>
       Comisión de Evaluación Interna <br/>
       EVALUACIÓN DEL DESEMPEÑO ACADÉMICO <p/>
-      {{ "Acta de Resultados de la Evaluación del Desempeño Docente 2012"|upper }}
+      {{ "Resultados de la Evaluación del Desempeño Docente 2012"|upper }}
 
       <!-- Tabla de encabezado -->
 
-      <table id="tabla-informacion"  border="0">
+      <table id="tabla-docente"  border="0">
 		{% if area %}
 		<tr>
-		  <td width="10%"><b>AREA</b></td> <td style="text-align: left; vertical-align: middle;" width="90%">{{ area }}</td>
+		  <td width="10%"><b>AREA</b></td> <td style="text-align: left;" width="90%">{{ area }}</td>
 		</tr>
 		{% endif %}
 		{% if carrera %}
@@ -83,12 +60,11 @@
 		</tr>
 		{% endif %}
 	  </table>
-
 	  <!-- Si se filtra por Componente -->
 	  {% if seccion_componente  %}
 	  <table>
 		<tr>
-		  <td style="text-align: left;">
+		  <td style="text-align: left;" width="40%">
 			<h2> {{ seccion_componente.titulo }}:</h2> 
 		  </td>
 		  <td style="text-align: left;">
@@ -100,26 +76,25 @@
 
       <!-- Tabla Central -->
 
-      <table id="tabla-resultados" cellspacing="0" >
+      <table id="tabla-resultados" width="100%" cellspacing="0" >
 		<tr>
-		  <th rowspan="3" colspan="2" width="35%">  DESCRIPCIÓN DE LOS INDICADORES DE CALIDAD </th>
-		  <th colspan="4" width="40%">  INFORMANTES </th>
-		  <th colspan="3" width="25%">  EVALUACIÓN </th>
+		  <th rowspan="3" colspan="2">  DESCRIPCIÓN DE LOS INDICADORES DE CALIDAD </th>
+		  <th colspan="4">  INFORMANTES </th>
+		  <th colspan="3">  EVALUACIÓN </th>
 		</tr>
 		<tr>
-		  <th rowspan="2" class="small-title" width="10%"> ESTUDIANTES </th>
-		  <th rowspan="2" class="small-title" width="10%"> DOCENTES </th>
-		  <th colspan="2" class="small-title" width="10%"> COMISIÓN ACADÉMICA </th>
-		  <th rowspan="2" class="small-title" width="10%"> PRIMARIA </th>
-		  <th rowspan="2" class="small-title" width="10%">  PONDERAD. </th>
-		  <th rowspan="2" class="small-title" width="5%"> CUALITAT. </th>
+		  <th rowspan="2"> ESTUDIANTES </th>
+		  <th rowspan="2"> DOCENTES </th>
+		  <th colspan="2"> COMISIÓN ACADÉMICA </th>
+		  <th rowspan="2"> PRIMARIA </th>
+		  <th rowspan="2">  PONDERAD. </th>
+		  <th rowspan="2"> CUALITAT. </th>
 		</tr>
 		<tr> 
-		  <th class="small-title" width="10%"> PAR ACAD. </th>
-		  <th class="small-title" width="10%"> DIRECTIVO </th>
+		  <th> PAR ACAD. </th>
+		  <th> DIRECTIVO </th>
 		</tr>
-
-		<!-- for: indicador, resultado -->
+		<!-- indicador, resultado -->
 		{% for i, r in resultados_indicadores.items %}
 
 		<!-- Titulos de los componentes -->
@@ -140,29 +115,29 @@
 		<!-- Cada uno de los indicadores -->
 
 		<tr>
-		  <td style="text-align: justify; font-size: 9px;" width="28%"> 
+		  <td style="text-align: left; font-size: 9px;"> 
 			{{ r.objeto_seccion.descripcion }} 
 		  </td>
-		  <td width="7%">
+		  <td>
 			{{ i }} 
 		  </td>
-		  <td> 
+		  <td width="10%"> 
 		  {% if r.informantes.estudiante >= 0 %} {{ r.informantes.estudiante }} % {% else %} - {% endif %} 
 		  </td>
-		  <td> 
+		  <td width="10%"> 
 		  {% if r.informantes.docente >= 0 %} {{ r.informantes.docente  }} % {% else %} - {% endif %}
 		  </td>
-		  <td> 
+		  <td width="10%"> 
 			{% if r.informantes.paracademico >= 0 %} {{ r.informantes.paracademico }} % {% else %} - {% endif %} 
 		  </td>
-		  <td> 
+		  <td width="10%"> 
 		  {% if r.informantes.directivo >= 0%} {{ r.informantes.directivo }} % {% else %} - {% endif %} 
 		  </td>
-		  <td> 
+		  <td width="10%"> 
 		  {% if r.primaria >= 0 %} {{ r.primaria|floatformat:"0" }} % {% else %} - {% endif %}
 		  </td>
-		  <td> {{ r.ponderada|floatformat:"2" }}<b>/</b>{{ r.ponderacion_seccion }} </td>
-		  <td> {{ r.cualitativa }} </td>
+		  <td width="10%"> {{ r.ponderada|floatformat:"2" }} <b>/</b> {{ r.ponderacion_seccion }} </td>
+		  <td width="10%"> {{ r.cualitativa }} </td>
 		</tr>
 
 		<!-- Totales por Componente -->
@@ -258,29 +233,25 @@
  		{% endifequal %}
 		{% endif %} <!-- end if promedios_componentes -->
 
-		{% endfor %} 
-		<!-- end for: indicador,  resultado -->
-		
-		<!-- Fila Resultados -->
+		{% endfor %}
+	  </table>
+
+      <!-- Tabla de Resultados -->
+      <table>
 		<tr>
-		  <td colspan="9"> 
-			&nbsp;
-		  </td>
-		</tr>
-		<tr>
-		  <td colspan="2"> <b> VALORACIÓN TOTAL OBTENIDA: </b> </td>
-		  <td> {{ promedios.estudiante|floatformat:"2" }} % </td>
-		  <td> {{ promedios.docente|floatformat:"2" }} % </td>
-		  <td> {{ promedios.paracademico|floatformat:"2" }} % </td>
-		  <td> {{ promedios.directivo|floatformat:"2" }} % </td>
-		  <td> <b> {{ promedios.primaria }} %  </b> </td>
-		  <td> <b> {{ promedios.ponderada|floatformat:"2" }} / 
-			  {% if seccion_componente %} {{ seccion_componente.ponderacion }} {% else %} 100 {% endif %}</b> </td>
-		  <td> <b> {{ promedios.cualitativa }} </b> </td>
+		 <td colspan="2"> <b> VALOR TOTAL OBTENIDO: </b> </td>
+		 <td width="10%"> {{ promedios.estudiante|floatformat:"2" }} % </td>
+		 <td width="10%"> {{ promedios.docente|floatformat:"2" }} % </td>
+		 <td width="10%"> {{ promedios.paracademico|floatformat:"2" }} % </td>
+		 <td width="10%"> {{ promedios.directivo|floatformat:"2" }} % </td>
+		 <td width="10%"> <b> {{ promedios.primaria }} %  </b> </td>
+		 <td width="10%"> <b> {{ promedios.ponderada|floatformat:"2" }} / 100 </b> </td>
+		 <td width="10%"> <b> {{ promedios.cualitativa }} </b> </td>
+		 </b>
 		</tr>
 	  </table>
 
-	  <table id="tabla-escala" cellspacing="0">
+	  <table id="tabla-escala">
 		<tr> 
 		  <td style="text-align: left;"> 
 			<b> D </b> = Destacado |
@@ -290,13 +261,9 @@
 		  </td>
 		</tr>
 	  </table>
-	  <p>
-		Las evidencias con las que se evaluó el desempeño del docente se encuentran en su carpeta profesional y 
-		forman parte del expediente general del informe de cada carrera.
-	  </p>
-	  <!--a href='javascript:window.print();'> 
+	  <a href='javascript:window.print();'> 
 		<img src="http://capacinet.gob.mx/Cursos/Aprendamos%20Juntos/finanzaspersonales/imagenes/icono_imprimir.jpg"/> 
-	  </a-->
+	  </a>
       <div id="pie" style="font-size: 9px; color: #666666">
 		<hr style="margin-bottom: 6px;"/>
 		Unidad de Telecomunicaciones e Infomacion - Departamento de Desarrollo de Software <br>
@@ -304,11 +271,6 @@
 		<a href="mailto:evaluacion.docente@unl.edu.ec"> <u>evaluacion.docente@unl.edu.ec</u> </a> <br/>
 		Loja - Ecuador
       </div>
-
-	  <!-- Para resultados consolidados de varios docentes o varias carreras -->
-	  <div class="salto-pagina">
-		<span class="vacio">&nbsp;</span>
-	  </div>
 
     </center>
   </body>

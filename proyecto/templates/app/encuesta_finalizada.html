@@ -11,14 +11,14 @@
 
 {% if request.session.estudianteAsignaturaDocente %}
 <p>
-  <a href="{% url proyecto.app.controllers.estudiante_asignaturas_docentes num_carrera %}"> 
+  <a href="{% url 'proyecto.app.controllers.estudiante_asignaturas_docentes' num_carrera %}"> 
     <<< Continuar >>> 
   </a>
 </p>
 {% else %}
 {% if request.session.director_carrera and num_carrera %}
 <p>
-  <a href="{% url proyecto.app.controllers.director_docentes num_carrera %}"> 
+  <a href="{% url 'proyecto.app.controllers.director_docentes' num_carrera %}"> 
   <!--a href="{#% url encuestas id_docente=request.session.docente_evaluar.id id_asignatura=0 id_tinformante=6 %#}"--> 
     <<< Continuar >>> 
   </a>
@@ -26,7 +26,7 @@
 {% else %}
 {% if request.session.docente %}
 <p>
-  <a href="{% url proyecto.app.controllers.index %}"> 
+  <a href="{% url 'proyecto.app.controllers.index' %}"> 
     <<< Continuar >>> 
   </a>
 </p>

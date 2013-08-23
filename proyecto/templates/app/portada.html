@@ -37,7 +37,7 @@
 		<div id="menu">
 			<ul>
 				<li><a href="#">Inicio</a></li>
-				<li><a href="/login/">Acceso al sistema</a></li>
+				<li><a href="/admin/">Acceso al sistema</a></li>
 				<li><a href="http://www.unl.edu.ec">Acerca de...</a></li>	
 			</ul>
 		</div>
@@ -48,7 +48,7 @@
 			<h1 style="color: #8EAD45;"> Bienvenidos al sistema de evaluación de docentes de la UNL</h1>
 			<p> 
 			  {% if periodoEvaluacionActual %}
-			  <a href="{% url proyecto.app.controllers.login %}">
+			  <a href="{% url 'login' %}">
 			    >>> <u> <b style="color: black; font-weight: 250%; font-size: 14px;"> 
 				{{ periodoEvaluacionActual.titulo|upper }} </b>  </u>
 			  </a>
