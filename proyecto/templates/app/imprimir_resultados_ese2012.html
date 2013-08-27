@@ -24,8 +24,24 @@
   <body>
     <center>
       <img width="75px" height="75px" src="/static/images/unl_logo.png"/>
-      <h4> {{ "Unversidad Nacional de Loja"|upper }} </h4>
+ 
       {{ titulo|safe }}
+
+      <!-- Datos academicos de los estudiantes que evaluaron al Docente -->
+      <table width="100%" cellspacing="0" style="font-size: 8px;">
+	<th> Ciclo/Modulo </th>
+	<th> Paralelo </th>
+	<th> Asignaturas </th>
+      {% for de in datos_evaluadores %}
+	<tr>
+	  <td> {{ de.semestre }} </td>
+	  <td> {{ de.paralelo }} </td>
+	  <td> {{ de.asignatura }} </td>
+	</tr>
+      {% endfor %}
+      </table>
+
+      <!-- Seccion principal de Resultados -->
       <table  width="100%" cellspacing="0">
 		<th rowspan="2" width="40%"> Indicadores </th>
 		<th colspan="4"> Niveles de Satisfacción  </th>

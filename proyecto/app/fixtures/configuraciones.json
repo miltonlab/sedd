@@ -1,0 +1,10 @@
+[
+  {
+    "pk": 1, 
+    "model": "app.configuracion", 
+    "fields": {
+      "periodoEvaluacionActual": None, 
+      "periodoAcademicoActual": None
+    }
+  }
+]

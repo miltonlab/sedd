@@ -841,15 +841,23 @@ def mostrar_resultados(request):
     if tabulacion.tipo == 'ESE2012':
         tabulacion = TabulacionSatisfaccion2012(periodoEvaluacion)
         metodo =  [c[2] for c in tabulacion.calculos if c[0] == opcion][0]
-        titulo = u'<h3 style="margin-bottom: 3px;"> {0} </h3> {1} <br/> <b> {2} </b> <br/>'.format(
-            tabulacion.periodoEvaluacion.titulo, request.session['area'], request.session['carrera'])
+        objeto_area = AreaSGA.objects.get(siglas=request.session['area'])
+        titulo = u' <br/> <b> UNIVERSIDAD NACIONAL DE LOJA </b> <br/>'
+        titulo += u'{1} <br/>  <b> {2} </b>  <p/> {0}  <br/>'.format(
+            tabulacion.periodoEvaluacion.titulo, 
+            objeto_area.siglas, 
+            request.session['carrera'])
         titulo += [c[3] for c in tabulacion.calculos if c[0] == opcion][0]
         # Por docente
         if opcion == 'a':
             id_docente = request.POST['docentes']
             if id_docente != '':
-                titulo += u': <b>{0}</b>'.format(DocentePeriodoAcademico.objects.get(id=int(id_docente)))
+                docente = DocentePeriodoAcademico.objects.get(id=int(id_docente))
+                titulo += u': <b>{0}</b>'.format(docente)
                 resultados = metodo(request.session['area'], request.session['carrera'], int(id_docente))
+                datos_evaluadores =  docente.get_datos_evaluadores(periodoEvaluacion.id)
+                # Se renderizan en el template
+                resultados['datos_evaluadores'] = datos_evaluadores
         # Por campos
         elif opcion == 'c':
             id_seccion = request.POST['campos']
@@ -989,10 +997,11 @@ def mostrar_resultados(request):
             else:
                 plantilla = 'app/imprimir_resultados_edd2013.html'
 
-    if resultados:
-    	resultados['titulo'] = u"Acta de Resultados de {0}".format(tabulacion.periodoEvaluacion.titulo)
-    	# Obtenido al inicio de la bifurcacion
-    	resultados['carrera_senescyt'] = carrera_senescyt
+        # Solo en EDD
+        if resultados:
+            resultados['titulo'] = u"Acta de Resultados de {0}".format(tabulacion.periodoEvaluacion.titulo)
+            # Obtenido al inicio de la bifurcacion
+            resultados['carrera_senescyt'] = carrera_senescyt
 
 
     if formato == 'HTML':
