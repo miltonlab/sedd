@@ -28,10 +28,13 @@
       {{ titulo|safe }}
 
       <!-- Datos academicos de los estudiantes que evaluaron al Docente -->
+      {% if datos_evaluadores %}
       <table width="100%" cellspacing="0" style="font-size: 8px;">
-	<th> Ciclo/Modulo </th>
-	<th> Paralelo </th>
-	<th> Asignaturas </th>
+	<tr>
+	    <td> <i> Ciclo/Modulo </i> </td>
+	    <td> <i> Paralelo </i> </td>
+	    <td> <i> Asignaturas </i> </td>
+	</tr>
       {% for de in datos_evaluadores %}
 	<tr>
 	  <td> {{ de.semestre }} </td>
@@ -40,16 +43,17 @@
 	</tr>
       {% endfor %}
       </table>
+      {% endif %}
 
       <!-- Seccion principal de Resultados -->
       <table  width="100%" cellspacing="0">
 		<th rowspan="2" width="40%"> Indicadores </th>
 		<th colspan="4"> Niveles de Satisfacción  </th>
 		<tr>
-		  <th width="15%"> Muy Satisfecho MS (4) </th>
-		  <th width="15%"> Satisfecho S (3) </th>
-		  <th width="15%"> Poco Satisfecho PS (2) </th>
-		  <th width="15%"> Insatisfecho INS (1) </th>
+		  <th width="15%"> Muy Satisfecho <br/> MS (4) </th>
+		  <th width="15%"> Satisfecho <br/> S (3) </th>
+		  <th width="15%"> Poco Satisfecho <br/> PS (2) </th>
+		  <th width="15%"> Insatisfecho <br/> INS (1) </th>
 		</tr>
 		{% for c in conteos %}
 		{% ifchanged c.pregunta.seccion %} 
