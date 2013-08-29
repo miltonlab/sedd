@@ -1308,7 +1308,7 @@ class TabulacionSatisfaccion2012:
             ('f',u'Los 10 indicadores de mayor INSATISFACCIÓN en la Carrera',
              self.mayor_insatisfaccion, u'Indicadores de mayor Insatisfacción'),
             ('g',u'Listado de docentes de la carrera y Calificaciones',
-             self.listado_calificaciones, u'Listado de Docentes y Calificaciones Encuesta de Satisfaccion Estudiantil'),
+             self.listado_calificaciones, u'Listado de Docentes y Porcentaje de Satisfacción Estudiantil'),
         )
  
 
