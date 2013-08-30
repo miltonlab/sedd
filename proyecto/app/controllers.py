@@ -845,7 +845,7 @@ def mostrar_resultados(request):
         titulo = u' <br/> <b> UNIVERSIDAD NACIONAL DE LOJA </b> <br/>'
         titulo += u'{1} <br/>  <b> {2} </b>  <p/> {0}  <br/>'.format(
             tabulacion.periodoEvaluacion.titulo, 
-            objeto_area.siglas, 
+            'INSTITUTO IDIOMAS' if objeto_area.siglas == 'ACE' else objeto_area.siglas, 
             request.session['carrera'])
         titulo += [c[3] for c in tabulacion.calculos if c[0] == opcion][0]
         # Por docente

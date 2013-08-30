@@ -86,7 +86,7 @@
 
 		{% for docente in listado_calificaciones %}
 		<tr>
-		  <td width="20%"> {{ docente.0 }} </td>
+		  <td width="10%"> {{ docente.0 }} </td>
 		  <td style="text-align: left;"> {{ docente.1 }} {{ docente.2 }}  </td>
 		  <td width="10%" class= "{% if docente.3 < media %} bajo {% else %} alto {% endif %}"> 
 		  {{ docente.3|floatformat:"2" }} % 
