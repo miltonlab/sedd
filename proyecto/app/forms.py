@@ -81,7 +81,7 @@ class ResultadosESE2012Form(forms.Form):
                 id__in=ids_docentes).order_by('usuario__last_name', 'usuario__first_name').filter(
                 periodoAcademico=periodoEvaluacion.periodoAcademico))
         if area == u'ACE':
-            cuestionario = periodoEvaluacion.cuestionarios.get(informante__tipo=u'InstitutoIdiomas')
+            cuestionario = periodoEvaluacion.cuestionarios.get(informante__tipo=u'EstudianteIdiomas')
         elif area == u'MED':
             cuestionario = periodoEvaluacion.cuestionarios.get(informante__tipo=u'EstudianteMED')
         else:  # Todas las demás areas
