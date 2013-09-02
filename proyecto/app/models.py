@@ -37,7 +37,7 @@ class Configuracion(models.Model):
     
     class Meta:
         verbose_name = u'Configuraciones'
-        verbose_name_plural = u'Configuraciones'
+        verbose_name_plural = u'Configuraciones'  
 
     def __unicode__(self):
         return u"Configuraciones de la Aplicación"
