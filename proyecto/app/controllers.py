@@ -455,7 +455,6 @@ def encuesta_responder(request, id_cuestionario):
     #
     # Encuesta dirigida a ESTUDIANTES
     #
-    ###info_estudiante = ('EstudianteNovel', 'Estudiante', 'EstudianteMED', 'EstudianteIdiomas')
     if cuestionario.informante.tipo.startswith('Estudiante'):
         area = request.session['area']
         carrera = request.session['carrera']
@@ -530,9 +529,7 @@ def encuesta_grabar(request):
     #
     # Encuesta dirigida a ESTUDIANTES
     #
-    ###info_estudiante = ('EstudianteNovel', 'Estudiante', 'EstudianteMED', 'EstudianteIdiomas')
     if evaluacion.cuestionario.informante.tipo.startswith('Estudiante'):
-    ###if request.session.get('estudianteAsignaturaDocente', None):
         estudianteAsignaturaDocente = request.session['estudianteAsignaturaDocente']
         # Si se regresa a grabar otra vez la misma encuesta
         if Evaluacion.objects.filter(estudianteAsignaturaDocente = estudianteAsignaturaDocente

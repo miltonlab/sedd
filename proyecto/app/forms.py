@@ -1,7 +1,9 @@
 # -*- coding: utf-8 -*-
 
 from django import forms
+from django.contrib.admin import widgets
 from django.db.models import Q
+
 from proyecto.app.models import Configuracion
 from proyecto.app.models import PeriodoAcademico
 from proyecto.app.models import PeriodoEvaluacion
@@ -20,7 +22,6 @@ class ResultadosEDD2013Form(forms.Form):
     Formulario Unico para los resultados de la Evaluación del 
     Desempenio Docente  2012 - 2013
     """
-
     def __init__(self, tabulacion, area, carrera):
         forms.Form.__init__(self)
         opciones = [(o[0], o[1]) for o in tabulacion.calculos]
@@ -45,7 +46,6 @@ class ResultadosEAAD2012Form(forms.Form):
     Formulario Unico para los resultados de la Evaluación de 
     Actividades Adicionales a la Docencia 2012
     """
-
     def __init__(self, tabulacion, area, carrera):
         forms.Form.__init__(self)
         opciones = [(o[0], o[1]) for o in tabulacion.calculos]
@@ -67,7 +67,6 @@ class ResultadosESE2012Form(forms.Form):
     Formulario Único para los resultados de la Encuesta de Satisfacción Estudiantil 2012
     cualquier tipo de Informante
     """
-
     def __init__(self, tabulacion, area, carrera):
         forms.Form.__init__(self)
         opciones = [(o[0], o[1]) for o in tabulacion.calculos]
@@ -99,7 +98,6 @@ class ResultadosESE2012Form(forms.Form):
 
         
     class Media:
-        ###js = ('/static/js/jquery-1.6.2.min.js', '/static/js/ese2012.js',)
         js = ('js/ese2012.js',)
 
 

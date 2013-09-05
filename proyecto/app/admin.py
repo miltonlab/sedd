@@ -109,9 +109,16 @@ class OfertaAcademicaSGAEnLinea(admin.TabularInline):
     model = models.OfertaAcademicaSGA
     extra = 1
 
+class ExtensionPeriodoEvaluacionEnLinea(admin.TabularInline):
+    model = models.ExtensionPeriodoEvaluacion
+    extra = 1
+
 class PeriodoEvaluacionAdmin(admin.ModelAdmin):
+    exclude = ('observaciones',)
     filter_horizontal = ('areasSGA',)
     list_filter = ('periodoAcademico',)
+    inlines = (ExtensionPeriodoEvaluacionEnLinea,)
+
 
 class PeriodoAcademicoAdmin(admin.ModelAdmin):
     filter_horizontal = ('ofertasAcademicasSGA',)

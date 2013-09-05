@@ -455,12 +455,35 @@ class Cuestionario(models.Model):
     def __unicode__(self):
         return self.nombre
 
+
+class FiltroPeriodoManager(models.Manager):
+    """
+    Query Set Manager para filtrar Contestaciones de Evaluaciones 
+    segun su Periodo de Evaluacion incluyendo o excluyendo aquellas
+    que se han realizado en periodos extendidos
+    """
+    def set_periodo_evaluacion(self, periodoEvaluacion):
+        self.periodoEvaluacion = periodoEvaluacion
+
+    def get_query_set(self):
+        # No se ha fijado el Periodo de Evaluacion o se debe contabilizar evaluaciones extra
+        if not self.periodoEvaluacion or self.periodoEvaluacion.contabilizar_extras:
+            return super(FiltroPeriodoManager, self).get_query_set()
+        # No se debe contabilizar las evaluciones extra 
+        elif not self.periodoEvaluacion.contabilizar_extras:
+            return super(FiltroPeriodoManager, self).get_query_set().filter(
+                evaluacion__fechaFin__lte=self.periodoEvaluacion.fin.date()).filter(
+                evaluacion__horaFin__lte=self.periodoEvaluacion.fin.time())
+
+
 class Contestacion(models.Model):
     pregunta = models.IntegerField()
     respuesta = models.TextField()
     # Adicionales a la respuesta propiamente establecida
     observaciones = models.TextField(null=True, blank=True)
     evaluacion = models.ForeignKey('Evaluacion', related_name='contestaciones')
+    # Manejador de acuerdo al Periodo de Evaluacion
+    objects = FiltroPeriodoManager()
 
     def get_pregunta(self):
         """ Devuelve el objeto 'pregunta' a partir del atributo id_pregunta """
@@ -473,8 +496,8 @@ class Contestacion(models.Model):
         
     def __unicode__(self):
         return u'{0}:{1}'.format(self.pregunta, self.respuesta)
-    
-    
+        
+
 class Evaluacion(models.Model):
     """ 
     Delega la lógica que determina el tipo de evaluación a los controladores
@@ -670,7 +693,7 @@ class AreaSGA(models.Model):
     class Meta:
         ordering=['nombre']
 
-
+ 
 class PeriodoEvaluacion(models.Model):
     nombre = models.CharField(max_length='100')
     titulo = models.CharField(max_length='300')
@@ -678,6 +701,11 @@ class PeriodoEvaluacion(models.Model):
     observaciones = models.TextField(null=True, blank=True)
     inicio = models.DateTimeField()
     fin = models.DateTimeField()
+    # Si se incluyen en resultados las evaluaciones extras
+    contabilizar_extras = models.BooleanField(
+        verbose_name="CONTABILIZAR EXTRAS", 
+        help_text='Permite Contabilizar Evaluaciones Adicionales en Resultados', 
+        default=False)
     periodoAcademico = models.ForeignKey('PeriodoAcademico', related_name='periodosEvaluacion', verbose_name="Periodo Académico")
     areasSGA = models.ManyToManyField(AreaSGA, related_name='periodosEvaluacion', verbose_name=u'Areas Académicas SGA')
     
@@ -692,7 +720,13 @@ class PeriodoEvaluacion(models.Model):
     
     def vigente(self):
         ahora = datetime.today()
-        return self.inicio <=  ahora <= self.fin 
+        vigente = self.inicio <= ahora <= self.fin
+        # Se busca si existen extensiones del Periodo de Evaluacion
+        # que esten vigentes.
+        if not vigente:
+            extensiones_vigentes = filter(lambda e: e.vigente(), self.extensiones.all())
+            vigente = len(extensiones_vigentes) > 0
+        return vigente
 
     def finalizado(self):
         ahora = datetime.today()
@@ -785,6 +819,24 @@ class PeriodoEvaluacion(models.Model):
         return self.nombre
 
 
+class ExtensionPeriodoEvaluacion(models.Model):
+    secuencia = models.IntegerField(unique=True)
+    inicio = models.DateTimeField()
+    fin = models.DateTimeField()
+    # Justificacion de la Prolongacion
+    observaciones = models.TextField() 
+    periodoEvaluacion = models.ForeignKey('PeriodoEvaluacion', related_name='extensiones', verbose_name="Extensión Periodo de Evaluación")
+
+    def vigente(self):
+        ahora = datetime.today()
+        return self.inicio <=  ahora <= self.fin 
+    
+    class Meta:
+        ordering = ['inicio', 'fin']
+        verbose_name = u'Extensión Periodo de Evaluación'
+        verbose_name_plural = u'Extensiones de Periodo de Evaluación'
+
+
 # TODO: Modelar de mejor manera la funcionalidad
 tipos_tabulacion = (
     (u'ESE2012', u'Tabulación Satisfacción Estudiantil 2012'),
@@ -828,7 +880,7 @@ class TabulacionEvaluacion2013:
 
     def por_docente(self, siglas_area, nombre_carrera, id_docente, componente=None):
         # Se pasa un tupla no un solo id
-        return self.calcular(siglas_area, nombre_carrera, (id_docente,), componente)
+        return self._calcular(siglas_area, nombre_carrera, (id_docente,), componente)
 
     def por_carrera(self, siglas_area, nombre_carrera, componente):
         # Obtenemos los id de los Docentes que dictan Asignaturas en la carrera seleccionada
@@ -844,7 +896,7 @@ class TabulacionEvaluacion2013:
             ).order_by('usuario__last_name', 'usuario__first_name').values_list(
             'id', flat=True
             )
-        return self.calcular(siglas_area, nombre_carrera, ids_docentes, componente)
+        return self._calcular(siglas_area, nombre_carrera, ids_docentes, componente)
 
     def por_area(self, siglas_area, componente=None):
         # Obtenemos los id de los Docentes que dictan Asignaturas en el area seleccionada
@@ -859,7 +911,7 @@ class TabulacionEvaluacion2013:
             ).order_by('usuario__last_name', 'usuario__first_name').values_list(
             'id', flat=True
             )
-        return self.calcular(siglas_area, None , ids_docentes, componente)
+        return self._calcular(siglas_area, None , ids_docentes, componente)
 
 
     def listado_calificaciones(self, siglas_area, nombre_carrera):
@@ -887,11 +939,15 @@ class TabulacionEvaluacion2013:
             listado_calificaciones.append(fila)
         return dict(listado_calificaciones=listado_calificaciones)
 
-    def calcular(self, siglas_area, nombre_carrera, ids_docentes, componente=None):
+    def _calcular(self, siglas_area, nombre_carrera, ids_docentes, componente=None):
         """ 
         Metodo generico para calcular los resultados de acuerdo a los diferentes criterios
         Si se trata del reporte de sugerencias se salta al metodo respectivo
         """ 
+        # Para contabilizar de acuerdo a la naturaleza del Periodo de Evaluacion
+        # Proceso verificado en FiltroPeriodoManager
+        Contestacion.objects.set_periodo_evaluacion(self.periodoEvaluacion)
+
         if componente == 'sugerencias':
             return self.extraer_sugerencias(siglas_area, nombre_carrera, ids_docentes)
 
@@ -913,7 +969,7 @@ class TabulacionEvaluacion2013:
         for tipo in tipos:
             cuestionario = Cuestionario.objects.get(periodoEvaluacion=self.periodoEvaluacion, informante__tipo=tipo)
             # En caso de tratarse del insituto de idiomas se generaliza el informante
-            # Anecdota: Un error que me llevo mas de dos dias
+            # Anecdota: Un error "simplon" que me llevo mas de dos dias encontrarlo
             informante = tipo.lower().replace('idiomas','')
             # Para los calculos finales
             pesos.update({informante : cuestionario.peso}) 
@@ -924,7 +980,7 @@ class TabulacionEvaluacion2013:
                 preguntas = [p.id for p in cuestionario.get_preguntas() if 
                              p.tipo==TipoPregunta.objects.get(tipo='SeleccionUnica') and
                              p.seccion.superseccion.codigo==componente ]
-            # Solo ids
+            # Solo IDs de contestaciones
             contestaciones = None
             if informante == 'estudiante':
                 contestaciones = Contestacion.objects.filter(
@@ -964,7 +1020,6 @@ class TabulacionEvaluacion2013:
             # Sumatorias por pregunta
             for pregunta, promedio in promedios_preguntas.items():
                 suma = indicadores.get(pregunta.seccion,0) + promedio
-                ###indicadores[pregunta.seccion] = suma
                 indicadores.update({pregunta.seccion: suma})
             # Promedio por seccion (indicador)
             for seccion, suma in indicadores.items():
@@ -1383,24 +1438,25 @@ class TabulacionSatisfaccion2012:
         conteos = datos['conteos']
         totales = datos['totales']
         porcentajes = datos['porcentajes']
-
-        # conteos = self._contabilizar(siglas_area, nombre_carrera, indicadores)['conteos']
-        # totales = self._contabilizar(siglas_area, nombre_carrera, indicadores)['totales']
-        # porcentajes = self._contabilizar(siglas_area, nombre_carrera, indicadores)['porcentajes']
            
         return dict(conteos=conteos, totales=totales, porcentajes=porcentajes)
 
     
     def por_otros_aspectos(self, siglas_area, nombre_carrera, docente, seccion):
-        indicadores_otros=Pregunta.objects.filter(seccion=seccion).filter(tipo__tipo=u'Ensayo').values_list('id', flat=True)
+        # Para contabilizar de acuerdo a la naturaleza del Periodo de Evaluacion
+        # Proceso verificado en FiltroPeriodoManager
+        Contestacion.objects.set_periodo_evaluacion(self.periodoEvaluacion)
+
+        indicadores_otros = Pregunta.objects.filter(seccion=seccion).filter(tipo__tipo=u'Ensayo').values_list('id', flat=True)
+
         ### Version anterior con conteo de respuestas comunes
-        #
         # conteo=Contestacion.objects.filter(evaluacion__cuestionario__periodoEvaluacion=self.periodoEvaluacion).filter(
         #     evaluacion__cuestionario__periodoEvaluacion__tabulacion__tipo='ESE2012').filter(
         #     evaluacion__estudianteAsignaturaDocente__asignaturaDocente__asignatura__area=siglas_area).filter(
         #     evaluacion__estudianteAsignaturaDocente__asignaturaDocente__asignatura__carrera=nombre_carrera).filter(
         #     pregunta__in=indicadores_otros).values('pregunta','respuesta').annotate(
         #     frecuencia=Count('respuesta')).order_by('pregunta')
+
         sugerencias = Contestacion.objects.filter(evaluacion__cuestionario__periodoEvaluacion=self.periodoEvaluacion).filter(
             evaluacion__cuestionario__periodoEvaluacion__tabulacion__tipo='ESE2012').filter(
             evaluacion__estudianteAsignaturaDocente__asignaturaDocente__asignatura__area=siglas_area).filter(
@@ -1423,16 +1479,10 @@ class TabulacionSatisfaccion2012:
         # ya se determina en la vista anterior
         # Se selecciona unicamente el id para la comparación posterior
         indicadores = (id_pregunta, )
-
         datos = self._contabilizar(siglas_area, nombre_carrera, indicadores)
         conteos = datos['conteos']
         totales = datos['totales']
         porcentajes = datos['porcentajes']
-
-        # conteos = self._contabilizar(siglas_area, nombre_carrera, indicadores)['conteos']
-        # totales = self._contabilizar(siglas_area, nombre_carrera, indicadores)['totales']
-        # porcentajes = self._contabilizar(siglas_area, nombre_carrera, indicadores)['porcentajes']
-
         return dict(conteos=conteos, totales=totales, porcentajes=porcentajes)
         
 
@@ -1505,6 +1555,10 @@ class TabulacionSatisfaccion2012:
         @return totales
         @return porcentajes
         """
+        # Para contabilizar de acuerdo a la naturaleza del Periodo de Evaluacion
+        # Proceso verificado en FiltroPeriodoManager
+        Contestacion.objects.set_periodo_evaluacion(self.periodoEvaluacion)
+        
         conteo_ms=Contestacion.objects.filter(evaluacion__cuestionario__periodoEvaluacion=self.periodoEvaluacion).filter(
             evaluacion__cuestionario__periodoEvaluacion__tabulacion__tipo='ESE2012').filter(
             evaluacion__estudianteAsignaturaDocente__asignaturaDocente__asignatura__area=siglas_area).filter(
