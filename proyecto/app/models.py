@@ -467,8 +467,8 @@ class FiltroPeriodoManager(models.Manager):
 
     def get_query_set(self):
         # No se ha fijado el Periodo de Evaluacion o se debe contabilizar evaluaciones extra
-        if not self.periodoEvaluacion or self.periodoEvaluacion.contabilizar_extras:
-            return super(FiltroPeriodoManager, self).get_query_set()
+	if 'periodoEvaluacion' not in self.__dict__.keys() or self.periodoEvaluacion.contabilizar_extras:
+	    return super(FiltroPeriodoManager, self).get_query_set()
         # No se debe contabilizar las evaluciones extra 
         elif not self.periodoEvaluacion.contabilizar_extras:
             return super(FiltroPeriodoManager, self).get_query_set().filter(
