@@ -470,10 +470,14 @@ class FiltroPeriodoManager(models.Manager):
 	if 'periodoEvaluacion' not in self.__dict__.keys() or self.periodoEvaluacion.contabilizar_extras:
 	    return super(FiltroPeriodoManager, self).get_query_set()
         # No se debe contabilizar las evaluciones extra 
-        elif not self.periodoEvaluacion.contabilizar_extras:
-            return super(FiltroPeriodoManager, self).get_query_set().filter(
-                evaluacion__fechaFin__lte=self.periodoEvaluacion.fin.date()).filter(
-                evaluacion__horaFin__lte=self.periodoEvaluacion.fin.time())
+       	elif not self.periodoEvaluacion.contabilizar_extras:
+            # return super(FiltroPeriodoManager, self).get_query_set().filter(
+            #     evaluacion__fechaFin__lte=self.periodoEvaluacion.fin.date())
+            #     evaluacion__horaFin__lte=self.periodoEvaluacion.fin.time())
+            return super(FiltroPeriodoManager, self).get_query_set().extra(
+                tables=['app_contestacion', 'app_evaluacion'],
+                where=["""("fechaFin" || ' ' || "horaFin")::timestamp <= %s"""],
+                params=[self.periodoEvaluacion.fin])       
 
 
 class Contestacion(models.Model):
