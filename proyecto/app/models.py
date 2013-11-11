@@ -1520,7 +1520,7 @@ class TabulacionSatisfaccion2012:
         # Para asegurar que se tomen unicamente preguntas que representen indicadores además
         # Se seleccionan solo ids para poder comparar
         indicadores=Pregunta.objects.filter(seccion__in=secciones).filter(tipo__tipo=u'SeleccionUnica').values_list('id', flat=True)
-        conteos = self._contabilizar(siglas_area, nombre_carrera, indicadores)
+        conteos = self._contabilizar(siglas_area, nombre_carrera, indicadores)['conteos']
         # Ordenar de menor a mayor por 'INS' luego por 'PS'
         conteos.sort(lambda c1, c2: -cmp(c1['INS'], c2['INS']) or -cmp(c1['PS'], c2['PS'] ))
         return dict(conteos=conteos[:10], totales=None, porcentajes=None)
