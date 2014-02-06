@@ -12,10 +12,14 @@ Instalación
  - Modificar y copiar proyecto/apache/sedd.cfg a /etc/apache2/sites-enabled 
  - Reiniciar apache
 
-### Cambios en el codigo fuente de Django
+### Cambios en el codigo fuente de Django 
  * Cambiar el ancho de #changelist-filter en "...django/contrib/admin/media/css/changelists.css"
  * Aumentar el tamaño de first_name y last_name en el modelo "...django/contrib/auth/models.py"
  * Cambiar el ancho de .dashboard #content "...django/contrib/admin/media/css/base.css"
+
+### Cambios en el codigo fuente del paquete django-nested-inlines
+ * from django.utils import six en vez de import six
+ ** Archivo: nested_inlines/helpers.py
 
 Requerimientos
 -------------------------------------------------------------------
@@ -34,7 +38,7 @@ Requerimientos
  * pisa 3.0.33				(libreria para generar PDFs)
  * reportlab 2.6
  * html5lib 0.95
-
+ * django-nested-inlies ?	pip install -e git+git://github.com/Soaa-/django-nested-inlines.git#egg=django-nested-inlines
 #### Opcionales 
 
  * django-chronograph 0.3.1 (Admin de Tareas)

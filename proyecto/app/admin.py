@@ -7,6 +7,12 @@ from proyecto.app import models
 from proyecto.app.forms import EstudianteAsignaturaDocenteAdminForm
 from proyecto.app.forms import AsignaturaDocenteAdminForm
 
+#TODO:  Recordar ejecutar hack en el codigo de nested_inlines.helpers.py
+#cuando deje el estado de testing
+#from nested_inlines.admin import NestedModelAdmin
+#from nested_inlines.admin import NestedStackedInline
+#from nested_inlines.admin import NestedTabularInline
+
 import logging
 logg = logging.getLogger('logapp')
 
@@ -17,7 +23,7 @@ class ItemPreguntaEnLinea(admin.StackedInline):
 
 class PreguntaAdmin(admin.ModelAdmin):
     inlines = (ItemPreguntaEnLinea,)
-    fields = ('seccion','orden', 'codigo', 'texto', 'descripcion', 'tipo')
+    fields = ('seccion','orden', 'codigo', 'texto', 'descripcion', 'tipo', 'observaciones')
     search_fields = ('texto', 'descripcion')
     list_filter = ('seccion__cuestionario__periodoEvaluacion__periodoAcademico', 
                    'seccion__cuestionario__periodoEvaluacion', 'seccion__cuestionario')
@@ -83,6 +89,7 @@ class SeccionEnLinea(admin.TabularInline):
 """
 
 class CuestionarioAdmin(admin.ModelAdmin):
+###class CuestionarioAdmin(NestedModelAdmin):
     actions = ['clonar_cuestionario']
     ###inlines = ('SeccionEnLinea',)
     save_as = True
@@ -344,6 +351,25 @@ class TabulacionAdmin(admin.ModelAdmin):
 class TipoInformanteAdmin(admin.ModelAdmin):
     pass
 
+
+""" Testing
+class PreguntaInline(NestedTabularInline):
+    model = models.Pregunta
+    extra = 1
+    fields = ('texto', 'descripcion')
+
+class SeccionInline(NestedStackedInline):
+    model = models.Seccion
+    inlines = [PreguntaInline,]
+    fields = ('nombre', 'titulo')
+    extra = 1
+
+class CuestionarioNested(NestedModelAdmin):
+    #model = models.Cuestionario
+    inlines = (SeccionInline,)
+    fields = ['nombre', 'titulo']
+admin.site.register(models.Cuestionario,CuestionarioNested)
+"""
 admin.site.register(models.Cuestionario,CuestionarioAdmin)
 admin.site.register(models.Seccion,SeccionAdmin)
 admin.site.register(models.Pregunta,PreguntaAdmin)

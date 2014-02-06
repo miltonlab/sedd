@@ -58,7 +58,7 @@
 		{% for c in conteos %}
 		{% ifchanged c.pregunta.seccion %} 
 		<td colspan="5" style="text-align: left;"> 
-		  <b> COMPONENTE {{ c.pregunta.seccion.orden }}: {{ c.pregunta.seccion.titulo|upper }} </b> 
+		  <b> CAMPO {{ c.pregunta.seccion.orden }}: {{ c.pregunta.seccion.titulo|upper }} </b> 
 		</td> 
 		{% endifchanged %}
 		<tr>

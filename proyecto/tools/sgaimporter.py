@@ -1,5 +1,5 @@
 # -*- coding: utf-8 -*-
-# Para ejecutar el modulo de manerea independiente
+# Para ejecutar el modulo de manera independiente
 import sys, os
 sys.path.append(os.path.abspath(os.path.dirname(__file__) + '../../'))
 os.environ['DJANGO_SETTINGS_MODULE'] = 'proyecto.settings'
@@ -20,9 +20,11 @@ import json
 import logging as log
 
 
-EXCLUSIONES = {'areas':('',),
+EXCLUSIONES = {'areas':('MED',),
                'modalidades':(u'semipresencial',),
-               'carreras': (u'Taller Educación Física',u'Taller Educacion Fisica', u'TALLER EDUCACION FISICA')}
+               'carreras': (u'Cultura Física MED', u'Taller Educación Física', 
+                            u'Curso de Computación', u'Curso de Inglés MED')
+               }
 
 def importar(periodoAcademicoId, periodoEvaluacionId=None):
     """ Importar unidades en primera instancia """

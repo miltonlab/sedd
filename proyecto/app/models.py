@@ -393,6 +393,8 @@ class Cuestionario(models.Model):
     fin=models.DateTimeField(u'Finalización de la Encuesta')
     # Obligatoriedad de todas las preguntas del cuestionario
     preguntas_obligatorias = models.BooleanField(default=True)
+    # fuente de Verificación en todas las preguntas de Seleccion Unica
+    fuente_verificacion = models.BooleanField(default=False, verbose_name=u'Preguntas con fuente de verificación')
     informante = models.ForeignKey(TipoInformante, null=True)
     # Generalmente de acuerdo al Tipo de Informante
     peso = models.FloatField(default=1.0)
@@ -403,6 +405,7 @@ class Cuestionario(models.Model):
         """ Obtiene todas las preguntas de todas las secciones y subsecciones """
         preguntas = []
         for s in self.secciones.all():
+            # Recursividad
             preguntas.extend(s.get_preguntas())
         return preguntas
 
@@ -411,46 +414,39 @@ class Cuestionario(models.Model):
         Crea una copia de un cuestionario incluyendo todas sus secciones y todas sus
         preguntas. Teniendo en cuenta que todos los objetos involucrados seran objetos
         nuevos.
-        TODO: Falta clonar recursivamente las Secciones
         """
-        numero = Cuestionario.objects.count()
         nuevo = Cuestionario()
-        nuevo.nombre = u'(Clonado {1}) {0}'.format(self.nombre, str(numero+1))
-        nuevo.titulo = u'(Clonado {1}) {0}'.format(self.titulo, str(numero+1))
+        nuevo.nombre = u'(Clonado ID {1}) {0}'.format(self.nombre, self.id)
+        nuevo.titulo = u'(Clonado ID {1}) {0}'.format(self.titulo, self.id)
         nuevo.encabezado = self.encabezado
-        nuevo.inicio = self.inicio
-        nuevo.fin = self.fin
+        nuevo.inicio = datetime.now()
+        nuevo.fin = datetime.now()
         # No se relacionan para mayor flexibilidad
+        # Deben fijarse luego en el administrador
         nuevo.informante = None
         nuevo.periodoEvaluacion = None
         nuevo.save()
         for seccion in self.secciones.all():
-            nuevaSeccion = Seccion()
-            nuevaSeccion.nombre = '(Seccion Clonada) ' + seccion.nombre
-            nuevaSeccion.titulo = seccion.titulo
-            nuevaSeccion.descripcion = seccion.descripcion
-            nuevaSeccion.orden = seccion.orden
-            nuevaSeccion.seccionPadre = None
-            nuevaSeccion.cuestionario = nuevo 
+            nuevaSeccion = seccion.clonar()
+            nuevaSeccion.cuestionario = nuevo
             nuevaSeccion.save()
-            for pregunta in seccion.preguntas.all():
-                nuevaPregunta = Pregunta()
-                nuevaPregunta.codigo = pregunta.codigo
-                nuevaPregunta.texto = pregunta.texto
-                nuevaPregunta.descripcion = pregunta.descripcion
-                nuevaPregunta.observaciones = pregunta.observaciones
-                nuevaPregunta.orden = pregunta.orden
-                nuevaPregunta.tipo = pregunta.tipo
-                nuevaPregunta.seccion = nuevaSeccion
-                nuevaPregunta.save()
-                for item in pregunta.items.all():
-                    nuevoItem = ItemPregunta()
-                    nuevoItem.texto = item.texto
-                    nuevoItem.descripcion = item.descripcion
-                    nuevoItem.orden = item.orden
-                    nuevoItem.pregunta = nuevaPregunta
-                    nuevoItem.save()
+        nuevo.save()    
         return nuevo
+
+    def save(self, *args, **kwargs):
+        super(Cuestionario, self).save(*args, **kwargs)
+        # Agregar Fuente de verificacion a todas las preguntas de seleccion
+        # del cuestinario
+        # TODO: Puede que el campo Pregunta.observaciones no sirva solo para
+        # determinar la Fuente de Verificacion
+        for pregunta in self.get_preguntas():
+            # Solo seleccion unica
+            if pregunta.tipo.id == 2:
+                if self.fuente_verificacion:
+                    pregunta.observaciones = u'Fuente de Verificación'
+                elif not self.fuente_verificacion:
+                    pregunta.observaciones = u''
+            pregunta.save()
 
     def __unicode__(self):
         return self.nombre
@@ -632,6 +628,43 @@ class Seccion(models.Model):
         preguntas.extend(self.preguntas.all())
         return preguntas
 
+    def clonar(self):
+        """
+        Duplica recursivamene todo el conetenido de una Seccion incluyendo 
+        subsecciones y preguntas
+        """
+        # Clonacion de los datos simples de la Seccion
+        nuevaSeccion = Seccion()
+        nuevaSeccion.nombre = u'(Seccion Clonada ) ' + self.nombre
+        nuevaSeccion.titulo = self.titulo
+        nuevaSeccion.descripcion = self.descripcion
+        nuevaSeccion.orden = self.orden
+        nuevaSeccion.save()
+        # Clonacion de Preguntas con Items
+        for pregunta in self.preguntas.all():
+            nuevaPregunta = Pregunta()
+            nuevaPregunta.codigo = pregunta.codigo
+            nuevaPregunta.texto = pregunta.texto
+            nuevaPregunta.descripcion = pregunta.descripcion
+            nuevaPregunta.observaciones = pregunta.observaciones
+            nuevaPregunta.orden = pregunta.orden
+            nuevaPregunta.tipo = pregunta.tipo
+            nuevaPregunta.seccion = nuevaSeccion
+            nuevaPregunta.save()
+            for item in pregunta.items.all():
+                nuevoItem = ItemPregunta()
+                nuevoItem.texto = item.texto
+                nuevoItem.descripcion = item.descripcion
+                nuevoItem.orden = item.orden
+                nuevoItem.pregunta = nuevaPregunta
+                nuevoItem.save()
+        for sub in self.subsecciones.all():
+            # Invocacion recursiva del metodo
+            nuevaSubseccion = sub.clonar()
+            nuevaSubseccion.superseccion = nuevaSeccion
+            nuevaSubseccion.save()
+        return nuevaSeccion
+
     def preguntas_ordenadas(self):
         return self.pregunta_set.order_by('orden')
 
@@ -639,7 +672,10 @@ class Seccion(models.Model):
         if self.cuestionario:
             return u'Sección  {0} '.format(self.nombre)
         elif self.superseccion:
-            return u'Subsección {0}'.format(self.nombre)
+            return u'Subsección {0} '.format(self.nombre)
+        else:
+            return u'ERROR Seccion %s' % self.id
+        
 
     class Meta:
         ordering = ['orden']
