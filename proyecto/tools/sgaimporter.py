@@ -69,7 +69,7 @@ def importar(periodoAcademicoId, periodoEvaluacionId=None):
                     if js_ud[0] != '_error':
                         unidades_docentes = js_ud[6]
                         # TODO: En SGAWS se deberia quitar los datos del docente en el metodo sgaws_unidades_docentes_paralelo
-                        for id_unidad, unidad, horas, creditos, obligatoria, inicio, fin, cedula, nombres, apellidos in unidades_docentes:
+                        for id_unidad, unidad, horas, creditos, obligatoria, inicio, fin, cedula, nombres, apellidos, titulo in unidades_docentes:
 
                             # Si se ha especificado un periodo de evaluacion
                             # se importa unicamente las unidades que se estan dictando actualmente
