@@ -260,7 +260,7 @@ class DocentePeriodoAcademicoAdmin(admin.ModelAdmin):
 
 class DireccionCarreraAdmin(admin.ModelAdmin):
     actions = ['actualizar_periodo_academico']
-    list_filter = ('director__periodoAcademico',)
+    #list_filter = ('director__periodoAcademico',)
     raw_id_fields = ('director',)
 
     def actualizar_periodo_academico(self, request, queryset):
@@ -281,6 +281,12 @@ class DireccionCarreraAdmin(admin.ModelAdmin):
             except models.DocentePeriodoAcademico.DoesNotExist:
                 logg.error('Docente {0} no encontrado en periodo Actual {1}'.format(
                     dc.director, periodoAcademico))
+                dc.director = None
+                cont = cont + 1
+                dc.save()
+                logg.info('{0} sin Director en el Periodo Academico Actual'.format(dc))
+
+                    
         self.message_user(request,'Actualizadas {0} Direcciones de Carrera'.format(cont))
 
     actualizar_periodo_academico.short_description = u'Actualizar Coordinadores al Periodo Academico Actual'

@@ -348,9 +348,15 @@ class DireccionCarrera(models.Model):
                                verbose_name=u'Carrera-Area')
     # Director o Coordinador de Carrera
     director = models.ForeignKey('DocentePeriodoAcademico', verbose_name=u"Coordinador",
-                                 related_name="direcciones")
+                                 related_name="direcciones", null=True)
     def __unicode__(self):
-        return u"Coordinación {0} - {1}".format(self.carrera, self.director.periodoAcademico.rango())
+        if self.director:
+            return u"Coordinación {0} - {1}".format(self.carrera, self.director.periodoAcademico.rango())
+        else:
+            return u"Coordinación {0} - {1} << Sin Coordinador >> ".format(
+                self.carrera, 
+                Configuracion.objects.get(id=1).periodoAcademicoActual.rango()
+                )
 
     def get_docentes(self):
         # separa carrera y area
