@@ -112,7 +112,7 @@ class Asignatura(models.Model):
     carrera = models.CharField(max_length='100')
     # Codigo de la carrera establecido por la SENESCYT
     carrera_senescyt = models.CharField(max_length='10', default='0000')
-    semestre = models.CharField(max_length='10', verbose_name=u'módulo')
+    semestre = models.CharField(max_length='10', verbose_name=u'ciclo')
     paralelo = models.CharField(max_length='50')
     seccion = models.CharField(max_length='10')
     modalidad = models.CharField(max_length='20')
@@ -423,7 +423,7 @@ class Cuestionario(models.Model):
         nuevo.fin = datetime.now()
         # No se relacionan para mayor flexibilidad
         # Deben fijarse luego en el administrador
-        nuevo.informante = None
+        nuevo.informante = self.informante
         nuevo.periodoEvaluacion = None
         nuevo.save()
         for seccion in self.secciones.all():
@@ -639,6 +639,7 @@ class Seccion(models.Model):
         nuevaSeccion.titulo = self.titulo
         nuevaSeccion.descripcion = self.descripcion
         nuevaSeccion.orden = self.orden
+        nuevaSeccion.codigo = self.codigo
         nuevaSeccion.save()
         # Clonacion de Preguntas con Items
         for pregunta in self.preguntas.all():
@@ -648,6 +649,7 @@ class Seccion(models.Model):
             nuevaPregunta.descripcion = pregunta.descripcion
             nuevaPregunta.observaciones = pregunta.observaciones
             nuevaPregunta.orden = pregunta.orden
+            nuevaPregunta.codigo = pregunta.codigo
             nuevaPregunta.tipo = pregunta.tipo
             nuevaPregunta.seccion = nuevaSeccion
             nuevaPregunta.save()

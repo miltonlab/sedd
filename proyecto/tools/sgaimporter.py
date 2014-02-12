@@ -68,7 +68,9 @@ def importar(periodoAcademicoId, periodoEvaluacionId=None):
                     js_ud = json.loads(r_ud)
                     if js_ud[0] != '_error':
                         unidades_docentes = js_ud[6]
-                        for id_unidad, unidad, horas, creditos, obligatoria, inicio, fin, cedula, nombres, apellidos, titulo in unidades_docentes:
+                        # TODO: En SGAWS se deberia quitar los datos del docente en el metodo sgaws_unidades_docentes_paralelo
+                        for id_unidad, unidad, horas, creditos, obligatoria, inicio, fin, cedula, nombres, apellidos in unidades_docentes:
+
                             # Si se ha especificado un periodo de evaluacion
                             # se importa unicamente las unidades que se estan dictando actualmente
                             # TODO: probar snippet
@@ -95,10 +97,17 @@ def importar(periodoAcademicoId, periodoEvaluacionId=None):
                                 semestre=modulo, paralelo=paralelo, seccion=seccion, modalidad=modalidad, nombre=nombre_unidad, 
                                 creditos=creditos, duracion=horas, inicio=fecha_inicio, fin=fecha_fin, periodoAcademico=periodoAcademico
                                 )
-                            # TODO: Obtener email del docente, pendiente en SGAWS
+                            r_d = sga.wspersonal.sgaws_datos_docente(cedula=cedula)
+                            js_d = json.loads(r_d)
+                            if js_d[0] != '_error':
+                                titulo = js_d[3] or ''
+                                email = js_d[5] or ''
+                            else: 
+                                email = ''
+                                titulo = ''
                             dict_usuario_docente = dict(
                                 username=cedula, password='', first_name=nombres.title(), last_name=apellidos.title(),
-                                cedula=cedula, titulo=titulo, email=''
+                                cedula=cedula, titulo=titulo, email=email
                                 )
                             log.info(u'Datos de Unidad a crearse: {0}'.format(dict_unidad))
                             (asignatura, nueva) = Asignatura.objects.get_or_create(idSGA=dict_unidad['idSGA'],

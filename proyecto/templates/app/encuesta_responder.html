@@ -78,7 +78,10 @@ function validarEnsayos(){
 };
 
 function validarObservaciones(){
-    /* Validación en Evaluacion de Actividades Adicionales a la Docencia 2011-2012 */
+    /* 
+	 * Fuente de Verificacion
+	 * Validación incial en Evaluacion de Actividades Adicionales a la Docencia 2011-2012 
+	 */
     var flag = true;
     $.each($('#formulario input[name^="pregunta"]:radio:checked'), function(){
 	var p = $(this).attr("name");
@@ -122,6 +125,11 @@ function grabarEncuesta(){
 }
 
 $(document).ready(function(){
+
+	{% if cuestionario.preguntas_obligatorias %}
+	alert("Debe responder obligatoriamente todas las preguntas !!!");
+	{% endif %}
+
     $('#grabar').click(function(){
 	{% if cuestionario.preguntas_obligatorias %}
 	if (validarSeleccionUnica() == true && validarEnsayos() == true){
@@ -153,62 +161,64 @@ $(document).ready(function(){
 
   <table id="tabla-contenedor">
 
-	<td colspan="2">
-	  <div id="encabezado-cuestionario" width="25%">
-	    {{ cuestionario.encabezado|safe }} 
-	  </div>
+	<thead>
+	  <td colspan="3">
+		<div id="encabezado-cuestionario"s>
+		  {{ cuestionario.encabezado|safe }} 
+		</div>
 
-	  <!-- Encuesta dirigida a los ESTUDIANTES -->
-	  {#% if cuestionario.informante.tipo.startswith('Estudiante') %#}
-	  {% if asignaturaDocente %}
-	  <div id="datos_academicos" style="line-height: 18px;">
-	    Area: <b> {{ asignaturaDocente.asignatura.area }} </b> <br/>
-	    Carrera: <b> {{ asignaturaDocente.asignatura.carrera }} </b> <br/>
-	    Asignatura ( {% ifequal asignaturaDocente.asignatura.getTipo "asignatura" %} <b>X</b> {% endifequal %}  )
-	    Taller ( {% ifequal asignaturaDocente.asignatura.getTipo "taller" %} <b>X</b> {% endifequal %}  )
-	    Modulo ( {% ifequal asignaturaDocente.asignatura.getTipo "modulo" %} <b>X</b> {% endifequal %}  )
-	    Unidad ( {% ifequal asignaturaDocente.asignatura.getTipo "unidad" %} <b>X</b> {% endifequal %}  )
-	    Curso ( {% ifequal asignaturaDocente.asignatura.getTipo "curso" %} <b>X</b> {% endifequal %}  )
-	    Otro ( {% ifequal asignaturaDocente.asignatura.getTipo "otro" %} <b>X</b> {% endifequal %}  )
-	    <br/>
-	    Nombre de el/la Docente Evaluado(a): <b> {{ asignaturaDocente.docente }} </b> <br/>
-	    Fecha de Evaluacion: <b> {{ fecha }} </b> <br/>
-	  </div>
-	  {% endif %}
+		<!-- Encuesta dirigida a los ESTUDIANTES -->
+		{#% if cuestionario.informante.tipo.startswith('Estudiante') %#}
+		{% if asignaturaDocente %}
+		<div id="datos_academicos" style="line-height: 18px;">
+		  Area: <b> {{ asignaturaDocente.asignatura.area }} </b> <br/>
+		  Carrera: <b> {{ asignaturaDocente.asignatura.carrera }} </b> <br/>
+		  Asignatura ( {% ifequal asignaturaDocente.asignatura.getTipo "asignatura" %} <b>X</b> {% endifequal %}  )
+		  Taller ( {% ifequal asignaturaDocente.asignatura.getTipo "taller" %} <b>X</b> {% endifequal %}  )
+		  Modulo/Ciclo ( {% ifequal asignaturaDocente.asignatura.getTipo "modulo" %} <b>X</b> {% endifequal %}  )
+		  Unidad ( {% ifequal asignaturaDocente.asignatura.getTipo "unidad" %} <b>X</b> {% endifequal %}  )
+		  Curso ( {% ifequal asignaturaDocente.asignatura.getTipo "curso" %} <b>X</b> {% endifequal %}  )
+		  Otro ( {% ifequal asignaturaDocente.asignatura.getTipo "otro" %} <b>X</b> {% endifequal %}  )
+		  <br/>
+		  Nombre de el/la Docente Evaluado(a): <b> {{ asignaturaDocente.docente }} </b> <br/>
+		  Fecha de Evaluacion: <b> {{ fecha }} </b> <br/>
+		</div>
+		{% endif %}
 
-	  <!-- Encuesta dirigida a los DIRECTORES DE CARRERA -->
-	  {% if 'Directivo' in cuestionario.informante.tipo %}
-	  <div id="datos_academicos" style="line-height: 18px;">
-	    AREA: <b> {{ request.session.area }} </b> <br/>
-	    CARRERA: <b> {{ request.session.carrera }} </b> <br/>
-	    MÓDULO: (<b>X</b>) <br/>
-	    NOMBRE DEL PROFESOR (A) EVALUADO (A): <b> {{ request.session.docente_evaluar }} </b>
-	  </div>
-	  {% endif %}
+		<!-- Encuesta dirigida a los DIRECTORES DE CARRERA -->
+		{% if 'Directivo' in cuestionario.informante.tipo %}
+		<div id="datos_academicos" style="line-height: 18px;">
+		  AREA: <b> {{ request.session.area }} </b> <br/>
+		  CARRERA: <b> {{ request.session.carrera }} </b> <br/>
+		  MÓDULO/CICLO: (<b>X</b>) <br/>
+		  NOMBRE DEL PROFESOR (A) EVALUADO (A): <b> {{ request.session.docente_evaluar }} </b>
+		</div>
+		{% endif %}
 
-	  <!-- Encuesta dirigida a los PARES ACADEMICOS -->
-	  {% if 'ParAcademico' in cuestionario.informante.tipo %}
-	  <div id="datos_academicos" style="line-height: 18px;">
-	    AREA: <b> {{ request.session.area }} </b> <br/>
-	    CARRERA: <b> {{ request.session.carrera }} </b> <br/>
-	    MÓDULO: (<b>X</b>) <br/>
-	    NOMBRE DEL PROFESOR (A) EVALUADO (A): <b> {{ request.session.docente_evaluar }} </b>
-	  </div>
-	  {% endif %}
+		<!-- Encuesta dirigida a los PARES ACADEMICOS -->
+		{% if 'ParAcademico' in cuestionario.informante.tipo %}
+		<div id="datos_academicos" style="line-height: 18px;">
+		  AREA: <b> {{ request.session.area }} </b> <br/>
+		  CARRERA: <b> {{ request.session.carrera }} </b> <br/>
+		  MÓDULO: (<b>X</b>) <br/>
+		  NOMBRE DEL PROFESOR (A) EVALUADO (A): <b> {{ request.session.docente_evaluar }} </b>
+		</div>
+		{% endif %}
 
-	  <!-- Encuesta de autoevaluacion para los DOCENTES -->
-	  {% if cuestionario.informante.tipo == 'Docente' %}
-	  <div id="datos_academicos" style="line-height: 18px;">
-	    AREA: <b> {{ request.session.areas_docente }} </b> <br/>
-	    CARRERA: <b> {{ request.session.carreras_docente }} </b> <br/>
-	    MÓDULO: (<b>X</b>) <br/>
-	    NOMBRE DEL PROFESOR (A) EVALUADO (A): <b> {{ request.session.docente }} </b>
-	  </div>
-	  {% endif %}
+		<!-- Encuesta de autoevaluacion para los DOCENTES -->
+		{% if cuestionario.informante.tipo == 'Docente' %}
+		<div id="datos_academicos" style="line-height: 18px;">
+		  AREA: <b> {{ request.session.areas_docente }} </b> <br/>
+		  CARRERA: <b> {{ request.session.carreras_docente }} </b> <br/>
+		  MÓDULO/CICLO: (<b>X</b>) <br/>
+		  NOMBRE DEL PROFESOR (A) EVALUADO (A): <b> {{ request.session.docente }} </b>
+		</div>
+		{% endif %}
 
-	</td>
-	<!-- end datos academicos -->
-	
+	  </td>
+	  <!-- end datos academicos -->
+	</thead>
+
 	<tbody>
 
 	  {% for seccion in cuestionario.secciones.all %}  <!-- secciones de cuestionario -->
@@ -232,7 +242,8 @@ $(document).ready(function(){
 		<!-- preguntas de subsecciones -->
 		{% for pregunta in subseccion.preguntas.all %}
 		<!-- columna  pregunta -->
-		<td class="td-tabla-contenedor" width="60%" colspan="{% ifequal pregunta.tipo.tipo 'Ensayo' %} 3 {% endifequal %} ">
+		<td class="td-tabla-contenedor" width="{% if cuestionario.fuente_verificacion %} 30% {% else %} 60% {% endif %}" 
+			colspan="{% ifequal pregunta.tipo.tipo 'Ensayo' %} 3 {% endifequal %} ">
 		  <b> 
 			{% if pregunta.codigo %} {{ pregunta.codigo }}. {% else %} {{ pregunta.orden }}. {% endif %} 
 		  </b>
@@ -246,10 +257,10 @@ $(document).ready(function(){
 		</td>
 		<!--/ preguntas de subsecciones -->
 	
-		<!-- items de pregunta si es de seleccion -->
+		<!-- columns items de pregunta si es de seleccion -->
 		{% ifequal pregunta.tipo.tipo 'SeleccionUnica' %}
-		<td class="td-tabla-contenedor" width="30%">
-		  <table id="tabla-items">
+		<td class="td-tabla-contenedor" width="{% if cuestionario.fuente_verificacion %} 50% {% else %} 30% {% endif %}">
+		  <table id="tabla-items" width="20%">
 			<tbody>
 			  <tr>
 				{% for item in pregunta.items.all %}
@@ -264,7 +275,7 @@ $(document).ready(function(){
 				{% endfor%}
 
 				{% if pregunta.observaciones %}
-				<td id="observaciones">
+				<td id="observaciones" width="80%">
 				  {{pregunta.observaciones|safe}}:
 				  <textarea name="observaciones-pregunta-{{ pregunta.id }}" rows="6" style="width: 100%;"></textarea>
 				</td>
@@ -347,7 +358,7 @@ $(document).ready(function(){
 	<tfoot>
 	  <div id="comandos">
 		<tr>
-		  <td colspan="2"> 
+		  <td colspan="3"> 
 			<input type="button" id="grabar" name="grabar" value="GRABAR"/>  
 			<input type="reset" value="BORRAR"/>
 			<input type="button" id="cancelar" name="cancelar" value="CANCELAR"/>

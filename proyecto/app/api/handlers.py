@@ -1,7 +1,11 @@
 #-*- coding: utf-8 -*-
 
 from piston.handler import BaseHandler
-from proyecto.app.models import PeriodoAcademico, PeriodoEvaluacion
+from piston.utils import rc
+from proyecto.app.models import PeriodoAcademico
+from proyecto.app.models import PeriodoEvaluacion
+from proyecto.app.models import Usuario
+
 import logging
 logg = logging.getLogger('logapp')
 
@@ -46,3 +50,36 @@ class PeriodoAcademicoHandler(BaseHandler):
         """ Lee todos los Periodos Academicos que existen en la BD """
         periodos = PeriodoAcademico.objects.all()
         return periodos
+
+
+#class DocentePeriodoAcademicoHandler(BaseHandler):
+class UsuarioHandler(BaseHandler):
+    allowed_methods = ('PUT')
+    model = Usuario
+    #exclude = ('periodoAcademico', 'observaciones', 'descripcion')
+
+    def update(self, request):
+        """
+        TEST
+        import simplejson, httplib
+        con = httplib.HTTPConnection('localhost', 8000)
+        con.request('PUT', '/api/docentes/actualizar',
+        json.dumps({'cedula':'1101379111','nombres':'Jose Leo'}), 
+        {'Content-Type':'application/json'})
+        """
+        try:
+            print 'SEDD-API: Sincronizando usuario... CONSOLA'
+            logg.info('SEDD-API: Sincronizando usuario...')
+            cedula = request.data['cedula']
+            usuario = Usuario.objects.get(cedula=cedula)
+            usuario.nombres = request.data['nombres']
+            usuario.apellidos = request.data['apellidos']
+            usuario.titulo = request.data.get('titulo', '')
+            usuario.email = request.data['email']
+            usuario.save()
+            logg.info('SEDD-API: Usuario Actualizado {0}: {1}'.format(cedula, nombres))
+            return rc.ALL_OK
+        except Exception, ex:
+            print 'ERROR: ', str(ex)
+            logg.error("SEDD-API: Error al modificar docente API Rest: ", str(ex))
+

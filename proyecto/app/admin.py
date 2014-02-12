@@ -223,8 +223,9 @@ class AsignaturaDocenteAdmin(admin.ModelAdmin):
             """ Creación de la Nueva Asignatura y AsignaturaDocente """
             # Se clona el objeto Asignatura , será una nueva entidad
             asignatura.pk = None
-            id_unidad = asignatura.idSGA.split(':')[0]
-            asignatura.idSGA = u"{0}:SEDD".format(id_unidad)
+            #id_unidad = asignatura.idSGA.split(':')[0]
+	    # El idSGA (unico) debera modificarse en manualmente en cada Asignatura clonada
+            asignatura.idSGA = u"{0}:SEDD".format(asignatura.idSGA)
             asignatura.paralelo = paralelo # El Paralelo en el cual se clonará
             asignatura.nombre = u"{0} (Clonado)".format(asignatura.nombre)
             # Grabado en la base de datos
