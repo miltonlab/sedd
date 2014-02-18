@@ -405,8 +405,16 @@ class Cuestionario(models.Model):
     # Generalmente de acuerdo al Tipo de Informante
     peso = models.FloatField(default=1.0)
     periodoEvaluacion = models.ForeignKey('PeriodoEvaluacion', blank=True, null=True, 
-                                          related_name='cuestionarios', verbose_name=u'Periodo de Evaluación'
-                                          )
+                                          related_name='cuestionarios', verbose_name=u'Periodo de Evaluación')
+
+    def get_secciones(self):
+        """ Obtiene todas las secciones. TODO: Aunque NO recursivamente """
+        secciones = []
+        secciones.extend(self.secciones.all())
+        for s in self.secciones.all():
+            secciones.extend(s.subsecciones.all())
+        return secciones
+
     def get_preguntas(self):
         """ Obtiene todas las preguntas de todas las secciones y subsecciones """
         preguntas = []
@@ -646,6 +654,7 @@ class Seccion(models.Model):
         nuevaSeccion.descripcion = self.descripcion
         nuevaSeccion.orden = self.orden
         nuevaSeccion.codigo = self.codigo
+        nuevaSeccion.ponderacion = self.ponderacion
         nuevaSeccion.save()
         # Clonacion de Preguntas con Items
         for pregunta in self.preguntas.all():
@@ -1144,7 +1153,7 @@ class TabulacionEvaluacion2013:
             primaria = round(primaria)
             resultado.update({'primaria' : primaria})
             promedio_primaria += primaria
-            ponderada = primaria * resultado['ponderacion_seccion'] / 100
+            ponderada = primaria * (resultado['ponderacion_seccion'] or 0.0) / 100
             promedio_ponderada += ponderada
             resultado.update({'ponderada' : ponderada})
             resultado.update({'cualitativa' : self._cualificar_valor(primaria)})
