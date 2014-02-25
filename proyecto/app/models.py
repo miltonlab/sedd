@@ -1230,7 +1230,7 @@ class TabulacionEvaluacion2013:
         for k,v in rangos.items():
             if v[0] <= round(valor) <= v[-1]:
                 return k
-        return ''
+        return '-'
 
     def extraer_sugerencias(self, area, carrera, ids_docentes):
         sugerencias = {}
