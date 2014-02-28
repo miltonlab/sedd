@@ -877,7 +877,7 @@ class PeriodoEvaluacion(models.Model):
 
 
 class ExtensionPeriodoEvaluacion(models.Model):
-    secuencia = models.IntegerField(unique=True)
+    secuencia = models.IntegerField()
     inicio = models.DateTimeField()
     fin = models.DateTimeField()
     # Justificacion de la Prolongacion
