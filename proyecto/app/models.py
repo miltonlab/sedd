@@ -935,11 +935,11 @@ class TabulacionEvaluacion2013:
             self.listado_calificaciones, u'Listado de Docentes y Calificaciones'),
             )
 
-    def por_docente(self, siglas_area, nombre_carrera, id_docente, componente=None):
+    def por_docente(self, siglas_area, nombre_carrera, id_docente, componente=None, formato=None):
         # Se pasa un tupla no un solo id
-        return self._calcular(siglas_area, nombre_carrera, (id_docente,), componente)
+        return self._calcular(siglas_area, nombre_carrera, (id_docente,), componente, formato)
 
-    def por_carrera(self, siglas_area, nombre_carrera, componente):
+    def por_carrera(self, siglas_area, nombre_carrera, componente, formato=None):
         # Obtenemos los id de los Docentes que dictan Asignaturas en la carrera seleccionada
         aux_ids = AsignaturaDocente.objects.filter(
             docente__periodoAcademico=self.periodoEvaluacion.periodoAcademico,
@@ -953,9 +953,9 @@ class TabulacionEvaluacion2013:
             ).order_by('usuario__last_name', 'usuario__first_name').values_list(
             'id', flat=True
             )
-        return self._calcular(siglas_area, nombre_carrera, ids_docentes, componente)
+        return self._calcular(siglas_area, nombre_carrera, ids_docentes, componente, formato)
 
-    def por_area(self, siglas_area, componente=None):
+    def por_area(self, siglas_area, componente=None, formato=None):
         # Obtenemos los id de los Docentes que dictan Asignaturas en el area seleccionada
         aux_ids = AsignaturaDocente.objects.filter(
             docente__periodoAcademico=self.periodoEvaluacion.periodoAcademico,
@@ -968,10 +968,10 @@ class TabulacionEvaluacion2013:
             ).order_by('usuario__last_name', 'usuario__first_name').values_list(
             'id', flat=True
             )
-        return self._calcular(siglas_area, None , ids_docentes, componente)
+        return self._calcular(siglas_area, None , ids_docentes, componente, formato)
 
 
-    def listado_calificaciones(self, siglas_area, nombre_carrera):
+    def listado_calificaciones(self, siglas_area, nombre_carrera, formato=None):
         # Obtenemos los id de los Docentes que dictan Asignaturas en la carrera seleccionada
         aux_ids = AsignaturaDocente.objects.filter(
             docente__periodoAcademico=self.periodoEvaluacion.periodoAcademico,
@@ -985,7 +985,7 @@ class TabulacionEvaluacion2013:
             ).order_by('usuario__last_name', 'usuario__first_name').all()
         listado_calificaciones = list()
         for docente in docentes:
-            resultados = self.por_docente(siglas_area, nombre_carrera, docente.id)
+            resultados = self.por_docente(siglas_area, nombre_carrera, docente.id, None)
             total = resultados.get('total',0)
             promedios = resultados.get('promedios', {})
             logg.info('{0} resultados: {1} - {2}'.format(docente, promedios, total))
@@ -996,7 +996,7 @@ class TabulacionEvaluacion2013:
             listado_calificaciones.append(fila)
         return dict(listado_calificaciones=listado_calificaciones)
 
-    def _calcular(self, siglas_area, nombre_carrera, ids_docentes, componente=None):
+    def _calcular(self, siglas_area, nombre_carrera, ids_docentes, componente=None, formato=None):
         """ 
         Metodo generico para calcular los resultados de acuerdo a los diferentes criterios
         Si se trata del reporte de sugerencias se salta al metodo respectivo
@@ -1004,6 +1004,9 @@ class TabulacionEvaluacion2013:
         # Para contabilizar de acuerdo a la naturaleza del Periodo de Evaluacion
         # Proceso verificado en FiltroPeriodoManager
         Contestacion.objects.set_periodo_evaluacion(self.periodoEvaluacion)
+
+        if formato == 'CSV':
+            return self._contabilizar_respuestas(siglas_area, nombre_carrera, ids_docentes, componente)
 
         if componente == 'sugerencias':
             return self.extraer_sugerencias(siglas_area, nombre_carrera, ids_docentes)
@@ -1291,6 +1294,95 @@ class TabulacionEvaluacion2013:
             sugerencias[nombre_docente] = resultado
         return dict(sugerencias=sugerencias)
 
+    def _contabilizar_respuestas(self, siglas_area, nombre_carrera, ids_docentes, componente):
+        """ 
+        Metodo  para contar las respuestas de los informantes generado en CSV
+        """ 
+        if componente == 'sugerencias':
+            return None
+        if siglas_area == 'ACE':
+            tipos = ('EstudianteIdiomas', 'DocenteIdiomas', 'ParAcademicoIdiomas', 'DirectivoIdiomas')
+        else:
+            tipos = ('Estudiante', 'Docente', 'ParAcademico', 'Directivo')
+        if not componente:
+            seccion_componente = None
+        else:
+            # Se pasa de string a objeto seccion para sacar datos en la plantilla
+            seccion_componente = Seccion.objects.filter(cuestionario__periodoEvaluacion=self.periodoEvaluacion, codigo=componente)[0]
+        resultados = []
+        for tipo in tipos:
+            cuestionario = Cuestionario.objects.get(periodoEvaluacion=self.periodoEvaluacion, 
+                                                    informante__tipo=tipo)
+            # En caso de tratarse del insituto de idiomas se generaliza el informante
+            informante = tipo.lower().replace('idiomas','')
+            # Solo ids de preguntas
+            if not componente:
+                preguntas = [p.id for p in cuestionario.get_preguntas() 
+                             if p.tipo==TipoPregunta.objects.get(tipo='SeleccionUnica')]
+            else:
+                preguntas = [p.id for p in cuestionario.get_preguntas() if 
+                             p.tipo==TipoPregunta.objects.get(tipo='SeleccionUnica') and
+                             p.seccion.superseccion.codigo==componente]
+            # Se inicia el QuerySet contestaciones
+            if informante == 'estudiante':
+                contestaciones = Contestacion.objects.filter(
+                    evaluacion__estudianteAsignaturaDocente__asignaturaDocente__docente__id__in=ids_docentes, 
+                    pregunta__in=preguntas).values_list(
+                    'evaluacion__estudianteAsignaturaDocente__asignaturaDocente__docente', 
+                    'evaluacion__cuestionario__informante__tipo',
+                    'pregunta', 
+                    'respuesta'
+                    )
+            elif informante == 'docente':
+                contestaciones = Contestacion.objects.filter(
+                    evaluacion__parAcademico__isnull=True, evaluacion__directorCarrera__isnull=True,
+                    evaluacion__docentePeriodoAcademico__id__in=ids_docentes, pregunta__in=preguntas
+                    ).values_list(
+                    'evaluacion__docentePeriodoAcademico',
+                    'evaluacion__cuestionario__informante__tipo',
+                    'pregunta', 
+                    'respuesta'
+                    )
+            elif informante == 'paracademico':
+                contestaciones = Contestacion.objects.filter(
+                    evaluacion__parAcademico__isnull=False, evaluacion__directorCarrera__isnull=True,
+                    evaluacion__docentePeriodoAcademico__id__in=ids_docentes, pregunta__in=preguntas
+                    ).values_list(
+                    'evaluacion__docentePeriodoAcademico',
+                    'evaluacion__cuestionario__informante__tipo',
+                    'pregunta', 
+                    'respuesta'
+                    )
+            elif informante == 'directivo':
+                contestaciones = Contestacion.objects.filter(
+                    evaluacion__directorCarrera__isnull=False, evaluacion__parAcademico__isnull=True,
+                    evaluacion__docentePeriodoAcademico__id__in=ids_docentes, pregunta__in=preguntas
+                    ).values_list(
+                    'evaluacion__docentePeriodoAcademico',
+                    'evaluacion__cuestionario__informante__tipo',
+                    'pregunta', 
+                    'respuesta'
+                    )
+            contestaciones = contestaciones.annotate(conteo=Count('respuesta')).all()
+            #print contestaciones
+            # Formato y orden de los datos en los QuerySet Resultantes
+            # (docente_id, informante_nombre, pregunta_id, respuesta_texto, cantidad) 
+            sublista = [[siglas_area, nombre_carrera, 
+                        DocentePeriodoAcademico.objects.get(id=c[0]).usuario.last_name,
+                        DocentePeriodoAcademico.objects.get(id=c[0]).usuario.first_name,
+                        c[1],
+                        # El atributo Pegunta.text devulve tambien el HTML de maquetacion
+                        Pregunta.objects.get(id=c[2]).get_codigo(),
+                        Pregunta.objects.get(id=c[2]).__unicode__(),
+                        c[3],
+                        str(c[4])
+                        ] for c in contestaciones ]
+            resultados.extend(sublista)
+            # Odenar por apellido, cuestionario,pregunta
+            resultados.sort(lambda r1, r2: cmp(r1[2], r2[2]) or cmp(r1[4], r2[4]) or cmp(r1[5], r2[5]))
+        return dict(area=siglas_area, carrera=nombre_carrera, resultados_indicadores=resultados)
+
+# ######################################
 
 class TabulacionAdicionales2012:
     tipo = u'EAAD2012'
@@ -1578,7 +1670,7 @@ class TabulacionSatisfaccion2012:
         conteos.sort(lambda c1, c2: -cmp(c1['INS'], c2['INS']) or -cmp(c1['PS'], c2['PS'] ))
         return dict(conteos=conteos[:10], totales=None, porcentajes=None)
 
-    def listado_calificaciones(self, siglas_area, nombre_carrera):
+    def listado_calificaciones(self, siglas_area, nombre_carrera, formato=None):
         # Obtenemos los id de los Docentes que dictan Asignaturas en la carrera seleccionada
         aux_ids = AsignaturaDocente.objects.filter(
             docente__periodoAcademico=self.periodoEvaluacion.periodoAcademico,

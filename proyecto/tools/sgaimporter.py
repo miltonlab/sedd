@@ -128,7 +128,7 @@ def importar(periodoAcademicoId, periodoEvaluacionId=None):
                                 docente=docentePeriodoAcademico, asignatura=asignatura
                                 )
                             if nuevo:
-                                log.info(u'AsignaturaDocente nuevo: {0}'.format(asignaturaDocente))
+                                log.info(u'AsignaturaDocente nuevo: {0} >> {1}'.format(asignaturaDocente, asignaturaDocente.asignatura.carrera))
                             asignaturas_docentes.append(asignaturaDocente)
 
                     """ Migración de Estudiantes de Paralelo """ 
@@ -165,7 +165,8 @@ def importar(periodoAcademicoId, periodoEvaluacionId=None):
                                     defaults=dict(matricula=matricula, estado=estado)
                                     )
                                 if nuevo:
-                                    log.info(u'EstudianteAsignaturaDocente Nuevo: {0}'.format(estudianteAsignaturaDocente))
+                                    log.info(u'EstudianteAsignaturaDocente Nuevo: {0} >> {1}'.format(estudianteAsignaturaDocente, 
+							estudianteAsignaturaDocente.asignaturaDocente.asignatura.carrera))
 
 if __name__ == '__main__':
     if len(sys.argv) == 2:

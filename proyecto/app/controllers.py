@@ -37,6 +37,7 @@ from proyecto.app.models import OfertaAcademicaSGA
 from proyecto.app.models import AreaSGA
 from proyecto.app.forms import *
 from proyecto.tools.sgaws.cliente import SGA
+from proyecto.tools.util import UnicodeWriter
 from proyecto.settings import SGAWS_USER, SGAWS_PASS
 
 from datetime import datetime
@@ -930,30 +931,34 @@ def mostrar_resultados(request):
         if opcion !=  'd':
             metodo =  [c[2] for c in tabulacion.calculos if c[0] == opcion][0] 
         filtro = request.POST['filtros']
+        if filtro == 'e' and formato == 'CSV':
+            return HttpResponse('Msg: Formato no soportado en esta opcion')            
         filtro = codigos_filtro[filtro]
         if opcion == 'a':
             id_docente = request.POST['docentes']
             if id_docente != '':
                 docente = DocentePeriodoAcademico.objects.get(id=int(id_docente))
                 # Referencia a lo que devuelve el metodo especifico invocado sobre la instancia de Tabulacion 
-                resultados = metodo(request.session['area'], request.session['carrera'], int(id_docente), filtro)
+                resultados = metodo(request.session['area'], request.session['carrera'], int(id_docente), 
+                                    filtro, formato)
                 resultados['docente'] = docente
                 resultados['carrera'] = carrera
                 resultados['area'] = objeto_area.nombre
         elif opcion == 'b':
             # Por Carrera
-            resultados = metodo(request.session['area'], request.session['carrera'], filtro)
+            resultados = metodo(request.session['area'], request.session['carrera'], filtro, formato)
             resultados['carrera'] = carrera
             resultados['area'] = objeto_area.nombre
         elif opcion == 'c':
             # Por Area
-            resultados = metodo(request.session['area'], filtro)
+            resultados = metodo(request.session['area'], filtro, formato)
             resultados['area'] = objeto_area.nombre
         elif opcion == 'd':
             # Consolidado de Docentes por carrera
             area = request.session['area']
             carrera = request.session['carrera']
             contenido = generar_consolidado_edd2013(area, carrera, filtro, tabulacion)
+            # Fomateo dentro del caso debido al tipo de reporte
             if formato == 'HTML':
                 return HttpResponse(contenido)
             elif formato == 'PDF':
@@ -962,10 +967,14 @@ def mostrar_resultados(request):
                 filename = "Consolidado_{0}".format("Carrera")
                 response['Content-Disposition'] = 'attachment; filename={0}'.format(filename)
                 return response
+            else:
+                return HttpResponse('Msg: Formato no soportado en esta opcion')
         elif opcion == 'e':
+            if formato == 'CSV':
+                return HttpResponse('Msg: Formato no soportado en esta opcion')
             # Listado de Docentes con calificaciones
             # clave: listado_calificaciones
-            resultados = metodo(request.session['area'], request.session['carrera'])
+            resultados = metodo(request.session['area'], request.session['carrera'], formato)
             resultados['carrera'] = carrera
             resultados['area'] = objeto_area.nombre
         # Para el resto de casos
@@ -995,12 +1004,12 @@ def mostrar_resultados(request):
                 plantilla = 'app/imprimir_resultados_edd2013.html'
 
         # Solo en EDD
-        if resultados:
+        if resultados and formato != 'CSV':
             resultados['titulo'] = u"Acta de Resultados de {0}".format(tabulacion.periodoEvaluacion.titulo)
             # Obtenido al inicio de la bifurcacion
             resultados['carrera_senescyt'] = carrera_senescyt
 
-
+    # Formateo para todas las opciones de Reportes Resultados
     if formato == 'HTML':
         return render_to_response(plantilla, resultados, context_instance=RequestContext(request));
     elif formato == 'PDF':
@@ -1010,7 +1019,18 @@ def mostrar_resultados(request):
         filename = "Reporte"
         response['Content-Disposition'] = 'attachment; filename={0}'.format(filename)
         return response 
-
+    elif formato == 'CSV':
+        response = HttpResponse(content_type='text/csv')
+        #filename = u"ReporteDocentes-{0}-{1}.csv".format(resultados['area'].replace(' ','_'), 
+        #                                                resultados['carrera'].replace(' ','_'))
+        filename = 'Hoja_de_Calculo'
+        response['Content-Disposition'] = 'attachment; filename={0}'.format(filename)
+        escritor = UnicodeWriter(response, encoding='UTF-8', delimiter="|")
+        escritor.writerow(('Area', 'Carrera', 'Apellidos Docente', 'Nombres Docente', 
+                           'Cuestionario', 'Codigo', 'Pregunta', 'Valoracion', 'Respuestas'))
+        # Resultados_indicadores en realidad contiene resultados por preguntas
+        escritor.writerows(resultados['resultados_indicadores'])
+        return response
 
 def generar_consolidado_edd2013(siglas_area, nombre_carrera, filtro, tabulacion):
     if siglas_area and nombre_carrera:
