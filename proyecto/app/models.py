@@ -1363,10 +1363,12 @@ class TabulacionEvaluacion2013:
                     'pregunta', 
                     'respuesta'
                     )
+            # Formato y orden de los datos en los QuerySet Resultantes:
+            # docente_id, informante_nombre, pregunta_id, respuesta_texto, cantidad) 
             contestaciones = contestaciones.annotate(conteo=Count('respuesta')).all()
-            #print contestaciones
-            # Formato y orden de los datos en los QuerySet Resultantes
-            # (docente_id, informante_nombre, pregunta_id, respuesta_texto, cantidad) 
+	    # En caso de generarse por Area
+	    if siglas_area and not nombre_carrera:
+		nombre_carrera = 'Todas'
             sublista = [[siglas_area, nombre_carrera, 
                         DocentePeriodoAcademico.objects.get(id=c[0]).usuario.last_name,
                         DocentePeriodoAcademico.objects.get(id=c[0]).usuario.first_name,
@@ -1382,7 +1384,6 @@ class TabulacionEvaluacion2013:
             resultados.sort(lambda r1, r2: cmp(r1[2], r2[2]) or cmp(r1[4], r2[4]) or cmp(r1[5], r2[5]))
         return dict(area=siglas_area, carrera=nombre_carrera, resultados_indicadores=resultados)
 
-# ######################################
 
 class TabulacionAdicionales2012:
     tipo = u'EAAD2012'
