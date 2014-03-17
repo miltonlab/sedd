@@ -92,3 +92,23 @@ class DNIAuthBackend(object):
             return Usuario.objects.get(pk=id)
         except User.DoesNotExist:
             return None
+
+class EmailAuthBackend(object):
+    """
+    Autenticación Basada en el DNI. Debe utilizarselo en caso de
+    no funcionar la conexión al WebService de autenticación del SGA.
+    """
+    supports_object_permissions = False
+
+    def authenticate(self, username=None, password=None):
+        try:
+            user = Usuario.objects.get(email=username, cedula=password)
+        except User.DoesNotExist:
+            user = None
+        return user
+        
+    def get_user(self,id):
+        try:
+            return Usuario.objects.get(pk=id)
+        except User.DoesNotExist:
+            return None
