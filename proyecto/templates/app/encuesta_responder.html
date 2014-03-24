@@ -223,8 +223,8 @@ $(document).ready(function(){
 	  {% for subseccion in seccion.subsecciones.all %}
 	  <tr>
 		<!-- columna subseccion -->
-		<td class="td-tabla-contenedor" width="10%" rowspan="{{ subseccion.preguntas.count }}"> 
-		   {% if subseccion.codigo %} {{ subseccion.codigo }} {% else %} {{ subseccion.orden }} {% endif %} 
+		<td class="td-tabla-contenedor" width="10%" rowspan="{{ subseccion.preguntas.count }}" > 
+		   <span title="id={{ subseccion.id }}"> {% if subseccion.codigo %} {{ subseccion.codigo }} {% else %} {{ subseccion.orden }} {% endif %} </span>
 		</td>
 		<!--/columna subseccion -->
 
@@ -232,7 +232,7 @@ $(document).ready(function(){
 		{% for pregunta in subseccion.preguntas.all %}
 		<!-- columna  pregunta -->
 		<td class="td-tabla-contenedor" width="60%" colspan="{% ifequal pregunta.tipo.tipo 'Ensayo' %} 3 {% endifequal %} ">
-		  <b> 
+		  <b title="id={{ pregunta.id }}"> 
 			{% if pregunta.codigo %} {{ pregunta.codigo }}. {% else %} {{ pregunta.orden }}. {% endif %} 
 		  </b>
 		  {{ pregunta.texto|safe }}
