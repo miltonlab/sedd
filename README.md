@@ -45,3 +45,6 @@ Historial de cambios importantes
 
  * Compatibilidad en el uso de la libreria soappy, desde la version 0.12.0 hacia versiones superiores hasta la 0.12.5:
    - Agregado parámetro timeout en "proyecto.app.tools.sgaws.cliente.myHTTPTransport.call"
+
+ * Cambio del tamanio de la columna idSGA en la tabla app_asignaturas: 
+   alter TABLE  app_asignatura ALTER COLUMN id_sga TYPE varchar(40);

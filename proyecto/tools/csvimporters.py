@@ -14,7 +14,6 @@ import codecs
 def importar_docentes(archivo):
     """
     archivo: csv
-    idSGA: asignatura unica
     """
     f = codecs.open(archivo, mode='rb', encoding='utf-8')
     lineas = f.readlines()
@@ -23,17 +22,17 @@ def importar_docentes(archivo):
         # Con cierta validacion
         cedula, nombres, apellidos, titulo, email, periodoAcademicoId  = linea.split(';')[:6]
         if len(cedula) == 9:
-            cedula = '0' + cedula
+            cedula = '0' + cedula.strip()
         try:
             usuario = Usuario.objects.get(username=cedula)
         except Usuario.DoesNotExist:
             usuario = Usuario()
-            usuario.username = cedula
-            usuario.cedula = cedula
-            usuario.first_name = nombres
-            usuario.last_name = apellidos
-            usuario.titulo = titulo
-            usuario.email = email
+            usuario.username = cedula.strip()
+            usuario.cedula = cedula.strip()
+            usuario.first_name = nombres.strip()
+            usuario.last_name = apellidos.strip()
+            usuario.titulo = titulo.strip()
+            usuario.email = email.strip()
             # Se graba el usuario
             usuario.save()
         try:
@@ -46,31 +45,31 @@ def importar_docentes(archivo):
     return docentes
 
 
-def importar_estudiantes(archivo=None, idSGA=False):
+def importar_estudiantes(archivo=None, asignatura=False):
     """
     archivo: csv
-    idSGA: asignatura/paralelo unica(o)
+    asignatura: asignatura/paralelo
     """
     f = codecs.open(archivo, mode='rb', encoding='utf-8')
     lineas = f.readlines()
     estudiantes = []
     for linea in lineas:
-        if idSGA:
-            cedula, nombres, apellidos, email, periodoAcademicoId, idSGA = linea.split(';')
+        if asignatura:
+            cedula, nombres, apellidos, email, periodoAcademicoId, asignatura_paralelo = linea.split(';')
         else:
             # Se toma solo los 6 primeros campos, por validacion
             cedula, nombres, apellidos, email, periodoAcademicoId = linea.split(';')[:5]
         if len(cedula) == 9:
-            cedula = '0' + cedula
+            cedula = '0' + cedula.strip()
         try:
             usuario = Usuario.objects.get(cedula=cedula)
         except Usuario.DoesNotExist:
             usuario = Usuario()
-            usuario.username = cedula
-            usuario.cedula = cedula
-            usuario.first_name = nombres
-            usuario.last_name = apellidos
-            usuario.email = email
+            usuario.username = cedula.strip()
+            usuario.cedula = cedula.strip()
+            usuario.first_name = nombres.strip()
+            usuario.last_name = apellidos.strip()
+            usuario.email = email.strip()
             # Se graba el usuario
             usuario.save()
         try:
@@ -80,9 +79,10 @@ def importar_estudiantes(archivo=None, idSGA=False):
             periodoAcademico = None
         (estudiante, nuevo) = EstudiantePeriodoAcademico.objects.get_or_create(
             usuario=usuario, periodoAcademico=periodoAcademico)
-        if idSGA:
-            idSGA=idSGA.replace(' ','').replace('\n','')
-            asignaturasDocente = AsignaturaDocente.objects.filter(asignatura__idSGA=idSGA).all()
+        if asignatura:
+            asignatura_paralelo=asignatura_paralelo.strip().replace(' ','').replace('\n','')
+            #asignaturasDocente = AsignaturaDocente.objects.filter(asignatura__idSGA=idSGA).all()
+            asignaturasDocente = AsignaturaDocente.objects.filter(asignatura__nombre=asignatura_paralelo).all()
             for ad in asignaturasDocente:
                 ead = EstudianteAsignaturaDocente.objects.get_or_create(estudiante=estudiante, asignaturaDocente=ad)
             #estudiantes.append(dict(estudiante=estudiante, idSGA=idSGA.replace(' ','').replace('\n','')))
@@ -106,10 +106,10 @@ def importar_asignaturas(archivo, docente=False):
             asignatura = Asignatura(
                 area=lista[0], carrera=lista[1], semestre=lista[2], 
                 paralelo=lista[3], seccion=lista[4], modalidad=lista[5],
-                nombre=lista[6], tipo=lista[7], creditos=int(lista[8]), 
+                nombre=lista[6].strip(), tipo=lista[7], creditos=int(lista[8]), 
                 duracion=float(lista[9]), inicio=datetime.strptime(lista[10],'%d/%m/%Y').date(), 
                 fin=datetime.strptime(lista[11],'%d/%m/%Y').date(), 
-                idSGA=lista[12].replace(' ','').upper(), periodoAcademico=periodoAcademico
+                idSGA=lista[12].strip().replace(' ','').upper(), periodoAcademico=periodoAcademico
                 )
             asignatura.save()
             if docente:

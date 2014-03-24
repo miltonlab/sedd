@@ -95,8 +95,9 @@ class DNIAuthBackend(object):
 
 class EmailAuthBackend(object):
     """
-    Autenticación Basada en el DNI. Debe utilizarselo en caso de
-    no funcionar la conexión al WebService de autenticación del SGA.
+    Autenticación Basada en:
+    usuario: email
+    clave: dni
     """
     supports_object_permissions = False
 

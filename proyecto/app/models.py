@@ -124,7 +124,7 @@ class Asignatura(models.Model):
     inicio = models.DateField(null=True, verbose_name='inicia')
     fin = models.DateField(null=True, verbose_name='termina')
     # Campo combinado id_unidad:id_paralelo
-    idSGA = models.CharField(max_length='15', db_column='id_sga')
+    idSGA = models.CharField(max_length='40', db_column='id_sga')
     periodoAcademico = models.ForeignKey('PeriodoAcademico', related_name='asignaturas',
                                          verbose_name=u'Periodo Académico', db_column='periodo_academico_id')
 
@@ -147,7 +147,7 @@ class Asignatura(models.Model):
         super(Asignatura, self).save(*args, **kwargs)
     
     def __unicode__(self):
-        return u"{0} - {1}".format(self.idSGA, self.nombre)
+        return u"{0}".format(self.idSGA)
 
     
 class EstudiantePeriodoAcademico(models.Model):
@@ -256,7 +256,7 @@ class AsignaturaDocente(models.Model):
         unique_together = ('docente','asignatura')
 
     def __unicode__(self):
-        return u"{0} >> {1}".format(self.docente, self.asignatura.nombre)
+        return u"{0} >> {1}".format(self.docente, self.asignatura.idSGA)
 
 
 class DocentePeriodoAcademico(models.Model):
