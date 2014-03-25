@@ -20,7 +20,8 @@ class PreguntaAdmin(admin.ModelAdmin):
     fields = ('seccion','orden', 'codigo', 'texto', 'descripcion', 'tipo')
     search_fields = ('texto', 'descripcion')
     list_filter = ('seccion__cuestionario__periodoEvaluacion__periodoAcademico', 
-                   'seccion__cuestionario__periodoEvaluacion', 'seccion__cuestionario')
+                   'seccion__cuestionario__periodoEvaluacion', 'seccion__cuestionario',
+		   'seccion__superseccion')
     list_per_page = 30
 
     # Sobreescrito
