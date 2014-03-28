@@ -50,8 +50,10 @@ Requerimientos
    - libmysqlclient-dev 5.5.27
    
 
-Historial de cambios importantes
+Historial de cambios tecnicos importantes
 -------------------------------------------------------------------
 
  * Compatibilidad en el uso de la libreria soappy, desde la version 0.12.0 hacia versiones superiores hasta la 0.12.5:
    - Agregado parámetro timeout en "proyecto.app.tools.sgaws.cliente.myHTTPTransport.call"
+
+ * De acuerdo a la version 1.3 de Django no tiene efecto usar {% block field_sets %} en las plantillas del admin, se debe usar en su lugar {% block after_field_sets %}
