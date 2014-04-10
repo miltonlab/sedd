@@ -283,7 +283,7 @@ class DocentePeriodoAcademico(models.Model):
         """ Devuelve una lista de tuplas (carrera, area) pero unicamente del PeriodoAcademicoActual """
         lista_carreras_areas = []
         lista_carreras_areas_query  = AsignaturaDocente.objects.filter(
-            docente__periodoAcademico=Configuracion.getPeriodoAcademicoActual(),
+            docente__periodoAcademico=self.periodoAcademico, #Configuracion.getPeriodoAcademicoActual(),
             docente__id=self.id).values_list('asignatura__carrera', 'asignatura__area').distinct()
         lista_carreras_areas.extend(lista_carreras_areas_query)
         if self.carrera and self.carrera not in [c[0] for c in lista_carreras_areas_query]:
@@ -918,7 +918,7 @@ class Tabulacion(models.Model):
 
 
 class TabulacionEvaluacion2013:
-    tipo = u'EDA2013'
+    tipo = u'EDA2013' #TODO: Estandarizar con EDD2013
     descripcion = u'Evaluación del Desempeño Docente 2012-2013'
 
     def __init__(self, periodoEvaluacion=None):
@@ -996,10 +996,13 @@ class TabulacionEvaluacion2013:
             listado_calificaciones.append(fila)
         return dict(listado_calificaciones=listado_calificaciones)
 
+
     def _calcular(self, siglas_area, nombre_carrera, ids_docentes, componente=None, formato=None):
         """ 
         Metodo generico para calcular los resultados de acuerdo a los diferentes criterios
         Si se trata del reporte de sugerencias se salta al metodo respectivo
+        # TODO: Actualmente se contabiliza los resultados en todas la carreras en las que
+        	el docente dicta clases, se podria limitar realmente a la carrera especifica.
         """ 
         # Para contabilizar de acuerdo a la naturaleza del Periodo de Evaluacion
         # Proceso verificado en FiltroPeriodoManager
@@ -1197,6 +1200,7 @@ class TabulacionEvaluacion2013:
         logg.info('Calculado docente: {0} promedios: {1} total: {2}'.format(ids_docentes, promedios, promedio_ponderada))
         return dict(resultados_indicadores=resultados_indicadores, promedios_componentes=promedios_componentes,
                     promedios=promedios, total=promedio_ponderada, seccion_componente=seccion_componente)
+
 
     def _calcular_componentes(self, resultados_indicadores):
         promedios_componentes = {'CPF' : {'estudiante':[], 'docente':[], 'paracademico':[], 'directivo':[],

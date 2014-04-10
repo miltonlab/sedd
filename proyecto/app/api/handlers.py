@@ -4,6 +4,8 @@ from piston.handler import BaseHandler
 from piston.utils import rc
 from proyecto.app.models import PeriodoAcademico
 from proyecto.app.models import PeriodoEvaluacion
+from proyecto.app.models import DocentePeriodoAcademico
+from proyecto.app.models import TabulacionEvaluacion2013
 from proyecto.app.models import Usuario
 
 import logging
@@ -52,9 +54,29 @@ class PeriodoAcademicoHandler(BaseHandler):
         return periodos
 
 
+class ResultadosHandler(BaseHandler):
+    allowed_methods = ('GET',)
+
+    def read(self, request, id_periodo_evaluacion, dni):
+        try:
+            periodo_evaluacion = PeriodoEvaluacion.objects.get(id=id_periodo_evaluacion)
+            tabulacion = periodo_evaluacion.tabulacion
+            if tabulacion.tipo == 'EDD2013':
+                tabulacion = TabulacionEvaluacion2013(periodo_evaluacion)
+            docente = DocentePeriodoAcademico.objects.get(
+                usuario__cedula=dni, periodoAcademico=periodo_evaluacion.periodoAcademico)
+            # Se calcula en todas las carreras del docente
+            resultados_completos = tabulacion.por_docente(None, None, docente.id)
+            # Se extrae solo lo necesario
+            resultados = dict([(k, resultados_completos.get(k)) for k in ('promedios_componentes', 'promedios', 'total')])
+            return resultados
+        except Exception, ex:
+            return {'Error': str(ex)}
+       
+
 #class DocentePeriodoAcademicoHandler(BaseHandler):
 class UsuarioHandler(BaseHandler):
-    allowed_methods = ('PUT')
+    allowed_methods = ('PUT',)
     model = Usuario
     #exclude = ('periodoAcademico', 'observaciones', 'descripcion')
 
