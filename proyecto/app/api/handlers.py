@@ -2,6 +2,7 @@
 
 from piston.handler import BaseHandler
 from piston.utils import rc
+from proyecto.app.models import Configuracion
 from proyecto.app.models import PeriodoAcademico
 from proyecto.app.models import PeriodoEvaluacion
 from proyecto.app.models import DocentePeriodoAcademico
@@ -36,7 +37,6 @@ class PeriodoEvaluacionHandler(BaseHandler):
     model = PeriodoEvaluacion
     exclude = ('periodoAcademico', 'observaciones', 'descripcion')
 
-    # GET
     def read(self, request):
         """ Lee todos los Periodos de Evaluacion que existen en la BD """
         periodos = PeriodoEvaluacion.objects.all()
@@ -73,6 +73,15 @@ class ResultadosHandler(BaseHandler):
         except Exception, ex:
             return {'Error': str(ex)}
        
+class ParametrosHandler(BaseHandler):
+    allowed_methods = ('GET',)
+    model = Configuracion
+
+    def read(self, request):
+        try:
+            return Configuracion.objects.all()[0]
+        except Exception, ex:
+            return {'error' : str(ex)}
 
 #class DocentePeriodoAcademicoHandler(BaseHandler):
 class UsuarioHandler(BaseHandler):
