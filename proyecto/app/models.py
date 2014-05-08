@@ -722,7 +722,7 @@ class Tabulacion(models.Model):
     conjunto de encuestas pertenecientes a un Periodo de Evaluación.
     """
     descripcion = models.CharField(max_length='250')
-    tipo = models.CharField( max_length='20', unique=True, choices=tipos_tabulacion)
+    tipo = models.CharField( max_length='20', unique=False, choices=tipos_tabulacion)
     periodoEvaluacion = models.OneToOneField('PeriodoEvaluacion', related_name='tabulacion', blank=True, null=True)
 
     class Meta:
