@@ -7,6 +7,8 @@ from proyecto.app.models import PeriodoAcademico
 from proyecto.app.models import PeriodoEvaluacion
 from proyecto.app.models import DocentePeriodoAcademico
 from proyecto.app.models import TabulacionEvaluacion2013
+from proyecto.app.models import TabulacionSatisfaccion2012
+from proyecto.app.models import TabulacionAdicionales2012
 from proyecto.app.models import Usuario
 
 import logging
@@ -59,16 +61,24 @@ class ResultadosHandler(BaseHandler):
 
     def read(self, request, id_periodo_evaluacion, dni):
         try:
+            if not request.user.groups.filter(name='apiusers'):
+                return {'Notificacion': 'No tiene permisos suficientes !'}
             periodo_evaluacion = PeriodoEvaluacion.objects.get(id=id_periodo_evaluacion)
+            docente = DocentePeriodoAcademico.objects.get(
+                usuario__cedula=dni, periodoAcademico=periodo_evaluacion.periodoAcademico)
             tabulacion = periodo_evaluacion.tabulacion
             if tabulacion.tipo == 'EDD2013':
                 tabulacion = TabulacionEvaluacion2013(periodo_evaluacion)
-            docente = DocentePeriodoAcademico.objects.get(
-                usuario__cedula=dni, periodoAcademico=periodo_evaluacion.periodoAcademico)
-            # Se calcula en todas las carreras del docente
-            resultados_completos = tabulacion.por_docente(None, None, docente.id)
-            # Se extrae solo lo necesario
-            resultados = dict([(k, resultados_completos.get(k)) for k in ('promedios_componentes', 'promedios', 'total')])
+                # Se calcula en todas las carreras del docente
+                resultados_completos = tabulacion.por_docente(None, None, docente.id)
+                # Se extrae solo lo necesario
+                resultados = dict([(k, resultados_completos.get(k)) for k in ('promedios_componentes', 'promedios', 'total')])
+            elif tabulacion.tipo == 'ESE2012':
+                tabulacion = TabulacionSatisfaccion2012(periodo_evaluacion)
+                # Se calcula en todas las carreras del docente
+                resultados_completos = tabulacion.por_docente(None, None, docente.id)
+                # Se extrae solo lo necesario
+                resultados = dict([(k, resultados_completos.get(k)) for k in ('porcentajes', 'totales')])
             return resultados
         except Exception, ex:
             return {'Error': str(ex)}

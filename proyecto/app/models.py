@@ -1714,27 +1714,42 @@ class TabulacionSatisfaccion2012:
         Contestacion.objects.set_periodo_evaluacion(self.periodoEvaluacion)
         
         conteo_ms=Contestacion.objects.filter(evaluacion__cuestionario__periodoEvaluacion=self.periodoEvaluacion).filter(
-            evaluacion__cuestionario__periodoEvaluacion__tabulacion__tipo='ESE2012').filter(
-            evaluacion__estudianteAsignaturaDocente__asignaturaDocente__asignatura__area=siglas_area).filter(
-            evaluacion__estudianteAsignaturaDocente__asignaturaDocente__asignatura__carrera=nombre_carrera).filter(
+            evaluacion__cuestionario__periodoEvaluacion__tabulacion__tipo='ESE2012')
+        if siglas_area:
+            conteo_ms = conteo_ms.filter(evaluacion__estudianteAsignaturaDocente__asignaturaDocente__asignatura__area=siglas_area)
+        if nombre_carrera:
+            conteo_ms = conteo_ms.filter(evaluacion__estudianteAsignaturaDocente__asignaturaDocente__asignatura__carrera=nombre_carrera)
+        conteo_ms = conteo_ms.filter(
             pregunta__in=indicadores).values('pregunta').annotate(MS=Count('respuesta')).filter(
             respuesta='4').order_by('pregunta')
+
         conteo_s=Contestacion.objects.filter(evaluacion__cuestionario__periodoEvaluacion=self.periodoEvaluacion).filter(
-            evaluacion__cuestionario__periodoEvaluacion__tabulacion__tipo='ESE2012').filter(
-            evaluacion__estudianteAsignaturaDocente__asignaturaDocente__asignatura__area=siglas_area).filter(
-            evaluacion__estudianteAsignaturaDocente__asignaturaDocente__asignatura__carrera=nombre_carrera).filter(
+            evaluacion__cuestionario__periodoEvaluacion__tabulacion__tipo='ESE2012')
+        if siglas_area:
+            conteo_s = conteo_s.filter(evaluacion__estudianteAsignaturaDocente__asignaturaDocente__asignatura__area=siglas_area)
+        if nombre_carrera:
+            conteo_s = conteo_s.filter(evaluacion__estudianteAsignaturaDocente__asignaturaDocente__asignatura__carrera=nombre_carrera)
+        conteo_s = conteo_s.filter(
             pregunta__in=indicadores).values('pregunta').annotate(S=Count('respuesta')).filter(
             respuesta='3').order_by('pregunta')
+
         conteo_ps=Contestacion.objects.filter(evaluacion__cuestionario__periodoEvaluacion=self.periodoEvaluacion).filter(
-            evaluacion__cuestionario__periodoEvaluacion__tabulacion__tipo='ESE2012').filter(
-            evaluacion__estudianteAsignaturaDocente__asignaturaDocente__asignatura__area=siglas_area).filter(
-            evaluacion__estudianteAsignaturaDocente__asignaturaDocente__asignatura__carrera=nombre_carrera).filter(
+            evaluacion__cuestionario__periodoEvaluacion__tabulacion__tipo='ESE2012')
+        if siglas_area:
+            conteo_ps = conteo_ps.filter(evaluacion__estudianteAsignaturaDocente__asignaturaDocente__asignatura__area=siglas_area)
+        if nombre_carrera:
+            conteo_ps = conteo_ps.filter(evaluacion__estudianteAsignaturaDocente__asignaturaDocente__asignatura__carrera=nombre_carrera)
+        conteo_ps = conteo_ps.filter(
             pregunta__in=indicadores).values('pregunta').annotate(PS=Count('respuesta')).filter(
             respuesta='2').order_by('pregunta')
+
         conteo_ins=Contestacion.objects.filter(evaluacion__cuestionario__periodoEvaluacion=self.periodoEvaluacion).filter(
-            evaluacion__cuestionario__periodoEvaluacion__tabulacion__tipo='ESE2012').filter(
-            evaluacion__estudianteAsignaturaDocente__asignaturaDocente__asignatura__area=siglas_area).filter(
-            evaluacion__estudianteAsignaturaDocente__asignaturaDocente__asignatura__carrera=nombre_carrera).filter(
+            evaluacion__cuestionario__periodoEvaluacion__tabulacion__tipo='ESE2012')
+        if siglas_area:
+            conteo_ins = conteo_ins.filter(evaluacion__estudianteAsignaturaDocente__asignaturaDocente__asignatura__area=siglas_area)
+        if nombre_carrera:
+            conteo_ins = conteo_ins.filter(evaluacion__estudianteAsignaturaDocente__asignaturaDocente__asignatura__carrera=nombre_carrera)
+        conteo_ins = conteo_ins.filter(
             pregunta__in=indicadores).values('pregunta').annotate(INS=Count('respuesta')).filter(
             respuesta='1').order_by('pregunta')
         if id_docente:
@@ -1771,9 +1786,11 @@ class TabulacionSatisfaccion2012:
             for grado in ('MS','S','PS','INS'):
                 totales[grado] = sum([c[grado] for c in conteos])
             universo = Contestacion.objects.filter(evaluacion__cuestionario__periodoEvaluacion=self.periodoEvaluacion).filter(
-                evaluacion__cuestionario__periodoEvaluacion__tabulacion__tipo='ESE2012').filter(
-                evaluacion__estudianteAsignaturaDocente__asignaturaDocente__asignatura__area=siglas_area).filter(
-                evaluacion__estudianteAsignaturaDocente__asignaturaDocente__asignatura__carrera=nombre_carrera)
+                evaluacion__cuestionario__periodoEvaluacion__tabulacion__tipo='ESE2012')
+            if siglas_area:
+                universo = universo.filter(evaluacion__estudianteAsignaturaDocente__asignaturaDocente__asignatura__area=siglas_area)
+            if nombre_carrera:
+                universo = universo.filter(evaluacion__estudianteAsignaturaDocente__asignaturaDocente__asignatura__carrera=nombre_carrera)
             # Filtro adicional si se trata de contabilizar por docente
             if id_docente:
                 universo = universo.filter(evaluacion__estudianteAsignaturaDocente__asignaturaDocente__docente__id=id_docente)
