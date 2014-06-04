@@ -1406,17 +1406,20 @@ class TabulacionAdicionales2012:
     def por_docente(self, siglas_area, nombre_carrera, id_docente):
         """
         Resultados de la Evaluación de Actividades Adicionales a la Docencia 2012 POR DOCENTE
+        TODO: Filtrar por area y carrera especifica, puede ser necesario a futuro 
         """
         docente = DocentePeriodoAcademico.objects.get(id=id_docente)
         # Procesamiento de la Autoevaluacion del Docente #
         try:
             # Autoevaluacion de Actividades Adicionales del Docente
+            # TODO: desacoplar "periodoEvaluacion__id=2" para posibles futuros procesos similares
             autoevaluacion=docente.evaluaciones.get(cuestionario__periodoEvaluacion__id=2,
                                                     cuestionario__informante__tipo='Docente')
         except exceptions.MultipleObjectsReturned:
             # Existe una evaluacion duplicada
             logg.warning('Autoevaluacion duplicada docente {0} en periodo:{1}'.format(docente, 2))
             # Se toma la primera evaluacion
+            # TODO: desacoplar "periodoEvaluacion__id=2" para posibles futuros procesos similares
             autoevaluacion = docente.evaluaciones.filter(cuestionario__periodoEvaluacion__id=2,
                                                          cuestionario__informante__tipo='Docente')[0]
         except Evaluacion.DoesNotExist:
@@ -1457,7 +1460,7 @@ class TabulacionAdicionales2012:
         contestaciones = {}
         contestaciones['secciones'] = []
         # Los dos cuestionarios tienen las mismas secciones
-        # TODO: Creo que se puede mejorar el este codigo
+        # TODO: Creo que se puede mejorar este codigo
         for s in autoevaluacion.cuestionario.secciones.all():
             seccion = {'titulo':s.titulo, 'resultados': []}
             for p in s.preguntas.all():

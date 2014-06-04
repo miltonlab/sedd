@@ -25,6 +25,8 @@ class ServicioValidadorHandler(BaseHandler):
         en el periodo de evaluacion.
         """
         try:
+            if not request.user.groups.filter(name='apiusers'):
+                return {'Notificacion': 'No tiene permisos suficientes !'}
             periodo_evaluacion = PeriodoEvaluacion.objects.get(id=id_periodo_evaluacion)
             resultado = periodo_evaluacion.verificar_estudiante(dni)
             return resultado
@@ -40,6 +42,9 @@ class PeriodoEvaluacionHandler(BaseHandler):
     exclude = ('periodoAcademico', 'observaciones', 'descripcion')
 
     def read(self, request):
+        if not request.user.groups.filter(name='apiusers'):
+            return {'Notificacion': 'No tiene permisos suficientes !'}
+
         """ Lee todos los Periodos de Evaluacion que existen en la BD """
         periodos = PeriodoEvaluacion.objects.all()
         return periodos
@@ -75,10 +80,16 @@ class ResultadosHandler(BaseHandler):
                 resultados = dict([(k, resultados_completos.get(k)) for k in ('promedios_componentes', 'promedios', 'total')])
             elif tabulacion.tipo == 'ESE2012':
                 tabulacion = TabulacionSatisfaccion2012(periodo_evaluacion)
-                # Se calcula en todas las carreras del docente
                 resultados_completos = tabulacion.por_docente(None, None, docente.id)
                 # Se extrae solo lo necesario
                 resultados = dict([(k, resultados_completos.get(k)) for k in ('porcentajes', 'totales')])
+            elif tabulacion.tipo == 'EAAD2012':
+                tabulacion = TabulacionAdicionales2012(periodo_evaluacion)
+                resultados_completos = tabulacion.por_docente(None, None, docente.id)
+                resultados = {'docente' : resultados_completos['porcentaje1'],
+                              'comision' : resultados_completos['porcentaje2'],
+                              'global' : resultados_completos['total'] 
+                              }
             return resultados
         except Exception, ex:
             return {'Error': str(ex)}
