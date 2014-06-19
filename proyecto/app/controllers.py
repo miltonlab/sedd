@@ -1057,6 +1057,7 @@ def generar_consolidado_edd2013(siglas_area, nombre_carrera, filtro, tabulacion)
             docente = DocentePeriodoAcademico.objects.get(id=int(id_docente))
             # Referencia a lo que devuelve el metodo 'por_docente'  invocado sobre la instancia de Tabulacion 
             resultados = tabulacion.calculos[0][2](siglas_area, nombre_carrera, int(id_docente), filtro)
+	    resultados['titulo'] = "Consolidado Docentes por Carrera Evaluacion Docente 2013-2014"
             resultados['docente'] = docente
             resultados['carrera'] = nombre_carrera
             resultados['area'] = objeto_area.nombre
