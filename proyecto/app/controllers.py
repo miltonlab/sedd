@@ -910,6 +910,7 @@ def mostrar_resultados(request):
         else:
             resultados = metodo(request.session['area'], request.session['carrera'])
         if resultados:
+	    resultados['titulo'] = tabulacion.periodoEvaluacion.titulo
             resultados['docente'] = docente
             resultados['carrera'] = carrera
             resultados['area'] = area
@@ -994,9 +995,11 @@ def mostrar_resultados(request):
             resultados['promedios_componentes']['PV'].update({'fila' : 33})
 
         if filtro == 'sugerencias':
+	    resultados['titulo'] = u"Reporte de Sugerencias de {0}".format(tabulacion.periodoEvaluacion.titulo)
             # Reporte de sugerencias
             plantilla = 'app/imprimir_sugerencias_edd2013.html'
         else:
+	    resultados['titulo'] = u"Acta de Resultados de {0}".format(tabulacion.periodoEvaluacion.titulo)
             if opcion == 'e':
                 # Listado de Docentes con calificaciones para la SENESCYT
                 plantilla = 'app/imprimir_calificaciones_edd2013.html'
@@ -1005,7 +1008,6 @@ def mostrar_resultados(request):
 
         # Solo en EDD
         if resultados and formato != 'CSV':
-            resultados['titulo'] = u"Acta de Resultados de {0}".format(tabulacion.periodoEvaluacion.titulo)
             # Obtenido al inicio de la bifurcacion
             resultados['carrera_senescyt'] = carrera_senescyt
 
@@ -1057,7 +1059,7 @@ def generar_consolidado_edd2013(siglas_area, nombre_carrera, filtro, tabulacion)
             docente = DocentePeriodoAcademico.objects.get(id=int(id_docente))
             # Referencia a lo que devuelve el metodo 'por_docente'  invocado sobre la instancia de Tabulacion 
             resultados = tabulacion.calculos[0][2](siglas_area, nombre_carrera, int(id_docente), filtro)
-	    resultados['titulo'] = "Consolidado Docentes por Carrera Evaluacion Docente 2013-2014"
+	    resultados['titulo'] = u"Consolidado Docentes por Carrera {0}".format(tabulacion.periodoEvaluacion.titulo)
             resultados['docente'] = docente
             resultados['carrera'] = nombre_carrera
             resultados['area'] = objeto_area.nombre
