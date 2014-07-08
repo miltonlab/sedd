@@ -1011,7 +1011,10 @@ class TabulacionEvaluacion2013:
                             ).values_list('respuesta', flat=True)
                         aux_contestaciones[pregunta['seccion__codigo']] = contestaciones
                 # Se supone que en los tres componentes hay la misma cantidad de respuestas CPF, CPG y PV
-                num_contestaciones = len(aux_contestaciones.values()[0])
+		if aux_contestaciones.values():
+	            num_contestaciones = len(aux_contestaciones.values()[0])
+		else:
+		    num_contestaciones = 0
                 for i in range(num_contestaciones):
                     aux_dict = {'CPF' : aux_contestaciones['CPF'][i], 
                                 'CPG' : aux_contestaciones['CPG'][i], 
