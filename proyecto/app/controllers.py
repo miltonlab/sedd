@@ -599,12 +599,16 @@ def cargar_ofertas_sga(request, periodoAcademicoId):
         return HttpResponse("Falta Periodo Academico")
     try:
         proxy = SGA(SGAWS_USER, SGAWS_PASS)
-        periodoAcademico = PeriodoAcademico.objects.get(id=periodoAcademicoId)
+        periodoAcademico = PeriodoAcademico.objects.get(id=periodoAcademicoId
+	# TODO...: Podria ser deseable actualizar todas las ofertas y no solo las del periodo_academico en mension
         ofertas_dict = proxy.ofertas_academicas(periodoAcademico.inicio, periodoAcademico.fin)
         ofertas = [OfertaAcademicaSGA(idSGA=oa['id'], descripcion=oa['descripcion'])  for oa in ofertas_dict]
         for oa in ofertas:
             try:
-                OfertaAcademicaSGA.objects.get(idSGA=oa.idSGA)
+                oa_existente = OfertaAcademicaSGA.objects.get(idSGA=oa.idSGA)
+		# Actualizacion en caso de cambios en el SGA
+		oa_existente.descripcion = oa.descripcion
+		oa_existente.save()
             except OfertaAcademicaSGA.DoesNotExist:
                 oa.save()
         return HttpResponse("OK")

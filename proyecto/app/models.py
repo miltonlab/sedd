@@ -73,7 +73,10 @@ class PeriodoAcademico(models.Model):
         ofertas = [OfertaAcademicaSGA(idSGA=oa['id'], descripcion=oa['descripcion'])  for oa in ofertas_dict]
         for oa in ofertas:
             try:
-                OfertaAcademicaSGA.objects.get(idSGA=oa.idSGA)
+                oa_existente = OfertaAcademicaSGA.objects.get(idSGA=oa.idSGA)
+		# Actualizacion en caso de cambios en el SGA
+		oa_existente.descripcion = oa.descripcion
+		oa_existente.save()
             except OfertaAcademicaSGA.DoesNotExist:
                 # Se agregan solo en el caso que no existan aún la oferta académica
                 oa.periodoAcademico = self
