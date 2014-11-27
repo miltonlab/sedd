@@ -5,6 +5,8 @@ SEDD [Sistema de Evaluacion de Docentes]
 Instalación
 ------------------------------------------------------------------
 
+ - Muy aconsejable crear un entorno virtual con 
+   virtualenv -p /usr/bin/python2.7 <<nombre>>
  - Renombrar settings.cfg a settings.py y configurar cuentas de acceso
  - Sincronizar la BD
  - Aplicar todas las migraciones existentes
@@ -13,9 +15,8 @@ Instalación
  - Reiniciar apache
 
 ### Cambios en el codigo fuente de Django 
- * Cambiar el ancho de #changelist-filter en "...django/contrib/admin/media/css/changelists.css"
+ * Cambiar el valor del propiedad width de #changelist-filter a 200 en "...django/contrib/admin/media/css/changelists.css"
  * Aumentar el tamaño de first_name y last_name en el modelo "...django/contrib/auth/models.py"
- * Cambiar el ancho de .dashboard #content "...django/contrib/admin/media/css/base.css"
 
 ### Cambios en el codigo fuente del paquete django-nested-inlines
  * from django.utils import six en vez de import six
@@ -25,7 +26,7 @@ Requerimientos
 -------------------------------------------------------------------
  * Sistema Operativo: Debian squeeze backports
  * Librerias de desarrollo del Sistema:
-   python-dev, postgresql-server-dev, libmysql-dev, libxml2-dev, libxslt1-dev 
+   python-dev postgresql-server-dev-9.1 libmysqld-dev libxml2-dev libxslt1-dev 
  * python-django 1.3
  * python-psycopg2 2.4.2
  * python-lxml 2.3
