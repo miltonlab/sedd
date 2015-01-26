@@ -62,13 +62,16 @@ class SGA:
         periodos = json.loads(r)
         anio_actual = datetime.date.today().year
         for id, descripcion in periodos:
-            anios = descripcion.split('-')
-            anio1 = anios[0].strip()
-            anio2 = anios[1].strip()
-            if anio1 == str(anio_actual):
-                return dict(id=id, descripcion=descripcion)
-            if anio2 == str(anio_actual):
-                return dict(id=id, descripcion=descripcion)
+	    try:
+                anios = descripcion.split('-')
+                anio1 = anios[0].strip()
+                anio2 = anios[1].strip()
+                if anio1 == str(anio_actual):
+                    return dict(id=id, descripcion=descripcion)
+                if anio2 == str(anio_actual):
+                    return dict(id=id, descripcion=descripcion)
+	    except:
+		continue 
         return dict(error='No se puede obtener el periodo actual')
         
     def ofertas_periodo_actual (self):
