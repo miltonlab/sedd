@@ -10,5 +10,5 @@ lxml==2.3.4
 ordereddict==1.1
 pisa==3.0.33
 psycopg2==2.4.5
-reportlab==2.6
+reportlab==3.5.55
 wsgiref==0.1.2
