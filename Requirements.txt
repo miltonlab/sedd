@@ -5,7 +5,7 @@ South==0.7.6
 django-extensions==1.0.0
 django-mailer==0.1.0
 django-piston==0.2.3
-html5lib==0.95
+html5lib==0.999999999
 lxml==2.3.4
 ordereddict==1.1
 pisa==3.0.33
