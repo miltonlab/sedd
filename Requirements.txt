@@ -6,7 +6,7 @@ django-extensions==1.0.0
 django-mailer==0.1.0
 django-piston==0.2.3
 html5lib==0.95
-lxml==2.3.4
+lxml==4.9.1
 ordereddict==1.1
 pisa==3.0.33
 psycopg2==2.4.5
